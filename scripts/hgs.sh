@@ -1,0 +1,8 @@
+bin/hgs XLDemo/XLTEST-n1048-k139.vrp results/hgs/XLTEST-n1048-k139.vrp.sol -seed 1 -t 2460
+bin/hgs XLDemo/XLTEST-n2168-k625.vrp results/hgs/XLTEST-n2168-k625.vrp.sol -seed 1 -t 5160
+bin/hgs XLDemo/XLTEST-n3101-k685.vrp results/hgs/XLTEST-n3101-k685.vrp.sol -seed 1 -t 7440
+bin/hgs XLDemo/XLTEST-n4245-k164.vrp results/hgs/XLTEST-n4245-k164.vrp.sol -seed 1 -t 10140
+bin/hgs XLDemo/XLTEST-n5174-k170.vrp results/hgs/XLTEST-n5174-k170.vrp.sol -seed 1 -t 12360
+bin/hgs XLDemo/XLTEST-n5649-k365.vrp results/hgs/XLTEST-n5649-k365.vrp.sol -seed 1 -t 13500
+bin/hgs XLDemo/XLTEST-n6034-k1234.vrp results/hgs/XLTEST-n6034-k1234.vrp.sol -seed 1 -t 14460
+bin/hgs XLDemo/XLTEST-n8575-k343.vrp results/hgs/XLTEST-n8575-k343.vrp.sol -seed 1 -t 20580
