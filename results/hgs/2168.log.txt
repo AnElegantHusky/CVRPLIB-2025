@@ -1,24 +1,3 @@
-=========== Algorithm Parameters =================
----- nbGranular              is set to 20
----- mu                      is set to 25
----- lambda                  is set to 40
----- nbElite                 is set to 4
----- nbClose                 is set to 5
----- nbIterPenaltyManagement is set to 100
----- targetFeasible          is set to 0.2
----- penaltyDecrease         is set to 0.85
----- penaltyIncrease         is set to 1.2
----- seed                    is set to 1
----- nbIter                  is set to 20000
----- nbIterTraces            is set to 500
----- timeLimit               is set to 5160
----- useSwapStar             is set to 1
-==================================================
------ READING INSTANCE: XLDemo/XLTEST-n2168-k625.vrp
------ FLEET SIZE WAS NOT SPECIFIED: DEFAULT INITIALIZATION TO 816 VEHICLES
------ INSTANCE SUCCESSFULLY LOADED WITH 2167 CLIENTS AND 816 VEHICLES
------ BUILDING INITIAL POPULATION
------ STARTING GENETIC ALGORITHM
 It      0      2 | T(s) 8.13 | Feas 43 550000.00 551311.28 | Inf 51 548548.56 550513.61 | Div 0.69 0.69 | Feas 0.09 1.00 | Pen 14.51 0.85
 It    500     26 | T(s) 33.16 | Feas 48 539895.00 540856.12 | Inf 60 539690.78 540599.93 | Div 0.65 0.63 | Feas 0.16 1.00 | Pen 20.89 0.38
 It   1000     60 | T(s) 59.35 | Feas 49 537319.00 537914.96 | Inf 54 537264.62 537972.53 | Div 0.59 0.64 | Feas 0.26 1.00 | Pen 21.31 0.17
@@ -217,6 +196,3 @@ It  97000    228 | T(s) 5081.45 | Feas 53 531976.00 532022.08 | Inf 40 532002.13
 It  97500    728 | T(s) 5106.51 | Feas 51 531976.00 532000.44 | Inf 28 531972.66 532126.32 | Div 0.07 0.15 | Feas 0.26 1.00 | Pen 35.66 0.10
 It  98000    491 | T(s) 5131.89 | Feas 65 531972.00 532047.12 | Inf 52 531956.79 532058.38 | Div 0.12 0.10 | Feas 0.25 1.00 | Pen 42.79 0.10
 It  98500    275 | T(s) 5156.65 | Feas 32 531931.00 532011.96 | Inf 33 531950.37 532053.56 | Div 0.09 0.12 | Feas 0.28 1.00 | Pen 36.37 0.10
------ GENETIC ALGORITHM FINISHED AFTER 98571 ITERATIONS. TIME SPENT: 5160.02
------ WRITING BEST SOLUTION IN : results/hgs/XLTEST-n2168-k625.vrp.sol
------ IMPOSSIBLE TO OPEN: results/hgs/XLTEST-n2168-k625.vrp.sol

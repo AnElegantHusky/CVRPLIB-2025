@@ -1,24 +1,3 @@
-=========== Algorithm Parameters =================
----- nbGranular              is set to 20
----- mu                      is set to 25
----- lambda                  is set to 40
----- nbElite                 is set to 4
----- nbClose                 is set to 5
----- nbIterPenaltyManagement is set to 100
----- targetFeasible          is set to 0.2
----- penaltyDecrease         is set to 0.85
----- penaltyIncrease         is set to 1.2
----- seed                    is set to 1
----- nbIter                  is set to 20000
----- nbIterTraces            is set to 500
----- timeLimit               is set to 12360
----- useSwapStar             is set to 1
-==================================================
------ READING INSTANCE: XLDemo/XLTEST-n5174-k170.vrp
------ FLEET SIZE WAS NOT SPECIFIED: DEFAULT INITIALIZATION TO 224 VEHICLES
------ INSTANCE SUCCESSFULLY LOADED WITH 5173 CLIENTS AND 224 VEHICLES
------ BUILDING INITIAL POPULATION
------ STARTING GENETIC ALGORITHM
 It      0      1 | T(s) 149.03 | Feas 60 322846.00 324311.76 | NO-INFEASIBLE | Div 0.68 -1.00 | Feas 1.00 1.00 | Pen 119.77 0.85
 It    500     92 | T(s) 327.92 | Feas 33 319073.00 319706.88 | Inf 60 319211.14 319969.53 | Div 0.59 0.43 | Feas 0.69 1.00 | Pen 53.14 0.38
 It   1000    232 | T(s) 485.09 | Feas 65 318028.00 318525.48 | Inf 39 318284.74 318887.71 | Div 0.55 0.58 | Feas 0.52 1.00 | Pen 23.58 0.17
@@ -105,6 +84,4 @@ It  41000   3242 | T(s) 11804.36 | Feas 40 313390.00 314055.68 | Inf 59 313106.8
 It  41500   3742 | T(s) 11979.00 | Feas 53 313390.00 314015.16 | Inf 57 313200.05 313414.57 | Div 0.42 0.30 | Feas 0.20 1.00 | Pen 21.50 0.10
 It  42000   4242 | T(s) 12140.61 | Feas 31 313390.00 314203.32 | Inf 45 313200.05 313382.43 | Div 0.47 0.32 | Feas 0.24 1.00 | Pen 21.50 0.10
 It  42500   4742 | T(s) 12285.90 | Feas 63 313390.00 313869.88 | Inf 27 313151.05 313791.34 | Div 0.40 0.44 | Feas 0.20 1.00 | Pen 21.50 0.10
------ GENETIC ALGORITHM FINISHED AFTER 42758 ITERATIONS. TIME SPENT: 12360.1
------ WRITING BEST SOLUTION IN : results/hgs/XLTEST-n5174-k170.vrp.sol
------ IMPOSSIBLE TO OPEN: results/hgs/XLTEST-n5174-k170.vrp.sol
+
