@@ -1,24 +1,3 @@
-=========== Algorithm Parameters =================
----- nbGranular              is set to 20
----- mu                      is set to 25
----- lambda                  is set to 40
----- nbElite                 is set to 4
----- nbClose                 is set to 5
----- nbIterPenaltyManagement is set to 100
----- targetFeasible          is set to 0.2
----- penaltyDecrease         is set to 0.85
----- penaltyIncrease         is set to 1.2
----- seed                    is set to 1
----- nbIter                  is set to 20000
----- nbIterTraces            is set to 500
----- timeLimit               is set to 14460
----- useSwapStar             is set to 1
-==================================================
------ READING INSTANCE: XLDemo/XLTEST-n6034-k1234.vrp
------ FLEET SIZE WAS NOT SPECIFIED: DEFAULT INITIALIZATION TO 1607 VEHICLES
------ INSTANCE SUCCESSFULLY LOADED WITH 6033 CLIENTS AND 1607 VEHICLES
------ BUILDING INITIAL POPULATION
------ STARTING GENETIC ALGORITHM
 It      0      2 | T(s) 64.16 | Feas 54 1024481.00 1026191.36 | Inf 59 1024376.60 1025669.59 | Div 0.75 0.75 | Feas 0.01 1.00 | Pen 16.56 0.85
 It    500     15 | T(s) 215.32 | Feas 44 1015140.00 1015722.76 | Inf 51 1014554.36 1015544.00 | Div 0.60 0.55 | Feas 0.14 1.00 | Pen 34.34 0.38
 It   1000      9 | T(s) 362.82 | Feas 52 1011605.00 1012612.88 | Inf 35 1011621.15 1012652.06 | Div 0.59 0.64 | Feas 0.15 1.00 | Pen 35.03 0.17
@@ -121,6 +100,4 @@ It  49000    163 | T(s) 14029.07 | Feas 52 1004071.00 1004124.96 | Inf 49 100406
 It  49500    291 | T(s) 14143.14 | Feas 46 1004019.00 1004094.76 | Inf 44 1004025.72 1004099.36 | Div 0.06 0.07 | Feas 0.05 1.00 | Pen 52.72 0.10
 It  50000    791 | T(s) 14262.97 | Feas 46 1004019.00 1004212.72 | Inf 28 1004019.63 1004206.37 | Div 0.13 0.12 | Feas 0.07 1.00 | Pen 46.63 0.10
 It  50500    156 | T(s) 14382.53 | Feas 33 1003962.00 1004024.56 | Inf 41 1003957.23 1004026.40 | Div 0.07 0.07 | Feas 0.40 1.00 | Pen 41.23 0.10
------ GENETIC ALGORITHM FINISHED AFTER 50830 ITERATIONS. TIME SPENT: 14460.3
------ WRITING BEST SOLUTION IN : results/hgs/XLTEST-n6034-k1234.vrp.sol
------ IMPOSSIBLE TO OPEN: results/hgs/XLTEST-n6034-k1234.vrp.sol
+
