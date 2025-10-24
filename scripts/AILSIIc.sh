@@ -1,8 +1,8 @@
 #!/bin/bash
 
-time=(7440 10140 12360 13500 14460)
-best=(685 164 170 365 1234)
-instances=(XLTEST-n3101-k685 XLTEST-n4245-k164 XLTEST-n5174-k170 XLTEST-n5649-k365 XLTEST-n6034-k1234)
+time=(13500 14460)
+best=(365 1234)
+instances=(XLTEST-n5649-k365 XLTEST-n6034-k1234)
 
 mkdir -p remote_results/AILSII
 
