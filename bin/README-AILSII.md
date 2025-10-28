@@ -35,5 +35,12 @@ https://doi.org/10.1016/j.cor.2022.105954 (also available at [aXiv](https://arxi
 AILS-II is an Adaptive Iterated Local Search (AILS) meta-heuristic that embeds adaptive strategies to tune  diversity control parameters. These parameters are the perturbation degree and the acceptance criterion. They are key parameters to ensure that the method escapes from local optima and keeps an adequate level of exploitation and exploration of the method. Its implementation is in JAVA language.
 
 ## run on windows git bash
+
 cd /c/Users/79430/Desktop/CVRPLIB-2025
-bash scripts/AILSIIc.sh
+bash scripts/AILSII_S_eta_0_dall30.sh
+
+cd /c/Users/79430/Desktop/CVRPLIB-2025
+bash scripts/AILSII_S_eta_0_dall10.sh
+
+cd /c/Users/79430/Desktop/CVRPLIB-2025
+bash scripts/AILSII_S_eta_0.sh
