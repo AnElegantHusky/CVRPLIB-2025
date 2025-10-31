@@ -101,11 +101,11 @@ class KGLS:
         # update stats if new best solution was found
         if current_costs < self._best_solution_costs:
             logger.info(
-                f'{(time.time() - start_time): 1f} '
+                f'{(time.process_time() - start_time): 1f} '
                 f'{solution_quality: .2f}'
             )
             self._best_iteration = self._iteration
-            self._best_solution_time = time.time()
+            self._best_solution_time = time.process_time()
             self._best_solution_costs = current_costs
             self._best_solution = self._cur_solution.copy()
 
@@ -113,10 +113,10 @@ class KGLS:
             # 保存到CSV文件
             with open(self.record_path, 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter=';')  # 设置分隔符为分号
-                writer.writerow([f'{(time.time() - start_time):.2f}', current_costs])
+                writer.writerow([f'{(time.process_time() - start_time):.2f}', current_costs])
 
         self._run_stats.append({
-            "run_time": time.time() - start_time,
+            "run_time": time.process_time() - start_time,
             "iteration": self._iteration,
             "costs": current_costs,
             "best_costs": self._best_solution_costs,
@@ -126,7 +126,7 @@ class KGLS:
     def run(self, visualize_progress: bool = False, start_solution: VRPSolution = None):
         logger.info(f'Running KGLS. {self._abortion_condition.msg}')
 
-        start_time = time.time()
+        start_time = time.process_time()
         self._run_stats = []
         self._iteration = 0
 
@@ -174,7 +174,7 @@ class KGLS:
 
             self._update_run_stats(start_time)
 
-        logger.info(f'KGLS finished after {(time.time() - start_time): 1f} seconds and '
+        logger.info(f'KGLS finished after {(time.process_time() - start_time): 1f} seconds and '
                     f'{self._iteration} iterations.')
 
     def print_time_distribution(self):

@@ -69,7 +69,7 @@ class MaxRuntimeCondition(BaseAbortionCondition):
             start_time: int,
             best_sol_time: int
     ) -> bool:
-        elapsed_time = time.time() - start_time
+        elapsed_time = time.process_time() - start_time
         return elapsed_time >= self.abortion_parameter
 
 
