@@ -37,10 +37,4 @@ AILS-II is an Adaptive Iterated Local Search (AILS) meta-heuristic that embeds a
 ## run on windows git bash
 
 cd /c/Users/79430/Desktop/CVRPLIB-2025
-bash scripts/AILSII_S_eta_0_dall30.sh
-
-cd /c/Users/79430/Desktop/CVRPLIB-2025
-bash scripts/AILSII_S_eta_0_dall10.sh
-
-cd /c/Users/79430/Desktop/CVRPLIB-2025
-bash scripts/AILSII_S_eta_0.sh
+bash scripts/AILSII_CPU.sh
