@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import argparse
 import os
 import glob
 import logging
@@ -23,8 +23,8 @@ INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 LOG_FILE = os.path.join(SCRIPT_DIR, "log", "experiment_log.log")
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
-# TIME_LIMIT = 5 * 24 * 3600  # 5天，单位为秒
-TIME_LIMIT = 3
+TIME_LIMIT = 5 * 24 * 3600  # 5天，单位为秒
+# TIME_LIMIT = 3
 
 MAX_WORKERS = None
 
@@ -249,7 +249,23 @@ def main(method_name: str = None):
 
 
 if __name__ == "__main__":
-    # TODO: 请在三台不同的服务器上分别运行以下每行代码
-    main("AILSII_CPU.jar")
-    main("filo2")
-    main("hgs-TV")
+    # 创建参数解析器
+    parser = argparse.ArgumentParser(
+        description="CVRPLIB Experiment。"
+    )
+
+    # 添加 "method_name" 参数
+    # 这是一个 "位置参数" (positional argument)，因为没有 "--" 前缀
+    # 它自动成为必需的 (required)
+    parser.add_argument(
+        "method_name",
+        type=str,
+        help="要运行的方法/可执行文件的名称 (例如: AILSII_CPU.jar, filo2, hgs-TV)"
+    )
+
+    # 解析命令行参数
+    args = parser.parse_args()
+
+    # 使用从命令行获取的 method_name 调用 main 函数
+    # args.method_name 的值就是用户在命令行输入的值
+    main(method_name=args.method_name)

@@ -1,8 +1,14 @@
 # CVRPLIB-2025
 
-在项目根目录下运行：
+编译：
 ```
 sudo chmod +x ./bin/* ./scripts/*
 ./scripts/compile.sh
-python run.py
+```
+
+在三台不同服务器上，分别运行：
+```
+python run.py AILSII_CPU.jar
+python run.py hgs-TV
+python run.py filo2
 ```
