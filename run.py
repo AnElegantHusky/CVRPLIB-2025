@@ -35,7 +35,7 @@ LOG_FILE = "experiment_log.log"
 # 4. (可选) 定义每个进程的超时时间（秒）
 # 如果一个method运行时间过长，脚本将终止它并记录为“超时”
 # PROCESS_TIMEOUT = 600  # 10分钟
-TIME_LIMIT = 1
+TIME_LIMIT = 2
 
 # 5. (可选) 定义最大并行工作进程数
 # 默认使用所有可用的CPU核心
@@ -86,7 +86,7 @@ def get_command_args(method_path: str, instance_path: str) -> Optional[List[str]
 
     if method_name == "AILSII_CPU.jar":
         # 假设 methodA 的命令是: /bin/methodA -i <instance_file> --heuristic "GA"
-        return ["java", "-jar", "-Xms2000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path, "-rounded", "true", "-stoppingCriterion", "Time", "-limit", f"{TIME_LIMIT}", ">", f"remote_results/{method_name}/{instance_name}.csv"]
+        return ["java", "-jar", "-Xms2000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path, "-rounded", "true", "-stoppingCriterion", "Time", "-limit", f"{TIME_LIMIT}"]
 
     elif method_name == "filo2":
         # 假设 methodB 的命令是: /bin/methodB --input <instance_file> --config /etc/config.xml -t 300
@@ -120,55 +120,90 @@ def run_single_experiment(task_info: tuple) -> None:
     """
     运行单个实验（一个method + 一个instance）。
     此函数被设计为在单独的进程中运行，并包含完整的异常处理（要求 3）。
+
+    [!] 特殊处理: AILSII_CPU.jar 的输出将被重定向到文件。
     """
     method_path, instance_path = task_info
     method_name = os.path.basename(method_path)
     instance_name = os.path.basename(instance_path)
 
-    # 日志前缀，方便识别
     log_prefix = f"[{method_name} | {instance_name}]"
 
     try:
-        # 1. 获取命令行参数
+        # 1. 获取命令列表 (不含重定向)
         command_list = get_command_args(method_path, instance_path)
 
         if command_list is None:
-            # get_command_args 中已经记录了日志
             return
 
         logging.info(f"{log_prefix} 开始运行。命令: {' '.join(command_list)}")
 
-        # 2. 执行子进程
-        # subprocess.run() 会等待进程结束
-        result = subprocess.run(
-            command_list,
-            capture_output=True,  # 捕获 stdout 和 stderr
-            text=True,  # 以文本（str）形式解码
-            check=True,  # 如果返回非0退出码，则引发 CalledProcessError
-        )
+        # --- [!] 核心修改点 ---
 
-        # 3. 成功记录
-        # 只记录标准输出的前200个字符，避免日志刷屏
-        stdout_snippet = result.stdout.strip()[:200].replace('\n', ' ')
-        logging.info(f"{log_prefix} 运行成功。耗时: {result.args}s. STDOUT(snippet): {stdout_snippet}...")
+        if method_name == "AILSII_CPU.jar":
+            #
+            # --- 分支 1: AILSII_CPU.jar (重定向到 .csv 文件) ---
+            #
+
+            # 1a. 定义并创建输出目录
+            output_dir = os.path.join(SCRIPT_DIR, "remote_results", method_name)
+            output_csv_path = os.path.join(output_dir, f"{instance_name}.csv")
+            try:
+                os.makedirs(output_dir, exist_ok=True)
+            except OSError as e:
+                logging.error(f"{log_prefix} 无法创建输出目录 {output_dir}: {e}")
+                return
+
+            logging.info(f"{log_prefix} 输出将重定向到: {output_csv_path}")
+
+            # 1b. 打开文件并执行
+            with open(output_csv_path, 'w') as output_file:
+                result = subprocess.run(
+                    command_list,
+                    stdout=output_file,  # [!] 将 stdout 导入文件
+                    stderr=subprocess.PIPE,  # [!] 仍然捕获 stderr
+                    text=True,
+                    check=True,
+                    # timeout=PROCESS_TIMEOUT
+                )
+
+            # 1c. 成功记录 (stdout 已在文件中)
+            logging.info(f"{log_prefix} 运行成功。结果已保存到 {output_csv_path}")
+
+        else:
+            #
+            # --- 分支 2: 所有其他方法 (捕获到内存) ---
+            #
+
+            result = subprocess.run(
+                command_list,
+                capture_output=True,  # [!] 捕获 stdout 和 stderr
+                text=True,
+                check=True,
+                # timeout=PROCESS_TIMEOUT
+            )
+
+            # 2a. 成功记录 (stdout 在内存中)
+            stdout_snippet = result.stdout.strip()[:200].replace('\n', ' ')
+            logging.info(f"{log_prefix} 运行成功。STDOUT(snippet): {stdout_snippet}...")
+
+        # --- 异常处理 (对两个分支都有效) ---
 
     except subprocess.CalledProcessError as e:
-        # 错误：程序本身运行失败（返回了非0退出码）
         logging.error(f"{log_prefix} 运行失败。返回码: {e.returncode}")
-        logging.error(f"{log_prefix} STDERR: {e.stderr.strip()}")
+        # 无论哪个分支，e.stderr 都会被正确捕获 (如果是 PIPE) 或在 e.stderr (如果是 capture_output=True)
+        if e.stderr:
+            logging.error(f"{log_prefix} STDERR: {e.stderr.strip()}")
 
     # except subprocess.TimeoutExpired as e:
-    #     # 错误：超时
     #     logging.error(f"{log_prefix} 运行超时 (超过 {PROCESS_TIMEOUT} 秒)。进程已被终止。")
     #     if e.stderr:
     #         logging.error(f"{log_prefix} 超时前的 STDERR: {e.stderr.strip()}")
 
     except FileNotFoundError:
-        # 错误：可执行文件未找到
-        logging.error(f"{log_prefix} 运行失败。可执行文件未找到: {method_path}")
+        logging.error(f"{log_prefix} 运行失败。命令或文件未找到: {command_list[0]}")
 
     except Exception as e:
-        # 错误：其他所有未预料到的Python异常
         logging.error(f"{log_prefix} 发生意外的脚本错误: {e}")
 
 
