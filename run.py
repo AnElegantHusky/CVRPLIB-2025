@@ -20,7 +20,8 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results")
 INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 
 # 3. 定义日志文件
-LOG_FILE = "experiment_log.log"
+LOG_FILE = os.path.join(SCRIPT_DIR, "log", "experiment_log.log")
+os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 # TIME_LIMIT = 5 * 24 * 3600  # 5天，单位为秒
 TIME_LIMIT = 3
