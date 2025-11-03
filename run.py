@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+import os
+import glob
+import logging
+import subprocess
+import concurrent.futures
+from typing import List, Optional
+
+# --- [!] 请您在此处配置 ---
+
+# 1. 定义可执行文件（methods）的完整路径
+# 假设这四个可执行文件分别是 methodA, methodB, methodC, methodD
+METHODS_DIR = ".\\bin"
+METHODS_TO_RUN = [
+    # os.path.join(METHODS_DIR, "AILSII_CPU.jar"),
+    os.path.join(METHODS_DIR, "filo2"),
+    os.path.join(METHODS_DIR, "hgs"),
+    os.path.join(METHODS_DIR, "hgs-TV")
+]
+
+# 2. 定义实例文件（instances）所在的文件夹
+INSTANCES_DIR = ".\\XLTEST"
+
+# 3. 定义日志文件
+LOG_FILE = "experiment_log.log"
+
+# 4. (可选) 定义每个进程的超时时间（秒）
+# 如果一个method运行时间过长，脚本将终止它并记录为“超时”
+# PROCESS_TIMEOUT = 600  # 10分钟
+TIME_LIMIT = 1
+
+# 5. (可选) 定义最大并行工作进程数
+# 默认使用所有可用的CPU核心
+# 如果您想限制（例如，只用8个核心），请设置：MAX_WORKERS = 8
+MAX_WORKERS = None
+
+
+# --- 配置结束 ---
+
+
+def setup_logging():
+    """配置日志系统，同时输出到文件和控制台"""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler(LOG_FILE, mode='w'),  # 写入文件
+            logging.StreamHandler()  # 输出到控制台
+        ]
+    )
+
+
+def get_command_args(method_path: str, instance_path: str) -> Optional[List[str]]:
+    """
+    [!] 这是您需要“手工指定”参数的核心函数 (要求 1)
+
+    根据传入的 method_path，返回完整的命令行参数列表。
+
+    参数:
+        method_path (str): 可执行文件的完整路径 (例如, "/bin/methodA")
+        instance_path (str): 实例文件的完整路径 (例如, "/XLTEST/instance01.vrp")
+
+    返回:
+        List[str]: 一个字符串列表，例如 ["/bin/methodA", "-i", "/XLTEST/instance01.vrp", "--param", "value"]
+        Optional[None]: 如果此方法未定义命令，返回None，将跳过执行
+    """
+
+    instance_name = os.path.basename(instance_path)
+
+    # 获取可执行文件的基本名称，用于判断
+    method_name = os.path.basename(method_path)
+
+    # --- [!] 请您在此处配置 ---
+    #
+    # 请为您拥有的4个（或更多）method配置命令行
+    #
+    # 示例：
+
+    if method_name == "AILSII_CPU.jar":
+        # 假设 methodA 的命令是: /bin/methodA -i <instance_file> --heuristic "GA"
+        return ["java", "-jar", "-Xms2000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path, "-rounded", "true", "-stoppingCriterion", "Time", "-limit", f"{TIME_LIMIT}", ">", f"remote_results/{method_name}/{instance_name}.csv"]
+
+    elif method_name == "filo2":
+        # 假设 methodB 的命令是: /bin/methodB --input <instance_file> --config /etc/config.xml -t 300
+        return [f"{method_path}", instance_path, "-t", f"{TIME_LIMIT}", "--outpath", f"remote_results/{method_name}"]
+
+    elif method_name == "hgs":
+        # 假设 methodC 的命令是: /bin/methodC <instance_file>
+        return [f"{method_path}", instance_path, f"remote_results/{method_name}/{instance_name}.sol", "-seed", "1", "-t", f"{TIME_LIMIT}"]
+
+    elif method_name == "hgs-TV":
+        return [f"{method_path}", instance_path, "-sol", f"remote_results/{method_name}/{instance_name}.sol", "-seed", "1", "-t", f"{TIME_LIMIT}", "-type", "Uchoa", "-bss", f"remote_results/{method_name}/{instance_name}.csv", "-deco", "BarycentreClustering"]
+
+    # elif method_name == "methodD":
+    #     # 假设 methodD 不接受参数，只运行
+    #     # (虽然这不符合题意，但作为示例)
+    #     # return [method_path]
+    #
+    #     # 假设 methodD 尚未配置，我们可以返回 None 来跳过它
+    #     logging.warning(f"方法 {method_name} 的命令未在 get_command_args 中定义，已跳过。")
+    #     return None
+
+    else:
+        # 其他未知的可执行文件
+        logging.error(f"未知的可执行文件: {method_name}")
+        return None
+
+    # --- 配置结束 ---
+
+
+def run_single_experiment(task_info: tuple) -> None:
+    """
+    运行单个实验（一个method + 一个instance）。
+    此函数被设计为在单独的进程中运行，并包含完整的异常处理（要求 3）。
+    """
+    method_path, instance_path = task_info
+    method_name = os.path.basename(method_path)
+    instance_name = os.path.basename(instance_path)
+
+    # 日志前缀，方便识别
+    log_prefix = f"[{method_name} | {instance_name}]"
+
+    try:
+        # 1. 获取命令行参数
+        command_list = get_command_args(method_path, instance_path)
+
+        if command_list is None:
+            # get_command_args 中已经记录了日志
+            return
+
+        logging.info(f"{log_prefix} 开始运行。命令: {' '.join(command_list)}")
+
+        # 2. 执行子进程
+        # subprocess.run() 会等待进程结束
+        result = subprocess.run(
+            command_list,
+            capture_output=True,  # 捕获 stdout 和 stderr
+            text=True,  # 以文本（str）形式解码
+            check=True,  # 如果返回非0退出码，则引发 CalledProcessError
+        )
+
+        # 3. 成功记录
+        # 只记录标准输出的前200个字符，避免日志刷屏
+        stdout_snippet = result.stdout.strip()[:200].replace('\n', ' ')
+        logging.info(f"{log_prefix} 运行成功。耗时: {result.args}s. STDOUT(snippet): {stdout_snippet}...")
+
+    except subprocess.CalledProcessError as e:
+        # 错误：程序本身运行失败（返回了非0退出码）
+        logging.error(f"{log_prefix} 运行失败。返回码: {e.returncode}")
+        logging.error(f"{log_prefix} STDERR: {e.stderr.strip()}")
+
+    # except subprocess.TimeoutExpired as e:
+    #     # 错误：超时
+    #     logging.error(f"{log_prefix} 运行超时 (超过 {PROCESS_TIMEOUT} 秒)。进程已被终止。")
+    #     if e.stderr:
+    #         logging.error(f"{log_prefix} 超时前的 STDERR: {e.stderr.strip()}")
+
+    except FileNotFoundError:
+        # 错误：可执行文件未找到
+        logging.error(f"{log_prefix} 运行失败。可执行文件未找到: {method_path}")
+
+    except Exception as e:
+        # 错误：其他所有未预料到的Python异常
+        logging.error(f"{log_prefix} 发生意外的脚本错误: {e}")
+
+
+def main():
+    """主函数，负责编排所有任务"""
+    setup_logging()
+    logging.info("--- 脚本开始运行 ---")
+
+    # 1. 查找所有实例文件
+    instance_pattern = os.path.join(INSTANCES_DIR, "*.vrp")
+    instance_files = glob.glob(instance_pattern)
+
+    if not METHODS_TO_RUN:
+        logging.critical("配置错误：METHODS_TO_RUN 列表为空。请检查脚本配置。")
+        return
+
+    if not instance_files:
+        logging.critical(f"配置错误：在 {INSTANCES_DIR} 中未找到任何 *.vrp 文件。")
+        return
+
+    logging.info(f"找到 {len(METHODS_TO_RUN)} 个可执行文件。")
+    logging.info(f"找到 {len(instance_files)} 个实例文件。")
+
+    # 2. 创建所有任务组合 (笛卡尔积)
+    tasks = []
+    for method in METHODS_TO_RUN:
+        for instance in instance_files:
+            tasks.append((method, instance))
+
+    total_tasks = len(tasks)
+    logging.info(f"总共需要运行 {total_tasks} 个任务组合。")
+
+    # 3. 使用 ProcessPoolExecutor 并行执行 (要求 2)
+    # 它会自动管理进程池，并行运行 run_single_experiment 函数
+    with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+
+        if MAX_WORKERS:
+            logging.info(f"使用 {MAX_WORKERS} 个工作进程开始并行执行...")
+        else:
+            # executor._max_workers 在 Python 3.8+ 可用
+            try:
+                logging.info(f"使用 {executor._max_workers} 个CPU核心开始并行执行...")
+            except AttributeError:
+                logging.info(f"使用所有可用的CPU核心开始并行执行...")
+
+        # 使用 executor.map 来分发任务
+        # map 会保持任务的原始顺序
+        # 我们使用 list() 来强制执行所有任务并等待它们完成
+        list(executor.map(run_single_experiment, tasks))
+
+    logging.info("--- 所有任务已完成 ---")
+
+
+if __name__ == "__main__":
+    # 确保在 Windows 或 macOS 的 'spawn' 模式下，
+    # 多进程代码只在主模块中运行
+    main()
