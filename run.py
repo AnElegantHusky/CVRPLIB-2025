@@ -9,10 +9,11 @@ import concurrent.futures
 from typing import List, Optional
 
 # --- [!] 请您在此处配置 ---
+SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 1. 定义可执行文件（methods）的完整路径
 # 假设这四个可执行文件分别是 methodA, methodB, methodC, methodD
-METHODS_DIR = ".\\bin"
+METHODS_DIR = os.path.join(SCRIPT_DIR, "bin")
 METHODS_TO_RUN = [
     # os.path.join(METHODS_DIR, "AILSII_CPU.jar"),
     os.path.join(METHODS_DIR, "filo2"),
@@ -21,7 +22,7 @@ METHODS_TO_RUN = [
 ]
 
 # 2. 定义实例文件（instances）所在的文件夹
-INSTANCES_DIR = ".\\XLTEST"
+INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 
 # 3. 定义日志文件
 LOG_FILE = "experiment_log.log"
