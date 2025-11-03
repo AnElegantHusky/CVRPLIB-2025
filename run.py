@@ -23,7 +23,7 @@ INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 LOG_FILE = "experiment_log.log"
 
 # TIME_LIMIT = 5 * 24 * 3600  # 5天，单位为秒
-TIME_LIMIT = 2
+TIME_LIMIT = 3
 
 MAX_WORKERS = None
 
@@ -250,6 +250,6 @@ def main(method_name: str = None):
 if __name__ == "__main__":
     # TODO: 请在四台不同的服务器上分别运行以下每行代码
     main("AILSII_CPU.jar")
-    # main("filo2")
-    # main("hgs")
-    # main("hgs-TV")
+    main("filo2")
+    main("hgs")
+    main("hgs-TV")
