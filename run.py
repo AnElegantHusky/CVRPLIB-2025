@@ -12,19 +12,9 @@ from typing import List, Optional
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 1. 定义可执行文件（methods）的完整路径
-# 假设这四个可执行文件分别是 methodA, methodB, methodC, methodD
 METHODS_DIR = os.path.join(SCRIPT_DIR, "bin")
-METHODS_TO_RUN = [
-    os.path.join(METHODS_DIR, "AILSII_CPU.jar"),
-    os.path.join(METHODS_DIR, "filo2"),
-    os.path.join(METHODS_DIR, "hgs"),
-    os.path.join(METHODS_DIR, "hgs-TV")
-]
+
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results")
-METHODS_OUTPUT_DIRS = [os.path.join(OUTPUT_DIR, os.path.basename(method)) for method in METHODS_TO_RUN]
-for dir_path in METHODS_OUTPUT_DIRS:
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path, exist_ok=True)
 
 # 2. 定义实例文件（instances）所在的文件夹
 INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
@@ -32,14 +22,9 @@ INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 # 3. 定义日志文件
 LOG_FILE = "experiment_log.log"
 
-# 4. (可选) 定义每个进程的超时时间（秒）
-# 如果一个method运行时间过长，脚本将终止它并记录为“超时”
-# PROCESS_TIMEOUT = 600  # 10分钟
-TIME_LIMIT = 5 * 24 * 3600  # 5天，单位为秒
+# TIME_LIMIT = 5 * 24 * 3600  # 5天，单位为秒
+TIME_LIMIT = 2
 
-# 5. (可选) 定义最大并行工作进程数
-# 默认使用所有可用的CPU核心
-# 如果您想限制（例如，只用8个核心），请设置：MAX_WORKERS = 8
 MAX_WORKERS = None
 
 
@@ -207,8 +192,13 @@ def run_single_experiment(task_info: tuple) -> None:
         logging.error(f"{log_prefix} 发生意外的脚本错误: {e}")
 
 
-def main():
+def main(method_name: str = None):
     """主函数，负责编排所有任务"""
+    METHOD_TO_RUN = os.path.join(METHODS_DIR, method_name) if method_name else None
+    METHODS_OUTPUT_DIRS = os.path.join(OUTPUT_DIR, method_name)
+    if not os.path.exists(METHODS_OUTPUT_DIRS):
+        os.makedirs(METHODS_OUTPUT_DIRS, exist_ok=True)
+
     setup_logging()
     logging.info("--- 脚本开始运行 ---")
 
@@ -216,20 +206,20 @@ def main():
     instance_pattern = os.path.join(INSTANCES_DIR, "*.vrp")
     instance_files = glob.glob(instance_pattern)
 
-    if not METHODS_TO_RUN:
-        logging.critical("配置错误：METHODS_TO_RUN 列表为空。请检查脚本配置。")
+    if not METHOD_TO_RUN:
+        logging.critical("配置错误：METHOD_TO_RUN 为空。请检查脚本配置。")
         return
 
     if not instance_files:
         logging.critical(f"配置错误：在 {INSTANCES_DIR} 中未找到任何 *.vrp 文件。")
         return
 
-    logging.info(f"找到 {len(METHODS_TO_RUN)} 个可执行文件。")
+    logging.info(f"找到 {len(METHOD_TO_RUN)} 个可执行文件。")
     logging.info(f"找到 {len(instance_files)} 个实例文件。")
 
     # 2. 创建所有任务组合 (笛卡尔积)
     tasks = []
-    for method in METHODS_TO_RUN:
+    for method in list([METHOD_TO_RUN]):
         for instance in instance_files:
             tasks.append((method, instance))
 
@@ -258,6 +248,8 @@ def main():
 
 
 if __name__ == "__main__":
-    # 确保在 Windows 或 macOS 的 'spawn' 模式下，
-    # 多进程代码只在主模块中运行
-    main()
+    # TODO: 请在四台不同的服务器上分别运行以下每行代码
+    main("AILSII_CPU.jar")
+    # main("filo2")
+    # main("hgs")
+    # main("hgs-TV")
