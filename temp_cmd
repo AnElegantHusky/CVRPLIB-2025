@@ -1,2 +1,0 @@
-git restore --source=AILSII bin/AILSII_CPU.jar
-git restore --source=AILSII scripts/AILSII_CPU.sh

@@ -35,7 +35,7 @@ LOG_FILE = "experiment_log.log"
 # 4. (可选) 定义每个进程的超时时间（秒）
 # 如果一个method运行时间过长，脚本将终止它并记录为“超时”
 # PROCESS_TIMEOUT = 600  # 10分钟
-TIME_LIMIT = 2
+TIME_LIMIT = 5 * 24 * 3600  # 5天，单位为秒
 
 # 5. (可选) 定义最大并行工作进程数
 # 默认使用所有可用的CPU核心
