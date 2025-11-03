@@ -20,6 +20,11 @@ METHODS_TO_RUN = [
     os.path.join(METHODS_DIR, "hgs"),
     os.path.join(METHODS_DIR, "hgs-TV")
 ]
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results")
+METHODS_OUTPUT_DIRS = [os.path.join(OUTPUT_DIR, os.path.basename(method)) for method in METHODS_TO_RUN]
+for dir_path in METHODS_OUTPUT_DIRS:
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path, exist_ok=True)
 
 # 2. 定义实例文件（instances）所在的文件夹
 INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
