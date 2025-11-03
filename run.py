@@ -15,7 +15,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 # 假设这四个可执行文件分别是 methodA, methodB, methodC, methodD
 METHODS_DIR = os.path.join(SCRIPT_DIR, "bin")
 METHODS_TO_RUN = [
-    # os.path.join(METHODS_DIR, "AILSII_CPU.jar"),
+    os.path.join(METHODS_DIR, "AILSII_CPU.jar"),
     os.path.join(METHODS_DIR, "filo2"),
     os.path.join(METHODS_DIR, "hgs"),
     os.path.join(METHODS_DIR, "hgs-TV")
