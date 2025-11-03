@@ -249,8 +249,7 @@ def main(method_name: str = None):
 
 
 if __name__ == "__main__":
-    # TODO: 请在四台不同的服务器上分别运行以下每行代码
+    # TODO: 请在三台不同的服务器上分别运行以下每行代码
     main("AILSII_CPU.jar")
     main("filo2")
-    main("hgs")
     main("hgs-TV")
