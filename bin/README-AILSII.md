@@ -1,4 +1,18 @@
-## To run the algorithm
+## 编译jar==========================================================================================================================================================
+# 创建输出目录
+mkdir out\production\AILS-II
+
+# 编译代码
+javac -d out\production\AILS-II -cp src (Get-ChildItem src -Filter *.java -Recurse).FullName
+
+# 打包 JAR 文件
+jar cvfe AILSII.jar SearchMethod.AILSII -C out\production\AILS-II .
+
+# 测
+java -jar AILSII.jar -file XLDemo/XLTEST-n1048-k139.vrp -rounded true  -limit 3 -stoppingCriterion Time
+
+
+## To run the algorithm===============================================================================================================================================
 
 java -jar bin/AILSII.jar -file XLDemo/XLTEST-n1048-k139.vrp -best 139 -limit 1 -stoppingCriterion Time 
 
@@ -23,8 +37,7 @@ java -jar bin/AILSII.jar -file XLDemo/XLTEST-n1048-k139.vrp -best 139 -limit 1 -
 **-dMin** : Final Reference distance between the reference solution and the solution obtained after the local search. The default value is 15.
 
 
-
-## Description
+## Description============================================================================================================================================================
 [1] Máximo, Vinícius R., Nascimento, Mariá C.V. (2021).
 A hybrid adaptive iterated local search with diversification control to the capacitated vehicle routing problem. European Journal of Operational Research, Volume 294, p. 1108-1119, https://doi.org/10.1016/j.ejor.2021.02.024 (also available at [aXiv](https://arxiv.org/abs/2012.11021)).
 
@@ -34,7 +47,24 @@ https://doi.org/10.1016/j.cor.2022.105954 (also available at [aXiv](https://arxi
 
 AILS-II is an Adaptive Iterated Local Search (AILS) meta-heuristic that embeds adaptive strategies to tune  diversity control parameters. These parameters are the perturbation degree and the acceptance criterion. They are key parameters to ensure that the method escapes from local optima and keeps an adequate level of exploitation and exploration of the method. Its implementation is in JAVA language.
 
-## run on windows git bash
+## run on windows git bash=================================================================================================================================================
 
 cd /c/Users/79430/Desktop/CVRPLIB-2025
-bash scripts/AILSII_CPU.sh
+bash scripts/AILSII.sh
+
+
+## 输出=====================================================================================================================================================================
+新代码中包含两种输出，一种是只输出最终解（默认），另一种是输出每一步有提升的解（可能会占用大量存储空间）
+每个instance都输出在Results/{instance_name}文件夹下，solution的文件名为时间， 其他信息的文件名为{instance}.csv
+
+# 输出每次的解和最终解的开关在AILSIIj.java 82行：
+boolean outputAllSteps = false; // 这里设置为false只输出最终解
+
+# 若想要输出时间和besfF外的其他值，请替换AILSIIj.java 中366, 372行中的参数如下，参数可自由选取：
+				"solution quality: "+bestF
+				+" gap: "+deci.format(getGap())+"%"
+				+" K: "+solution.numRoutes
+				+" iteration: "+iterator
+				+" eta: "+deci.format(acceptanceCriterion.getEta())
+				+" omega: "+deci.format(selectedPerturbation.omega)
+				+" time: "+timeAF
