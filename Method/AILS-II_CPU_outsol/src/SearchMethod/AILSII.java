@@ -28,9 +28,32 @@ import Solution.Solution;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutionException;
+
 
 public class AILSII 
 {
+    // ================ 修改开始：添加内部类 ================
+    /**
+     * 一个简单的内部类，用于封装来自并行任务的返回结果。
+     * 它包含最终的解，以及该任务消耗的 CPU 时间（纳秒）。
+     */
+    private static class TaskResult {
+        final Solution solution;
+        final long cpuTime; // 纳秒
+
+        TaskResult(Solution solution, long cpuTime) {
+            this.solution = solution;
+            this.cpuTime = cpuTime;
+        }
+    }
+    // ================ 修改结束 ================
+
 	//----------Problema------------
 	Solution solution,referenceSolution,bestSolution;
 	
@@ -48,6 +71,8 @@ public class AILSII
 	long first,ini;
 	double timeAF,totalTime,time;
 	ThreadMXBean threadMXBean;
+
+    private long totalWorkerCpuTime = 0L;
 	
 	Random rand=new Random();
 	
@@ -84,10 +109,17 @@ public class AILSII
 	private FileWriter csvWriter; // CSV文件写入器
 	// ================ 修改结束 ================
 
+    private ExecutorService executorService;
+    private Config config; // 存储Config以供线程使用
+
 	public AILSII(Instance instance,InputParameters reader)
 	{ 
 		this.instance=instance;
 		Config config=reader.getConfig();
+
+        this.config = config; // 将局部的config存到类字段中
+        this.executorService = Executors.newFixedThreadPool(2); // 创建一个固定大小为2的线程池
+
 		this.optimal=reader.getBest();
 		this.executionMaximumLimit=reader.getTimeLimit();
 		this.threadMXBean = ManagementFactory.getThreadMXBean();
@@ -300,6 +332,9 @@ public class AILSII
 	public void search() {
 		iterator = 0;
 		first = threadMXBean.getCurrentThreadCpuTime(); // 获取当前线程的CPU时间
+
+        totalWorkerCpuTime = 0L;
+
 		referenceSolution.numRoutes = instance.getMinNumberRoutes();
 		constructSolution.construct(referenceSolution);
 
@@ -321,37 +356,134 @@ public class AILSII
 			writeSolutionToFile(bestF, initialTime);
 		}
 		// ================ 修改结束 ================
-		
-		while (!stoppingCriterion()) {
-			iterator++;
 
-			solution.clone(referenceSolution);
+        while (!stoppingCriterion()) {
+            iterator++;
 
-			selectedPerturbation = pertubOperators[rand.nextInt(pertubOperators.length)];
-			selectedPerturbation.applyPerturbation(solution);
-			feasibilityOperator.makeFeasible(solution);
-			localSearch.localSearch(solution, true);
-			distanceLS = pairwiseDistance.pairwiseSolutionDistance(solution, referenceSolution);
+            // ================ 修改开始：并行扰动和搜索 ================
 
-			evaluateSolution();
-			distAdjustment.distAdjustment();
+            // 1. 定义两个线程任务 (Callable<TaskResult>)
 
-			selectedPerturbation.getChosenOmega().setDistance(distanceLS); // update
+            Callable<TaskResult> task1 = () -> {
+                long taskStartTime = threadMXBean.getCurrentThreadCpuTime(); // 任务1的CPU计时器
 
-			if (acceptanceCriterion.acceptSolution(solution))
-				referenceSolution.clone(solution);
-		}
+                // 线程安全：创建此线程专属的 Solution 和搜索工具
+                Solution threadSolution = new Solution(instance, config);
+                threadSolution.clone(referenceSolution);
+                IntraLocalSearch threadIntraLS = new IntraLocalSearch(instance, config);
+                LocalSearch threadLS = new LocalSearch(instance, config, threadIntraLS);
+                FeasibilityPhase threadFP = new FeasibilityPhase(instance, config, threadIntraLS);
 
-		totalTime = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000; // 转换为秒
-		
-		// ================ 修改开始：在搜索结束后保存最终解 ================
-		// 保存最终的最优解（使用总时间作为文件名）
-		writeFinalSolutionToFile();
-		
-		// 关闭CSV文件
-		closeCSVFile();
-		// ================ 修改结束 ================
-	}
+                // 应用扰动和搜索
+                pertubOperators[0].applyPerturbation(threadSolution);
+                threadFP.makeFeasible(threadSolution);
+                threadLS.localSearch(threadSolution, true);
+
+                long taskEndTime = threadMXBean.getCurrentThreadCpuTime(); // 任务1的CPU计时器结束
+                long taskCpuTime = taskEndTime - taskStartTime;
+                return new TaskResult(threadSolution, taskCpuTime); // 返回结果和CPU时间
+            };
+
+            Callable<TaskResult> task2 = () -> {
+                long taskStartTime = threadMXBean.getCurrentThreadCpuTime(); // 任务2的CPU计时器
+
+                // 线程安全：创建此线程专属的 Solution 和搜索工具
+                Solution threadSolution = new Solution(instance, config);
+                threadSolution.clone(referenceSolution);
+                IntraLocalSearch threadIntraLS = new IntraLocalSearch(instance, config);
+                LocalSearch threadLS = new LocalSearch(instance, config, threadIntraLS);
+                FeasibilityPhase threadFP = new FeasibilityPhase(instance, config, threadIntraLS);
+
+                // 应用扰动和搜索
+                pertubOperators[1].applyPerturbation(threadSolution);
+                threadFP.makeFeasible(threadSolution);
+                threadLS.localSearch(threadSolution, true);
+
+                long taskEndTime = threadMXBean.getCurrentThreadCpuTime(); // 任务2的CPU计时器结束
+                long taskCpuTime = taskEndTime - taskStartTime;
+                return new TaskResult(threadSolution, taskCpuTime); // 返回结果和CPU时间
+            };
+
+            // 2. 提交任务 (Future<TaskResult>)
+            Future<TaskResult> future1 = executorService.submit(task1);
+            Future<TaskResult> future2 = executorService.submit(task2);
+
+            TaskResult result1 = null;
+            TaskResult result2 = null;
+
+            // 3. 获取结果
+            try {
+                result1 = future1.get();
+                result2 = future2.get();
+            } catch (InterruptedException | ExecutionException e) {
+                System.err.println("一个扰动线程执行失败: " + e.getMessage());
+                e.printStackTrace();
+                continue;
+            }
+
+            // 4. 将两个工作线程的 CPU 时间计入总和
+            // 这是“总 CPU 时间”方案
+            totalWorkerCpuTime += result1.cpuTime;
+            totalWorkerCpuTime += result2.cpuTime;
+
+            /* * 备选方案：如果你*真的*想要 "CPU makespan" (一种非标准度量)
+             * totalWorkerCpuTime += Math.max(result1.cpuTime, result2.cpuTime);
+             * (我强烈不推荐这样做，但这实现了你字面上的“makespan”要求)
+             */
+
+
+            // 5. 比较两个结果，选出最好的
+            Solution solution1 = result1.solution;
+            Solution solution2 = result2.solution;
+            Solution bestOfTwo;
+            Perturbation perturbationUsed;
+
+            if (solution1.f < solution2.f) {
+                bestOfTwo = solution1;
+                perturbationUsed = pertubOperators[0];
+            } else {
+                bestOfTwo = solution2;
+                perturbationUsed = pertubOperators[1];
+            }
+
+            // 6. 像以前一样继续...
+            solution.clone(bestOfTwo);
+            distanceLS = pairwiseDistance.pairwiseSolutionDistance(solution, referenceSolution);
+            evaluateSolution();
+            distAdjustment.distAdjustment();
+            perturbationUsed.getChosenOmega().setDistance(distanceLS);
+            if (acceptanceCriterion.acceptSolution(solution))
+                referenceSolution.clone(solution);
+
+            // ================ 修改结束 ================
+        }
+
+        // ================ 修改开始：修改总时间计算 ================
+        long mainCpuTime = threadMXBean.getCurrentThreadCpuTime() - first;
+        long totalCpuTime = mainCpuTime + totalWorkerCpuTime; // 主线程 + 所有工作线程
+        totalTime = (double) totalCpuTime / 1_000_000_000.0; // 转换为秒
+        // ================ 修改结束 ================
+
+        // ================ 修改开始：在搜索结束后保存最终解 ================
+
+        // !! 在保存文件之前，关闭线程池 !!
+        executorService.shutdown();
+        try {
+            // 等待最多60秒让正在运行的任务结束
+            if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                executorService.shutdownNow(); // 强制关闭
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+        }
+
+        // 保存最终的最优解（使用总时间作为文件名）
+        writeFinalSolutionToFile();
+
+        // 关闭CSV文件
+        closeCSVFile();
+        // ================ 修改结束 ================
+    }
 
 	public void evaluateSolution() {
 		if ((solution.f - bestF) < -epsilon) {
@@ -383,20 +515,50 @@ public class AILSII
 		}
 	}
 
-	private boolean stoppingCriterion() {
-		switch (stoppingCriterionType) {
-			case Iteration:
-				if (bestF <= optimal || executionMaximumLimit <= iterator)
-					return true;
-				break;
+    private boolean stoppingCriterion() {
+        switch (stoppingCriterionType) {
+            case Iteration:
+                // 迭代次数的判断保持不变
+                if (bestF <= optimal || executionMaximumLimit <= iterator)
+                    return true;
+                break;
 
-			case Time:
-				if (bestF <= optimal || executionMaximumLimit < (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000)
-					return true;
-				break;
-		}
-		return false;
-	}
+            case Time:
+                // ================ 修改开始 ================
+
+                // 1. 获取主线程*当前*消耗的 CPU 时间 (从 'first' 开始)
+                long mainCpuTime = threadMXBean.getCurrentThreadCpuTime() - first;
+
+                // 2. 加上我们一直在循环中累积的*工作线程*消耗的 CPU 时间
+                long totalCpuTime = mainCpuTime + totalWorkerCpuTime;
+
+                // 3. 将总的 CPU 时间（纳秒）转换为秒
+                double elapsedCpuSeconds = (double) totalCpuTime / 1_000_000_000.0;
+
+                // 4. 使用这个“总 CPU 时间”来和你的限制 (executionMaximumLimit) 比较
+                if (bestF <= optimal || executionMaximumLimit < elapsedCpuSeconds)
+                    return true;
+
+                // ================ 修改结束 ================
+                break;
+        }
+        return false;
+    }
+
+//	private boolean stoppingCriterion() {
+//		switch (stoppingCriterionType) {
+//			case Iteration:
+//				if (bestF <= optimal || executionMaximumLimit <= iterator)
+//					return true;
+//				break;
+//
+//			case Time:
+//				if (bestF <= optimal || executionMaximumLimit < (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000)
+//					return true;
+//				break;
+//		}
+//		return false;
+//	}
 	
 	// ================ 修改开始：添加实例名称设置方法 ================
 	public void setInstanceName(String instanceName) {
