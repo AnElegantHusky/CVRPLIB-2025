@@ -1,6 +1,3 @@
-CSV文件已创建: Results/XLTEST-n6034-k1234/XLTEST-n6034-k1234.csv
-输出目录设置为: Results/XLTEST-n6034-k1234/
-输出模式: 只输出最终解 - 实例: XLTEST-n6034-k1234
 136.09375;1038997.0
 136.46875;1035132.0
 136.6875;1034895.0
@@ -498,4 +495,4 @@ CSV文件已创建: Results/XLTEST-n6034-k1234/XLTEST-n6034-k1234.csv
 13692.21875;1000752.0
 Final solution saved to: XLTEST-n6034-k1234.sol
 Final solution cost: 1000752.0000
-CSV文件已关闭
+CSV锟侥硷拷锟窖关憋拷
