@@ -258,12 +258,17 @@ public class AILSII
 	 * @return 安全的文件名
 	 */
 	private String generateSafeFilename(double time) {
-		String timeStr = deci.format(time).replace(",", ".");
-		
-		// 移除文件名中的非法字符
-		timeStr = timeStr.replaceAll("[\\\\/:*?\"<>|]", "_");
-		
-		return timeStr + ".sol";
+        // 使用实例名作为文件名，如果为空则使用默认名
+        String name = (instanceName == null || instanceName.trim().isEmpty()) ? "instance" : instanceName.trim();
+
+        // 移除文件名中的非法字符
+        name = name.replaceAll("[\\\\/:*?\"<>|]", "_");
+
+        // 确保以 .sol 结尾
+        if (!name.toLowerCase().endsWith(".sol")) {
+            name = name + ".sol";
+        }
+        return name;
 	}
 
 	/**
@@ -303,11 +308,10 @@ public class AILSII
 	 */
 	private void writeFinalSolutionToFile() {
 		// 使用最终时间作为文件名
-		String formattedTime = deci.format(totalTime).replace(",", ".");
-		String safeTime = formattedTime.replaceAll("[\\\\/:*?\"<>|]", "_");
-		String filename = outputDirectory + safeTime + ".sol";
+        String filename = generateSafeFilename(totalTime);
+        String fullPath = outputDirectory + filename;
 		
-		try (FileWriter writer = new FileWriter(filename)) {
+		try (FileWriter writer = new FileWriter(fullPath)) {
 			// 写入标准的CVRP sol格式
 			// 先写所有路线
 			for (int i = 0; i < bestSolution.numRoutes; i++) {
@@ -423,8 +427,10 @@ public class AILSII
 
             // 4. 将两个工作线程的 CPU 时间计入总和
             // 这是“总 CPU 时间”方案
-            totalWorkerCpuTime += result1.cpuTime;
-            totalWorkerCpuTime += result2.cpuTime;
+//            totalWorkerCpuTime += result1.cpuTime;
+//            totalWorkerCpuTime += result2.cpuTime;
+
+            totalWorkerCpuTime += Math.max(result1.cpuTime, result2.cpuTime);
 
             /* * 备选方案：如果你*真的*想要 "CPU makespan" (一种非标准度量)
              * totalWorkerCpuTime += Math.max(result1.cpuTime, result2.cpuTime);
@@ -485,35 +491,48 @@ public class AILSII
         // ================ 修改结束 ================
     }
 
-	public void evaluateSolution() {
-		if ((solution.f - bestF) < -epsilon) {
-			// ================ 修改开始：修复clone前的空指针问题 ================
-			// 先检查solution是否有效
-			if (solution != null && solution.routes != null) {
-				bestF = solution.f;
-				bestSolution.clone(solution);
-				iteratorMF = iterator;
-				timeAF = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000;
+    public void evaluateSolution() {
+        if ((solution.f - bestF) < -epsilon) {
+            // ================ 修改开始：修复clone前的空指针问题 ================
+            // 先检查solution是否有效
+            if (solution != null && solution.routes != null) {
+                bestF = solution.f;
+                bestSolution.clone(solution);
+                iteratorMF = iterator;
 
-				if (print) {
-					System.out.println(timeAF + ";" + bestF);
-				}
-				
-				// ================ 修改开始：写入CSV文件 ================
-				// 每次找到更好的解时都写入CSV文件
-				writeToCSV(timeAF, bestF);
-				// ================ 修改结束 ================
-				
-				// ================ 修改开始：根据配置决定是否每次保存文件 ================
-				// 如果配置为输出所有解，则每次找到更好的解时都保存文件
-				if (outputAllSolutions) {
-					writeSolutionToFile(bestF, timeAF);
-				}
-				// ================ 修改结束 ================
-			}
-			// ================ 修改结束 ================
-		}
-	}
+                // ================ 修改开始：使用总 CPU 时间 ================
+
+                // 1. 获取主线程*当前*消耗的 CPU 时间 (从 'first' 开始)
+                long mainCpuTime = threadMXBean.getCurrentThreadCpuTime() - first;
+
+                // 2. 加上我们一直在 search() 循环中累积的*工作线程*消耗的 CPU 时间
+                //    (totalWorkerCpuTime 是一个类成员字段)
+                long totalCpuTime = mainCpuTime + totalWorkerCpuTime;
+
+                // 3. 将总的 CPU 时间（纳秒）转换为秒，这现在是你的“混合CPU时间”
+                timeAF = (double) totalCpuTime / 1_000_000_000.0;
+
+                // ================ 修改结束 ================
+
+                if (print) {
+                    System.out.println(timeAF + ";" + bestF);
+                }
+
+                // ================ 修改开始：写入CSV文件 ================
+                // 每次找到更好的解时都写入CSV文件
+                writeToCSV(timeAF, bestF);
+                // ================ 修改结束 ================
+
+                // ================ 修改开始：根据配置决定是否每次保存文件 ================
+                // 如果配置为输出所有解，则每次找到更好的解时都保存文件
+                if (outputAllSolutions) {
+                    writeSolutionToFile(bestF, timeAF);
+                }
+                // ================ 修改结束 ================
+            }
+            // ================ 修改结束 ================
+        }
+    }
 
     private boolean stoppingCriterion() {
         switch (stoppingCriterionType) {
