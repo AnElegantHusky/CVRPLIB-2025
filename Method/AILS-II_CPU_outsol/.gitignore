@@ -4,3 +4,5 @@ Resultados/
 /.settings/
 .classpath
 .project
+*.xml
+
