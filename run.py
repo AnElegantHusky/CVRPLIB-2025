@@ -70,7 +70,7 @@ def get_command_args(method_path: str, instance_path: str) -> Optional[List[str]
     #
     # 示例：
 
-    if method_name == "AILSII_CPU.jar":
+    if 'AILSII' in method_name:
         # 假设 methodA 的命令是: /bin/methodA -i <instance_file> --heuristic "GA"
         return ["java", "-jar", "-Xms2000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path, "-rounded", "true", "-stoppingCriterion", "Time", "-limit", f"{TIME_LIMIT}"]
 
