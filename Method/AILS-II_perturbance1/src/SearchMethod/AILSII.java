@@ -280,7 +280,7 @@ public class AILSII
             solution.clone(referenceSolution);
 
             // 2. 固定选择一个扰动算子 (pertubOperators[0])
-            pertubOperators[1].applyPerturbation(solution);
+            pertubOperators[0].applyPerturbation(solution);
 
             // 3. 恢复可行性
             feasibilityOperator.makeFeasible(solution);
@@ -294,7 +294,7 @@ public class AILSII
             evaluateSolution(); // 评估是否为全局最优
 
             distAdjustment.distAdjustment();
-            pertubOperators[1].getChosenOmega().setDistance(distanceLS);
+            pertubOperators[0].getChosenOmega().setDistance(distanceLS);
 
             if (acceptanceCriterion.acceptSolution(solution)) {
                 referenceSolution.clone(solution);
