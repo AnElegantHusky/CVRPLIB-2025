@@ -12,14 +12,17 @@ from typing import Tuple
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 2. AILSII Jar包路径 (假设在 bin 文件夹下)
-JAR_NAME = "AILS-II_CPU.jar"
+# JAR_NAME = "AILS-II_parallel.jar"
+JAR_NAME = "ails-perturbance1"
+
+
 JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
 
 # 3. 实例文件所在文件夹 (根据你的命令行，这里是 XLDemo)
 INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 
 # 4. 结果输出根目录
-OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results", JAR_NAME)
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME)
 
 # 5. 硬编码的任务列表 (文件名, 时间限制秒)
 # 这些是根据你提供的 hgs 命令行提取的
@@ -97,7 +100,7 @@ def run_single_task(task: Tuple[str, int]):
         "-limit", str(time_limit)
     ]
 
-    logging.info(f"{log_prefix} 开始运行...")
+    # logging.info(f"{log_prefix} 开始运行...")
     # logging.info(f"CMD: {' '.join(command)}") # 如果需要调试命令可取消注释
 
     try:
@@ -111,7 +114,7 @@ def run_single_task(task: Tuple[str, int]):
                 check=True
             )
 
-        logging.info(f"{log_prefix} 完成。日志已保存至 {output_csv_path}")
+        # logging.info(f"{log_prefix} 完成。日志已保存至 {output_csv_path}")
 
     except subprocess.CalledProcessError as e:
         logging.error(f"{log_prefix} 运行失败 (Exit Code: {e.returncode})")
@@ -123,7 +126,7 @@ def run_single_task(task: Tuple[str, int]):
 
 def main():
     logging.info("--- AILSII 专项测试脚本启动 ---")
-    logging.info(f"目标任务数: {len(TARGET_TASKS)}")
+    # logging.info(f"目标任务数: {len(TARGET_TASKS)}")
 
     if not os.path.exists(JAR_PATH):
         logging.critical(f"找不到 Jar 文件: {JAR_PATH}")
@@ -135,14 +138,14 @@ def main():
 
     # 使用进程池并行执行
     with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-        if MAX_WORKERS:
-            logging.info(f"并行进程数: {MAX_WORKERS}")
-        else:
-            logging.info("并行进程数: 自动 (所有核心)")
+        # if MAX_WORKERS:
+        #     logging.info(f"并行进程数: {MAX_WORKERS}")
+        # else:
+        #     logging.info("并行进程数: 自动 (所有核心)")
 
         list(executor.map(run_single_task, TARGET_TASKS))
 
-    logging.info("--- 所有任务已结束 ---")
+    # logging.info("--- 所有任务已结束 ---")
 
 
 if __name__ == "__main__":
