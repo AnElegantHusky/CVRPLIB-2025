@@ -3,13 +3,25 @@
 
 编译：
 ```
-sudo chmod +x ./bin/* ./scripts/*
+sudo chmod +x ./scripts/*
 ./scripts/compile.sh
+sudo chmod +x ./bin/* 
 ```
 
 在三台不同服务器上，分别运行：
+
+[//]: # (```)
+
+[//]: # (python run.py AILSII_CPU.jar)
+
+[//]: # (python run.py hgs-TV)
+
+[//]: # (python run.py filo2)
+
+[//]: # (```)
+
 ```
-python run.py AILSII_CPU.jar
-python run.py hgs-TV
-python run.py filo2
+python run.py AILSII_origin.jar --start-idx 0 --end-idx 10 --time-limit 10
+
 ```
+
