@@ -20,6 +20,12 @@ sudo chmod +x ./bin/*
 
 [//]: # (```)
 
+test
+```
+python run.py AILSII_origin.jar --start-idx 0 --end-idx 10 --time-limit 10
+
+```
+
 ```
 python run.py AILSII_origin.jar --start-idx 0 --end-idx 50
 ```
