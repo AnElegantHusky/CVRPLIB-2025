@@ -1,14 +1,13 @@
 # CVRPLIB-2025
 由于每个方法需要运行较长时间，最好能各分配一个服务器
 
-编译：
+# 编译
 ```
 sudo chmod +x ./scripts/*
 ./scripts/compile.sh
 sudo chmod +x ./bin/* 
 ```
 
-在三台不同服务器上，分别运行：
 
 [//]: # (```)
 
@@ -20,12 +19,14 @@ sudo chmod +x ./bin/*
 
 [//]: # (```)
 
-test
+测试命令（仅跑前10个实例，每个方法限时10秒）
 ```
 python run.py AILSII_origin.jar --start-idx 0 --end-idx 10 --time-limit 10
-
+python run.py AILSII_perturbation1.jar --start-idx 0 --end-idx 10 --time-limit 10
+python run.py AILSII_perturbation2.jar --start-idx 0 --end-idx 10 --time-limit 10
+python run.py AILSII_deco.jar --start-idx 0 --end-idx 10 --time-limit 10
 ```
-
+# 请在不同服务器上分别运行以下命令
 ```
 python run.py AILSII_origin.jar --start-idx 0 --end-idx 50
 ```
@@ -50,3 +51,10 @@ python run.py AILSII_perturbation2.jar --start-idx 0 --end-idx 50
 python run.py AILSII_perturbation2.jar --start-idx 50 --end-idx 100
 ```
 
+```
+python run.py AILSII_deco.jar --start-idx 50 --end-idx 100
+```
+
+```
+python run.py AILSII_deco.jar --start-idx 50 --end-idx 100
+```

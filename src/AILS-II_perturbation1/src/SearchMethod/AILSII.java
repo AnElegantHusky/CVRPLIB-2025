@@ -1,6 +1,6 @@
 /**
  * Copyright 2022, Vinícius R. Máximo
- *	Distributed under the terms of the MIT License.
+ *	Distributed under the terms of the MIT License. 
  *	SPDX-License-Identifier: MIT
  */
 package SearchMethod;
@@ -76,21 +76,16 @@ public class AILSII
     DecimalFormat deci=new DecimalFormat("0.0000");
     StoppingCriterionType stoppingCriterionType;
 
-    // ================ 文件输出相关变量 ================
+    //----------文件输出配置------------
     private String outputDirectory = "Results/"; // 默认输出目录
-    private boolean customOutputSet = false;     // [新增] 标记是否使用了自定义输出目录
-    private boolean outputAllSolutions = false;
-    private String instanceName = "default";
-    private FileWriter csvWriter;
-    private Config config;
+    private boolean customOutputSet = false;     // 标记是否使用了自定义输出目录
+    private String instanceName = "default";     // 存储实例名称
+    private FileWriter csvWriter;                // CSV文件写入器
 
     public AILSII(Instance instance,InputParameters reader)
     {
         this.instance=instance;
         Config config=reader.getConfig();
-
-        this.config = config;
-
         this.optimal=reader.getBest();
         this.executionMaximumLimit=reader.getTimeLimit();
         this.threadMXBean = ManagementFactory.getThreadMXBean();
@@ -141,24 +136,28 @@ public class AILSII
             e.printStackTrace();
         }
 
-        // 初始化输出目录
-        // initializeOutputDirectory(); // 放到设置目录后再调用
+        // 初始化放在 setInstanceName 或 setOutputDirectory 中处理
     }
 
-    // ================ [新增] 设置自定义输出目录 ================
+    /**
+     * 设置输出目录 (新添加的方法)
+     * @param path 输出路径
+     */
     public void setOutputDirectory(String path) {
         if (path != null && !path.isEmpty()) {
             this.outputDirectory = path;
-            // 确保路径以分隔符结尾
             if (!this.outputDirectory.endsWith(File.separator)) {
                 this.outputDirectory += File.separator;
             }
             this.customOutputSet = true;
             initializeOutputDirectory();
+            // 如果此时已经有 instanceName，可以尝试初始化文件
         }
     }
 
-    // ================ 文件输出辅助方法 ================
+    /**
+     * 初始化输出目录
+     */
     private void initializeOutputDirectory() {
         try {
             java.io.File directory = new java.io.File(outputDirectory);
@@ -170,6 +169,9 @@ public class AILSII
         }
     }
 
+    /**
+     * 初始化CSV文件
+     */
     private void initializeCSVFile() {
         try {
             String csvFilePath = outputDirectory + instanceName + ".csv";
@@ -180,6 +182,9 @@ public class AILSII
         }
     }
 
+    /**
+     * 写入CSV数据
+     */
     private void writeToCSV(double time, double bestF) {
         if (csvWriter != null) {
             try {
@@ -191,11 +196,13 @@ public class AILSII
         }
     }
 
+    /**
+     * 关闭CSV文件
+     */
     private void closeCSVFile() {
         if (csvWriter != null) {
             try {
                 csvWriter.close();
-                // System.out.println("CSV文件已关闭");
             } catch (IOException e) {
                 System.err.println("关闭CSV文件失败: " + e.getMessage());
             }
@@ -211,64 +218,15 @@ public class AILSII
         return routeString.trim();
     }
 
-    private String generateSafeFilename(double time) {
+    private String getFixedFilename() {
         String name = (instanceName == null || instanceName.trim().isEmpty()) ? "instance" : instanceName.trim();
-        name = name.replaceAll("[\\\\/:*?\"<>|]", "_");
-
-        // 如果只输出最终解，我们通常不希望文件名带时间戳，而是固定的 instanceName.sol 以便脚本查找
-        // 但这里为了兼容原有逻辑，可以保留。
-        // 建议：如果是最终解(totalTime调用)，使用 instanceName.sol 覆盖可能更好，或者保持原样。
-        // 这里保持原样逻辑，但在 writeFinalSolutionToFile 可能会希望覆盖。
-
-        // 如果想让最终结果文件名固定为 output_dir/instance_name.sol (方便run.py收集)，可以使用：
-        // return instanceName + ".sol";
-
-        // 保持原逻辑：
         if (!name.toLowerCase().endsWith(".sol")) {
             name = name + ".sol";
         }
         return name;
     }
 
-    // [新增] 获取固定的文件名，方便外部脚本读取
-    private String getFixedFilename() {
-         String name = (instanceName == null || instanceName.trim().isEmpty()) ? "instance" : instanceName.trim();
-         if (!name.toLowerCase().endsWith(".sol")) {
-            name = name + ".sol";
-        }
-        return name;
-    }
-
     private void writeSolutionToFile(double currentBestF, double currentTime) {
-        // String filename = generateSafeFilename(currentTime);
-        // 为了配合 run.py 收集结果，建议使用固定文件名覆盖，或者追加模式。
-        // 这里为了安全，我们使用固定文件名覆盖模式 (最新解覆盖旧解)，
-        // 或者如果需要保存历史，可以维持原样。
-        // 考虑到 run.py 通常只看最终结果，这里我们修改为覆盖写同一个文件：
-
-        String filename = getFixedFilename();
-        String fullPath = outputDirectory + filename;
-
-        try (FileWriter writer = new FileWriter(fullPath, false)) { // false = overwrite
-            for (int i = 0; i < bestSolution.numRoutes; i++) {
-                String routeNodes = getRouteNodes(i);
-                writer.write("Route #" + (i + 1) + ": " + routeNodes + "\n");
-            }
-            writer.write("Cost " + deci.format(currentBestF).replace(",", ".") + "\n");
-            writer.write("Time " + deci.format(currentTime).replace(",", "."));
-            writer.flush();
-            if (print) {
-                // System.out.println("Solution saved to: " + fullPath);
-            }
-        } catch (IOException e) {
-            System.err.println("写入解决方案文件失败: " + e.getMessage());
-        } catch (Exception e) {
-            System.err.println("写入文件时发生错误: " + e.getMessage());
-        }
-    }
-
-    private void writeFinalSolutionToFile() {
-        // 使用固定文件名，确保 run.py 能找到
         String filename = getFixedFilename();
         String fullPath = outputDirectory + filename;
 
@@ -277,21 +235,19 @@ public class AILSII
                 String routeNodes = getRouteNodes(i);
                 writer.write("Route #" + (i + 1) + ": " + routeNodes + "\n");
             }
-            writer.write("Cost " + deci.format(bestF).replace(",", "."));
+            writer.write("Cost " + deci.format(currentBestF).replace(",", ".") + "\n");
+            writer.write("Time " + deci.format(currentTime).replace(",", "."));
             writer.flush();
-            if (print) {
-                System.out.println("Final solution saved to: " + fullPath);
-                // System.out.println("Final solution cost: " + deci.format(bestF).replace(",", "."));
-            }
         } catch (IOException e) {
-            System.err.println("写入最终解决方案文件失败: " + e.getMessage());
+            System.err.println("写入解决方案文件失败: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("写入文件时发生错误: " + e.getMessage());
         }
     }
 
     public void search() {
         iterator = 0;
         first = threadMXBean.getCurrentThreadCpuTime();
-
         referenceSolution.numRoutes = instance.getMinNumberRoutes();
         constructSolution.construct(referenceSolution);
 
@@ -301,37 +257,36 @@ public class AILSII
         bestSolution.clone(referenceSolution);
         bestF = bestSolution.f;
 
-        if (outputAllSolutions) {
-            double initialTime = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000;
-            if (print) {
-                System.out.println("Initial solution: " + initialTime + ";" + bestF);
-            }
-            writeSolutionToFile(bestF, initialTime);
-        } else {
-            // 即使不输出所有，初始化时也写一次，确保有文件存在
-            double initialTime = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000;
-            writeSolutionToFile(bestF, initialTime);
+        double initialTime = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000;
+        if (print) {
+            System.out.println("Initial solution: " + initialTime + ";" + bestF);
         }
+
+        writeSolutionToFile(bestF, initialTime);
 
         while (!stoppingCriterion()) {
             iterator++;
+
             solution.clone(referenceSolution);
-            pertubOperators[0].applyPerturbation(solution);
+
+            selectedPerturbation = pertubOperators[0];
+            selectedPerturbation.applyPerturbation(solution);
             feasibilityOperator.makeFeasible(solution);
             localSearch.localSearch(solution, true);
             distanceLS = pairwiseDistance.pairwiseSolutionDistance(solution, referenceSolution);
+
             evaluateSolution();
             distAdjustment.distAdjustment();
-            pertubOperators[0].getChosenOmega().setDistance(distanceLS);
-            if (acceptanceCriterion.acceptSolution(solution)) {
+
+            selectedPerturbation.getChosenOmega().setDistance(distanceLS);
+
+            if (acceptanceCriterion.acceptSolution(solution))
                 referenceSolution.clone(solution);
-            }
         }
 
-        long totalCpuTime = threadMXBean.getCurrentThreadCpuTime() - first;
-        totalTime = (double) totalCpuTime / 1_000_000_000.0;
+        totalTime = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000;
 
-        writeFinalSolutionToFile();
+        writeSolutionToFile(bestF, totalTime);
         closeCSVFile();
     }
 
@@ -341,17 +296,13 @@ public class AILSII
                 bestF = solution.f;
                 bestSolution.clone(solution);
                 iteratorMF = iterator;
-
-                long totalCpuTime = threadMXBean.getCurrentThreadCpuTime() - first;
-                timeAF = (double) totalCpuTime / 1_000_000_000.0;
+                timeAF = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000;
 
                 if (print) {
                     System.out.println(timeAF + ";" + bestF);
                 }
 
                 writeToCSV(timeAF, bestF);
-
-                // 总是更新最新的解文件，这样被杀进程时也有最新结果
                 writeSolutionToFile(bestF, timeAF);
             }
         }
@@ -365,8 +316,7 @@ public class AILSII
                 break;
 
             case Time:
-                double elapsedCpuSeconds = (double) (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000.0;
-                if (bestF <= optimal || executionMaximumLimit < elapsedCpuSeconds)
+                if (bestF <= optimal || executionMaximumLimit < (threadMXBean.getCurrentThreadCpuTime() - first) / 1_000_000_000)
                     return true;
                 break;
         }
@@ -376,14 +326,16 @@ public class AILSII
     public void setInstanceName(String instanceName) {
         this.instanceName = instanceName;
 
-        // [修改] 仅当没有手动设置输出目录时，才使用默认结构
+        // 如果没有手动设置输出路径，则保持原有的行为（创建以instanceName命名的子文件夹）
         if (!customOutputSet) {
             this.outputDirectory = "Results/" + instanceName + "/";
         }
 
+        // 初始化目录和文件
         initializeOutputDirectory();
         initializeCSVFile();
-        // System.out.println("输出目录设置为: " + this.outputDirectory);
+
+        // System.out.println("输出目录: " + this.outputDirectory);
     }
 
     public static void main(String[] args)
@@ -392,12 +344,13 @@ public class AILSII
         reader.readingInput(args);
 
         Instance instance = new Instance(reader);
+
         AILSII ailsII = new AILSII(instance, reader);
 
         String instanceName = "default";
         String customOutput = null;
 
-        // [修改] 解析命令行参数，查找 -output
+        // 解析命令行参数
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("-file") && i + 1 < args.length) {
                 String filePath = args[i + 1];
@@ -409,43 +362,43 @@ public class AILSII
                     instanceName = fileName;
                 }
             }
-            // [新增]
+            // [新增] 解析 output 参数
             if (args[i].equals("-output") && i + 1 < args.length) {
                 customOutput = args[i + 1];
             }
         }
 
-        // [新增] 优先设置 output 目录
+        // 优先设置自定义输出目录
         if (customOutput != null) {
             ailsII.setOutputDirectory(customOutput);
         }
 
-        // 设置实例名 (setInstanceName 内部会检查 customOutputSet)
+        // 设置实例名称 (如果不设置 customOutput, 这里会使用默认的 Results/instanceName/ 结构)
         ailsII.setInstanceName(instanceName);
 
-        boolean outputAllSteps = false;
-        ailsII.setOutputAllSolutions(outputAllSteps);
-
+        System.out.println("开始搜索: " + instanceName);
         if (customOutput != null) {
-            System.out.println("搜索开始: " + instanceName + " (Output: " + customOutput + ")");
-        } else {
-            System.out.println("搜索开始: " + instanceName);
+            System.out.println("结果将保存至: " + customOutput);
         }
 
         ailsII.search();
     }
 
-    // ... (其余 Getters/Setters 保持不变，此处省略以节省空间) ...
+    // Getters/Setters 省略...
     public Solution getBestSolution() { return bestSolution; }
     public double getBestF() { return bestF; }
     public double getGap() { return 100*((bestF-optimal)/optimal); }
     public boolean isPrint() { return print; }
     public void setPrint(boolean print) { this.print = print; }
-    public boolean isOutputAllSolutions() { return outputAllSolutions; }
-    public void setOutputAllSolutions(boolean outputAllSolutions) { this.outputAllSolutions = outputAllSolutions; }
     public Solution getSolution() { return solution; }
     public int getIterator() { return iterator; }
-    public String printOmegas() { return ""; }
+    public String printOmegas() {
+        String str="";
+        for (int i = 0; i < pertubOperators.length; i++) {
+            str+="\n"+omegaSetup.get(this.pertubOperators[i].perturbationType+""+referenceSolution.numRoutes);
+        }
+        return str;
+    }
     public Perturbation[] getPertubOperators() { return pertubOperators; }
     public double getTotalTime() { return totalTime; }
     public double getTimePerIteration() { return totalTime/iterator; }
