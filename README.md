@@ -51,7 +51,7 @@ python run.py AILSII_perturbation2.jar --start-idx 50 --end-idx 100
 ```
 
 ```
-python run.py AILSII_deco.jar --start-idx 50 --end-idx 100
+python run.py AILSII_deco.jar --start-idx 0 --end-idx 50
 ```
 
 ```
