@@ -1,0 +1,16 @@
+contourpy
+cycler
+fonttools
+imageio
+kiwisolver
+matplotlib
+numpy
+packaging
+pandas
+pillow
+pyparsing
+python-dateutil
+pytz
+six
+tzdata
+vrplib
