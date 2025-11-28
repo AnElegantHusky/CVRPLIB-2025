@@ -69,7 +69,7 @@ python run.py AILSII_EoH.jar --start-idx 50 --end-idx 100
 ```
 8个instances
 ```
-python run_ails2_parallel.py AILSII_EoH.jar 
+python run_ails2_parallel.py
 ```
 
 
