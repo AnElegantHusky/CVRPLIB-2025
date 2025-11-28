@@ -1,9 +1,0 @@
-2025-11-26 22:16:15,070 [INFO] --- AILSII 专项测试脚本启动 ---
-2025-11-26 22:16:15,128 [ERROR] [XLTEST-n6034-k1234.vrp | 14460s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'
-2025-11-26 22:16:15,129 [ERROR] [XLTEST-n5649-k365.vrp | 13500s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'
-2025-11-26 22:16:15,129 [ERROR] [XLTEST-n1048-k139.vrp | 2460s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'
-2025-11-26 22:16:15,129 [ERROR] [XLTEST-n3101-k685.vrp | 7440s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'
-2025-11-26 22:16:15,129 [ERROR] [XLTEST-n4245-k164.vrp | 10140s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'
-2025-11-26 22:16:15,128 [ERROR] [XLTEST-n2168-k625.vrp | 5160s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'
-2025-11-26 22:16:15,129 [ERROR] [XLTEST-n8575-k343.vrp | 20580s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'
-2025-11-26 22:16:15,129 [ERROR] [XLTEST-n5174-k170.vrp | 12360s] 发生未知错误: [Errno 2] No such file or directory: 'D:\\.jdks\\corretto-24.0.2\\bin\\java.exe'

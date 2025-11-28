@@ -25,3 +25,4 @@ mkdir bin
 ./scripts/AILS-II_deco.sh
 
 ##################################################
+./scripts/AILS-II_EoH.sh

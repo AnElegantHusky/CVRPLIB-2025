@@ -57,3 +57,19 @@ python run.py AILSII_deco.jar --start-idx 0 --end-idx 50
 ```
 python run.py AILSII_deco.jar --start-idx 50 --end-idx 100
 ```
+
+# 测试EoH版本，请在不同服务器上分别运行以下命令
+100个instances：在不同服务器上分别运行以下命令
+```
+python run.py AILSII_EoH.jar --start-idx 0 --end-idx 50
+```
+
+```
+python run.py AILSII_EoH.jar --start-idx 50 --end-idx 100
+```
+8个instances
+```
+python run_ails2_parallel.py AILSII_EoH.jar 
+```
+
+

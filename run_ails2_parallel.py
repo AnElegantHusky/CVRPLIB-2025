@@ -12,8 +12,8 @@ from typing import Tuple
 SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 2. AILSII Jar包路径 (假设在 bin 文件夹下)
-# JAR_NAME = "AILS-II_parallel.jar"
-JAR_NAME = "AILSII_parallel_debug.jar"
+# JAR_NAME = "AILS-II_parallel_debug.jar"
+JAR_NAME = "AILSII_EoH.jar"
 
 
 JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
@@ -91,7 +91,7 @@ def run_single_task(task: Tuple[str, int]):
     # 3. 构建命令
     # 对应原命令: java -jar ... bin/AILSII_CPU.jar -file ... -limit ...
     command = [
-        JAVA_EXE_PATH, "-jar",
+        "java", "-jar",
         f"-Xms{JAVA_XMS}", f"-Xmx{JAVA_XMX}",
         JAR_PATH,
         "-file", instance_path,
@@ -99,6 +99,15 @@ def run_single_task(task: Tuple[str, int]):
         "-stoppingCriterion", "Time",
         "-limit", str(time_limit)
     ]
+    # command = [
+    #     "java", "-jar",
+    #     f"-Xms{JAVA_XMS}", f"-Xmx{JAVA_XMX}",
+    #     JAR_PATH,
+    #     "-file", instance_path,
+    #     "-rounded", "true",
+    #     "-stoppingCriterion", "Time",
+    #     "-limit", str(time_limit)
+    # ]
 
     # logging.info(f"{log_prefix} 开始运行...")
     # logging.info(f"CMD: {' '.join(command)}") # 如果需要调试命令可取消注释
