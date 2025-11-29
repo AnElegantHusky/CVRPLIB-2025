@@ -8,6 +8,31 @@ import time
 import csv
 import pandas as pd
 import ast
+import sqlite3
+
+def write_solution_python(db_path, algo_name, running_time, distance, solution_obj):
+    """
+    Python Worker 写入示例
+    db_path: 数据库路径 (str/Path)
+    solution_obj: 列表或字典对象
+    """
+    try:
+        # 必须在进程内部创建连接
+        with sqlite3.connect(db_path) as conn:
+            # 设置超时，防止极其偶尔的 'database is locked'
+            conn.execute("PRAGMA busy_timeout = 2000;")
+
+            sql = "INSERT INTO solutions (algo, distance, solution, runtime) VALUES (?, ?, ?, ?)"
+            conn.execute(sql, (
+                algo_name,
+                distance,
+                json.dumps(solution_obj),  # 序列化为字符串存储
+                running_time,
+            ))
+            # with 上下文会自动 commit
+
+    except sqlite3.Error as e:
+        print(f"[Python-Write] Error: {e}")
 
 # For real-time data streaming
 def initialize_csv(filename):
@@ -64,9 +89,9 @@ def get_neighbours(distance_matrix: np.array) -> list:
         # [3, 1, 0, 2]
     # output is something like
     # first col may represent the node with itself (distance 0), hence the node itself
-    # [[0, 3, 1, 2], 
-    #  [1, 3, 2, 0], 
-    #  [2, 3, 1, 0], 
+    # [[0, 3, 1, 2],
+    #  [1, 3, 2, 0],
+    #  [2, 3, 1, 0],
     #  [3, 2, 0, 1]] # -> if 3 and 2 is in the same place then may interchange, e.g. [2, 3, 0, 1] instead
     return neighbours
 
@@ -111,7 +136,7 @@ def sisr_cvrp(
     ----------
     The best distance & the best routes
     """
-    
+
     def ruin(last_routes: list[list[int]], neighbours: list[list[int]], in_absents=None, isHugeRuin=False) -> tuple[list[int], list[int]]:
         """
             ruin the existing routes by marking the node to be removed (absents) first using `remove_nodes` or `split_removal`
@@ -149,12 +174,12 @@ def sisr_cvrp(
                 if m < (len(tr)-l_t) or np.random.random() > m_alpha:
                     m += 1
             return m, newly_removed
-        
+
         def find_t(last_routes, c):
             for i in range(len(last_routes)):
                 if c in last_routes[i]: return i
             return None
-        
+
         def routes_summary(last_routes, absents):
             # print("routes summary")
             current_routes = []
@@ -169,7 +194,7 @@ def sisr_cvrp(
             # for r in current_routes:
                 # print(r)
             return current_routes
-        
+
         m = 1   # initial customers to preserve
         l_s_max = min(L_max, np.mean([len(x) for x in last_routes]))    # Equation (5)
         k_s_max = 4.0 * c_bar / (1.0 + l_s_max) - 1.0                   # Equation (6)
@@ -196,7 +221,7 @@ def sisr_cvrp(
                 ruined_t_indices.add(t)
         current_routes = routes_summary(last_routes, absents)
         return current_routes, absents
-    
+
     def recreate_single_demand(data, dist_m, current_routes, absents, last_length=None):
         """Algorithm 3 from SISR paper.
         Managing route feasibility is done in this step for: Capacity
@@ -211,7 +236,7 @@ def sisr_cvrp(
                 # r = [1, 2, 10, 5]
                 # assert capacity --> checking constraint
                 # reads: node x and column 2
-                if (np.sum([data[x][2] for x in r]) + data[c][2]) > vehicle_capcity: 
+                if (np.sum([data[x][2] for x in r]) + data[c][2]) > vehicle_capcity:
                     # adding the node for the route candidate will increase the vehicle capacity's limit, hence skip
                     # finding valid routes by finding all feasible combination of r inserted with c
                     continue
@@ -238,7 +263,7 @@ def sisr_cvrp(
             current_routes = route_add(current_routes, c, adding_position)
         if last_length is not None: return current_routes, rests
         return current_routes
-    
+
     def _recreate_single_demand_time_window(data, distance_matrix, current_routes, absents, last_length=None):
         """Algoritmh 3 from SISR paper
         Managing route feasibility is done in this step for: Capacity, Time Window
@@ -267,11 +292,11 @@ def sisr_cvrp(
                     # self-note: MAYYYBE kalo mau kasih penalty atau soft-time window masukin di sini
                     return False
             return True
-        
+
         def getValid_legacy(r, c):
-            """Mendapatkan seluruh kemungkinan rute baru yang feasible yang dibentuk 
+            """Mendapatkan seluruh kemungkinan rute baru yang feasible yang dibentuk
             dengan mencoba memasukkan node c ke dalam seluruh posisi di dalam rute r yang mungkin
-            
+
             Returns:
             ----------
             valids: list[set[int, float]]
@@ -283,7 +308,7 @@ def sisr_cvrp(
             for i in range(len(complete_r)-1):
                 tmp_t = max(tmp_t, data[complete_r[i]][3])
                 tmp_t += data[complete_r[i]][-1]
-                if tmp_t + distance_matrix[complete_r[i]][c] > data[c][4]: 
+                if tmp_t + distance_matrix[complete_r[i]][c] > data[c][4]:
                     break
                 new_r = r[:i] + [c] + r[i:]
                 if checkValid_legacy([0] + new_r + [0]):
@@ -291,7 +316,7 @@ def sisr_cvrp(
                     valids.append((i, new_d - dist))
                 tmp_t += distance_matrix[complete_r[i]][complete_r[i+1]]
             return valids
-        
+
         # 1. Sort the absent nodes with some methods, here only use random as a placeholder
         absents = [absents[i] for i in np.random.choice(len(absents), len(absents), replace=False)]
         if last_length is not None: rests = []
@@ -299,7 +324,7 @@ def sisr_cvrp(
             probable_place = []
             for ir, r in enumerate(current_routes):
                 # assert capacity
-                if (np.sum([data[x][2] for x in r]) + data[c][2]) > vehicle_capcity: 
+                if (np.sum([data[x][2] for x in r]) + data[c][2]) > vehicle_capcity:
                     continue
                 # finding valid routes by finding all feasible combination of r inserted with c
                 valids = getValid_legacy(r, c)
@@ -318,7 +343,7 @@ def sisr_cvrp(
             current_routes = route_add(current_routes, c, adding_position)
         if last_length is not None: return current_routes, rests
         return current_routes
-    
+
     def recreate_single_pickup_demand_hard_time_window(data, distance_matrix, current_routes, absents, last_length=None):
         """Algorithm 3 from SISR paper
         Managing route feasibility is done in this step for: Capacity, Time Window
@@ -357,7 +382,7 @@ def sisr_cvrp(
                     if _print:
                         print("     DITOLAK. Route ini akan keberatan beban di node {}".format(complete_r[j+1]))
                     return False
-                
+
                 # assert time window
                 t_current += distance_matrix[complete_r[j]][complete_r[j+1]]
                 if _print:
@@ -385,11 +410,11 @@ def sisr_cvrp(
             if _print:
                 print("     DITERIMA. Route ini dapat dipertimbangkan")
             return True
-        
+
         def getValid_legacy(r, c):
-            """Mendapatkan seluruh kemungkinan rute baru yang feasible yang dibentuk 
+            """Mendapatkan seluruh kemungkinan rute baru yang feasible yang dibentuk
             dengan mencoba memasukkan node c ke dalam seluruh posisi di dalam rute r yang mungkin
-            
+
             Returns:
             ----------
             valids: list[set[int, float]]
@@ -405,15 +430,15 @@ def sisr_cvrp(
                 if tmp_capacity > vehicle_capcity:
                     # progress so far mengakibatkan kelebihan muatan vehicle capacity
                     break
-                
+
                 # assert time window: dateng kecepetan boleh, dateng terlambat route ditolak
                 tmp_t = max(tmp_t, data[complete_r[i]][4])  # datang boleh kecepetan
                 tmp_t += data[complete_r[i]][-1]            # ditambah waktu pelayanan
-                if tmp_t + distance_matrix[complete_r[i]][c] > data[c][5]: 
+                if tmp_t + distance_matrix[complete_r[i]][c] > data[c][5]:
                     # progress so far mengakibatkan terlambat
                     break
                 # SELF-NOTE: jika sampai tahap ini, berarti bahkan rute sebelum di-insert pun bermasalahn
-                
+
                 new_r = r[:i] + [c] + r[i:]                 # insert node c ke dalam path ke i
                 if check_constraints([0] + new_r + [0], _print = False):
                     new_d = get_route_distance(distance_matrix, new_r)
@@ -421,7 +446,7 @@ def sisr_cvrp(
                     valids.append((i, new_d - dist))
                 tmp_t += distance_matrix[complete_r[i]][complete_r[i+1]]
             return valids
-        
+
         # 1. Sort the absent nodes with some methods, here only use random as a placeholder
         absents = [absents[i] for i in np.random.choice(len(absents), len(absents), replace=False)]
         if last_length is not None: rests = []
@@ -429,11 +454,11 @@ def sisr_cvrp(
             probable_place = []
             for ir, r in enumerate(current_routes):
                 # SELF-NOTE: pengecekan kapasitas DIPINDAHKAN
-                # INI PERLU DIBENERIN KARENA KALO KESELURUHAN PATH DIITUNG GINI, BISA AJA 
+                # INI PERLU DIBENERIN KARENA KALO KESELURUHAN PATH DIITUNG GINI, BISA AJA
                 # JALUR AWAL NGUTANG DARI JALUR AKHIR
                 # PAKE CHECKING NODE ONE-BY-ONE DI PATH-NYA daripada checking dengan np.sum()
                 # ATO MUNGKIN MASUKIN AJA KE getValid_legacy (tapi keknya bakalan aneh logic-wise....)
-                # if (np.sum([data[x][3] for x in r]) + data[c][3] - np.sum([data[x][2] for x in r])) > vehicle_capcity: 
+                # if (np.sum([data[x][3] for x in r]) + data[c][3] - np.sum([data[x][2] for x in r])) > vehicle_capcity:
                 #     continue
                 # finding valid routes by finding all feasible combination of r inserted with c
                 valids = getValid_legacy(r, c)
@@ -510,7 +535,7 @@ def sisr_cvrp(
                     if _print:
                         print("     DITOLAK. Route ini akan keberatan beban di node {}".format(complete_r[j+1]))
                     return False
-                
+
                 # asumsi cost == distance
                 t_current += distance_matrix[complete_r[j]][complete_r[j+1]]
                 cost_current += distance_matrix[complete_r[j]][complete_r[j+1]]
@@ -539,7 +564,7 @@ def sisr_cvrp(
             if _print:
                 print("     ---- DITERIMA. Route ini dapat dipertimbangkan ----")
             return True
-        
+
         def get_cost(distance_matrix, route):
             complete_r = [0] + route + [0]
             t_current = 0
@@ -558,11 +583,11 @@ def sisr_cvrp(
                     t_current += data[complete_r[j+1]][-1]
                     cost_current += data[complete_r[j+1]][-1] + data[complete_r[j+1]][7]
             return cost_current
-        
+
         def getValid_legacy(r, c):
-            """Mendapatkan seluruh kemungkinan rute baru yang feasible yang dibentuk 
+            """Mendapatkan seluruh kemungkinan rute baru yang feasible yang dibentuk
             dengan mencoba memasukkan node c ke dalam seluruh posisi di dalam rute r yang mungkin
-            
+
             Returns:
             ----------
             valids: list[set[int, float]]
@@ -579,7 +604,7 @@ def sisr_cvrp(
                 if tmp_capacity > vehicle_capcity:
                     # progress so far mengakibatkan kelebihan muatan vehicle capacity
                     break
-                
+
                 new_r = r[:i] + [c] + r[i:]                 # insert node c ke dalam path ke i
                 if check_constraints([0] + new_r + [0], _print = False):
                     new_distance = get_route_distance(distance_matrix, new_r)
@@ -587,7 +612,7 @@ def sisr_cvrp(
                     # (urutan_path_dimana_node_c_dimasukkan, jarak_baru_setelah_c_masuk - jarak_baru_sebelum_c_masuk, cost_baru - cost_sebelum)
                     valids.append((i, new_distance - dist, new_cost - cost))
             return valids
-        
+
         # 1. Sort the absent nodes with some methods, here only use random as a placeholder
         absents = [absents[i] for i in np.random.choice(len(absents), len(absents), replace=False)]
         if last_length is not None: rests = []
@@ -610,7 +635,7 @@ def sisr_cvrp(
             current_routes = route_add(current_routes, c, adding_position)
         if last_length is not None: return current_routes, rests
         return current_routes
-    
+
     def fleet_min(n, data, distance_matrix, neighbours, routes, verbose_step):
         absents = []
         absent_c = np.zeros(distance_matrix.shape[0])
@@ -636,7 +661,7 @@ def sisr_cvrp(
                 print("fleet_min", i+1, np.round((i+1)/n*100,4), "%:", len(best_routes))
         if verbose_step is not None and n%verbose_step!=0: print(i+1, "100.0 %:", len(best_routes))
         return best_routes
-    
+
     if time_window:
         if soft_time_window:
             recreate = recreate_single_pickup_demand_soft_time_window
@@ -658,40 +683,46 @@ def sisr_cvrp(
     initialize_csv(csv_path)
     initialize_csv(best_csv)
     initialize_csv(all_csv)
-
-    print("Hyperparameter Settings:")
+    if verbose_step:
+        print("Hyperparameter Settings:")
     alpha_T = (final_T/init_T)**(1.0/n_iter)    # Equation (2) | so alpha_T is c in the paper
-    print("init_T       :", init_T)
-    print("final_T      :", final_T)
-    print("n_iter       :", n_iter)
-    print("alpha_T      :", alpha_T)
-    print("n_iter_fleet :", n_iter_fleet)
-    
+    if verbose_step:
+        print("init_T       :", init_T)
+        print("final_T      :", final_T)
+        print("n_iter       :", n_iter)
+        print("alpha_T      :", alpha_T)
+        print("n_iter_fleet :", n_iter_fleet)
+
     coords = data[:, :2]
-    print("Data Type")
-    print(coords.shape, data.shape)
+    if verbose_step:
+        print("Data Type")
+        print(coords.shape, data.shape)
     distance_matrix = np.zeros([len(coords), len(coords)])
     for i in range(len(coords)):
         coord = coords[i]
         distance_matrix[i] = np.sum((coord-coords)**2, axis=1)**0.5 # euclidean distance
-    
+
     if init_route is not None:
         best_routes = copy.deepcopy(init_route)
     else:
-        print("No Initial Route")
-        print("Generate Several Best Routes")
-        print("Initial routes: There are {} numbers of routes".format(len(range(1, len(data)))))
+        if verbose_step:
+            print("No Initial Route")
+            print("Generate Several Best Routes")
+            print("Initial routes: There are {} numbers of routes".format(len(range(1, len(data)))))
         best_routes = [[i] for i in range(1, len(data))]
-        print("Best Routes:\n", best_routes)
-    print()
-    print("Get First Routes Distance")
+        if verbose_step:
+            print("Best Routes:\n", best_routes)
+    if verbose_step:
+        print()
+        print("Get First Routes Distance")
     best_distance = get_routes_distance(distance_matrix, best_routes, _print = False)
     last_routes = copy.deepcopy(best_routes)
     last_distance = get_routes_distance(distance_matrix, best_routes) # actually same as before
     neighbours = get_neighbours(distance_matrix)
-    print(len(best_routes), best_distance)
+    if verbose_step:
+        print(len(best_routes), best_distance)
     # plot_routes(data, best_routes)
-    
+
 #     if n_iter_fleet is None: n_iter_fleet=int(max(n_iter*0.1, 1))
     if (n_iter_fleet is not None) and (n_iter_fleet > 0):
         last_routes = fleet_min(n_iter_fleet, data, distance_matrix, neighbours, best_routes, verbose_step)
@@ -701,7 +732,7 @@ def sisr_cvrp(
             best_distance = last_distance
             best_routes = last_routes
         print(len(best_routes), best_distance)
-    
+
     temperature = init_T
     # the algorithm
     for i_iter in range(n_iter):
@@ -713,7 +744,7 @@ def sisr_cvrp(
             current_routes, absents = ruin(last_routes, neighbours)
             ruined_routes = copy.deepcopy(current_routes)
             current_routes = recreate(data, distance_matrix, current_routes, absents)
-        
+
         current_distance = get_routes_distance(distance_matrix, current_routes)
 
         crt_running_time = time.time() - start_time
@@ -733,6 +764,7 @@ def sisr_cvrp(
                 append_csv_row(csv_path, [crt_running_time, best_distance])
 
                 append_csv_row(shared_csv, ['sisr', crt_running_time, best_distance, best_routes])
+                write_solution_python(shared_csv, 'sisr', crt_running_time, best_distance, best_routes)
 
                 if crt_running_time / 3600 >= max_running_time:
                     return best_distance, best_routes
@@ -744,7 +776,7 @@ def sisr_cvrp(
 
         # Equation (1)
         temperature *= alpha_T # Basically temperature = previous_temperature X c
-        
+
     #     if verbose_step is not None and (i_iter+1) % verbose_step == 0:
     #         print("="*100)
     #         print(

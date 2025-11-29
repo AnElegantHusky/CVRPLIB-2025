@@ -190,7 +190,7 @@ public:
         } else if (key == TOKEN_SHARED_CSV) {
             shared_csv = value;
         } else if (key == TOKEN_START_TIME) {
-            start_time = std::stof(value);
+            start_time = std::stod(value);
         } else if (key == TOKEN_INST_LOG_PATH) {
             inst_log_path = value;
         } else if (key == TOKEN_MAX_RUNNING_SEC) {

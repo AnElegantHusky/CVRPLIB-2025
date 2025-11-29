@@ -11,6 +11,9 @@ import multiprocessing
 import traceback
 import io
 
+SISR_PATH = os.path.abspath(os.path.dirname(__file__))
+ROOT_PATH = os.path.dirname(SISR_PATH)
+
 # python
 def run_python_script(script_path, args=None, input_text=None):
     # Use the same Python interpreter that runs this script.
@@ -43,14 +46,23 @@ def run_sisr(data, vehicle_capcity, file, crt_sisr_log_path, shared_csv, start_t
     )
 
 # java
-PROJECT_ROOT = 'E:/onedrive/cityU/CVRPLIB/AILS-II/'
-JAVA_CLASSPATH = 'E:/onedrive/cityU/CVRPLIB/AILS-II/target/classes;C:/Users/10525/.m2/repository/org/apache/commons/commons-csv/1.10.0/commons-csv-1.10.0.jar;C:/Users/10525/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.14.0/junit-jupiter-api-5.14.0.jar;C:/Users/10525/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar;C:/Users/10525/.m2/repository/org/junit/platform/junit-platform-commons/1.14.0/junit-platform-commons-1.14.0.jar;C:/Users/10525/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar;C:/Users/10525/.m2/repository/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar'
-JAVA_ENCODING = '-Dfile.encoding=UTF-8'
+# PROJECT_ROOT = 'E:/onedrive/cityU/CVRPLIB/AILS-II/'
+# JAVA_CLASSPATH = 'E:/onedrive/cityU/CVRPLIB/AILS-II/target/classes;C:/Users/10525/.m2/repository/org/apache/commons/commons-csv/1.10.0/commons-csv-1.10.0.jar;C:/Users/10525/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.14.0/junit-jupiter-api-5.14.0.jar;C:/Users/10525/.m2/repository/org/opentest4j/opentest4j/1.3.0/opentest4j-1.3.0.jar;C:/Users/10525/.m2/repository/org/junit/platform/junit-platform-commons/1.14.0/junit-platform-commons-1.14.0.jar;C:/Users/10525/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar;C:/Users/10525/.m2/repository/commons-io/commons-io/2.15.1/commons-io-2.15.1.jar'
+# JAVA_ENCODING = '-Dfile.encoding=UTF-8'
+
+# javac -cp "libs/*" -d target/classes src/Auxiliary/*.java src/Data/*.java src/DiversityControl/*.java src/Evaluators/*.java src/Improvement/*.java src/Perturbation/*.java src/SearchMethod/*.java src/Solution/*.java
+
+JAVA_CLASSPATH = f'{ROOT_PATH}/AILS2/target/classes;{ROOT_PATH}/AILS2/libs/commons-csv-1.10.0.jar;{ROOT_PATH}/AILS2/libs/junit-jupiter-api-5.10.2.jar;{ROOT_PATH}/AILS2/libs/junit-jupiter-api-5.14.0.jar;{ROOT_PATH}/AILS2/libs/commons-io-2.15.1.jar'
+if os.name == "nt":  # Windows
+    pass
+else:  # Linux/macOS
+    JAVA_CLASSPATH = JAVA_CLASSPATH.replace(';', ':')
+
 def run_java_with_specific_jdk(java_path, args):
 
     command = [
         'java',
-        JAVA_ENCODING,
+        # JAVA_ENCODING,
         "-classpath", JAVA_CLASSPATH,
         java_path,
     ]
@@ -117,7 +129,7 @@ def monitor_csv(filename, return_dict):
         with open(filename, 'w') as f: pass
 
     with open(filename, 'r', encoding='utf-8') as f:
-        f.seek(0, 2)  # jump to last
+        f.seek(0, 2)  # TODO: jump to last
         while True:
             line = f.readline()
             if line:
@@ -190,13 +202,19 @@ def restart_workers(process_list, sisr_arg, ails_args, filo_args, return_dict, k
 
 
 if __name__ == '__main__':
-    SISR_PATH = os.path.abspath(os.path.dirname(__file__))
-    # AILS_PATH = 'C:/Users/shunyuyao8/OneDrive/cityU/CVRPLIB/AILS-II/src/SearchMethod/AILSII.java'
-    AILS2_PATH = 'E:/onedrive/cityU/CVRPLIB/AILS-II/src/SearchMethod/AILSII.java'
-    FILO2_PATH = 'E:/onedrive/cityU/CVRPLIB/FILO2/filo2-main/cmake-build-debug/'
 
-    instance_path = 'E:/onedrive/cityU/CVRPLIB/Baseline/SISRs/SISR-for-VRP-main/data/cvrplib_1019/XLTEST-n3101-k685.vrp'
-    log_path = 'E:/onedrive/cityU/CVRPLIB/Baseline/SISRs/SISR-for-VRP-main/log_buffer/XLTEST-n3101-k685'
+    # AILS_PATH = 'C:/Users/shunyuyao8/OneDrive/cityU/CVRPLIB/AILS-II/src/SearchMethod/AILSII.java'
+    # AILS2_PATH = 'E:/onedrive/cityU/CVRPLIB/AILS-II/src/SearchMethod/AILSII.java'
+    # FILO2_PATH = 'E:/onedrive/cityU/CVRPLIB/FILO2/filo2-main/cmake-build-debug/'
+
+    AILS2_PATH = f'SearchMethod/AILSII'
+    FILO2_PATH = f'{ROOT_PATH}/FILO2/build/'
+
+    # instance_path = 'E:/onedrive/cityU/CVRPLIB/Baseline/SISRs/SISR-for-VRP-main/data/cvrplib_1019/XLTEST-n3101-k685.vrp'
+    # log_path = 'E:/onedrive/cityU/CVRPLIB/Baseline/SISRs/SISR-for-VRP-main/log_buffer/XLTEST-n3101-k685'
+
+    instance_path = f'{ROOT_PATH}/SISR/data/cvrplib_1019/XLTEST-n3101-k685.vrp'
+    log_path = f'{ROOT_PATH}/SISR/log_buffer/XLTEST-n3101-k685'
     if not os.path.exists(log_path):
         os.makedirs(log_path)
 
