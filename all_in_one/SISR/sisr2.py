@@ -764,7 +764,7 @@ def sisr_cvrp(
                 append_csv_row(csv_path, [crt_running_time, best_distance])
 
                 append_csv_row(shared_csv, ['sisr', crt_running_time, best_distance, best_routes])
-                write_solution_python(shared_csv, 'sisr', crt_running_time, best_distance, best_routes)
+                # write_solution_python(shared_csv, 'sisr', crt_running_time, best_distance, best_routes)
 
                 if crt_running_time / 3600 >= max_running_time:
                     return best_distance, best_routes

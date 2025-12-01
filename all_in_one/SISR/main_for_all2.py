@@ -239,7 +239,8 @@ if __name__ == '__main__':
         pass
 
     # 路径与数据初始化 (简化版)
-    instance_name = 'XLTEST-n3101-k685'
+    # instance_name = 'XLTEST-n3101-k685'
+    instance_name = 'XLTEST-n2168-k625'
 
     # 使用 pathlib 拼接路径
     instance_path = ROOT_PATH / 'SISR' / 'data' / 'cvrplib_1019' / f'{instance_name}.vrp'
@@ -247,6 +248,7 @@ if __name__ == '__main__':
     vrp_data = vrplib.read_instance(str(instance_path))
     vehicle_capacity = vrp_data['capacity']
     data = np.concatenate((vrp_data['node_coord'], vrp_data['demand'][:, None]), axis=1)
+    inst_size = data.shape[0]
 
     log_path = ROOT_PATH / 'SISR' / 'log_buffer' / instance_name
     log_path.mkdir(parents=True, exist_ok=True)
@@ -264,8 +266,8 @@ if __name__ == '__main__':
         p.mkdir(exist_ok=True)
 
     start_time = time.time()
-    # max_running_time_min = inst_size // 25
-    max_running_time_min = 3  # TODO: ONLY FOR DEBUG
+    max_running_time_min = inst_size // 25
+    # max_running_time_min = 3  # TODO: ONLY FOR DEBUG
 
     # 参数模版 (Template)
     # 将可变参数用占位符或在 build 函数中动态替换
