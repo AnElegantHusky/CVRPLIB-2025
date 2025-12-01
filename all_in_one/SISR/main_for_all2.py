@@ -181,16 +181,16 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
     gc.collect()
 
     # 3. 重启被终止的进程
-    # # --- SISR ---
-    # if not process_dict.get('sisr') or not process_dict['sisr'].is_alive():
-    #     # 更新参数（这里需要根据你的实际 sisr 函数签名调整）
-    #     p = multiprocessing.Process(
-    #         target=run_sisr,
-    #         args=(*sisr_args, best_sol),
-    #         name="sisr"
-    #     )
-    #     p.start()
-    #     process_dict['sisr'] = p
+    # --- SISR ---
+    if not process_dict.get('sisr') or not process_dict['sisr'].is_alive():
+        # 更新参数（这里需要根据你的实际 sisr 函数签名调整）
+        p = multiprocessing.Process(
+            target=run_sisr,
+            args=(*sisr_args, best_sol),
+            name="sisr"
+        )
+        p.start()
+        process_dict['sisr'] = p
 
     # --- AILS2 (Java) ---
     if not process_dict.get('ails2') or not process_dict['ails2'].is_alive():
@@ -205,17 +205,17 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
         p.start()
         process_dict['ails2'] = p
 
-    # # --- FILO2 (C++) ---
-    # if not process_dict.get('filo2') or not process_dict['filo2'].is_alive():
-    #     val = best_sol if best_sol else ""
-    #     cmd = update_cmd_arg(filo_template, "--init-solution", val)
-    #     p = multiprocessing.Process(
-    #         target=run_external_process,
-    #         args=(cmd,),
-    #         name="filo2"
-    #     )
-    #     p.start()
-    #     process_dict['filo2'] = p
+    # --- FILO2 (C++) ---
+    if not process_dict.get('filo2') or not process_dict['filo2'].is_alive():
+        val = best_sol if best_sol else ""
+        cmd = update_cmd_arg(filo_template, "--init-solution", val)
+        p = multiprocessing.Process(
+            target=run_external_process,
+            args=(cmd,),
+            name="filo2"
+        )
+        p.start()
+        process_dict['filo2'] = p
 
 
 def update_cmd_arg(base_cmd, flag, value):
@@ -333,8 +333,7 @@ if __name__ == '__main__':
     ]
 
     # 进程字典
-    # process_dict = {'sisr': None, 'ails2': None, 'filo2': None}
-    process_dict = {'ails2': None}
+    process_dict = {'sisr': None, 'ails2': None, 'filo2': None}
 
     # 初始启动
     manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, {})
