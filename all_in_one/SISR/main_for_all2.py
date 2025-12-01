@@ -10,6 +10,7 @@ import signal
 import gc
 import vrplib
 import json
+import psutil
 from pathlib import Path
 
 
@@ -20,14 +21,35 @@ SISR_PATH = Path(__file__).resolve().parent
 ROOT_PATH = SISR_PATH.parent
 
 # Java Classpath 处理...
+# classpath
 # javac -cp "libs/*" -d target/classes src/Auxiliary/*.java src/Data/*.java src/DiversityControl/*.java src/Evaluators/*.java src/Improvement/*.java src/Perturbation/*.java src/SearchMethod/*.java src/Solution/*.java
 
+# jar
+# 1. javac -cp "libs/*" -d target/classes $(find src -name "*.java")
+# mkdir -p target/classes/META-INF
+# # 进入classes目录
+# cd target/classes
+# # 创建MANIFEST.MF
+# # 写入正确的 MANIFEST.MF（注意替换主类路径）
+# echo "Manifest-Version: 1.0" > META-INF/MANIFEST.MF
+# echo "Main-Class: SearchMethod.AILSII" >> META-INF/MANIFEST.MF
+# # 最后添加一个空行（必须）
+# echo "" >> target/classes/META-INF/MANIFEST.MF
+# cd ../..
+# 打包classes目录下的所有文件（包括META-INF）到target/AILS2.jar
+# jar -cvfm target/AILS2.jar target/classes/META-INF/MANIFEST.MF -C target/classes .
+
+
+# 2. mvn clean package
+
 java_cp_list = [
-    ROOT_PATH / 'AILS2' / 'target' / 'classes',
-    ROOT_PATH / 'AILS2' / 'libs' / 'commons-csv-1.10.0.jar',
-    ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.10.2.jar',
-    ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.14.0.jar',
-    ROOT_PATH / 'AILS2' / 'libs' / 'commons-io-2.15.1.jar',
+    ROOT_PATH / 'AILS2' / 'target' / 'AILS-II-1.0-SNAPSHOT.jar',
+
+    # ROOT_PATH / 'AILS2' / 'target' / 'classes',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'commons-csv-1.10.0.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.10.2.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.14.0.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'commons-io-2.15.1.jar',
 ]
 
 java_cp = os.pathsep.join(str(p) for p in java_cp_list)
@@ -93,8 +115,36 @@ def run_sisr(data, vehicle_capcity, file, crt_sisr_log_path, shared_csv, start_t
     )
 
 
+def kill_process_tree(pid):
+    """
+    递归杀死进程树：先杀子进程（Java/C++），再杀父进程（Python Wrapper）
+    """
+    try:
+        parent = psutil.Process(pid)
+        children = parent.children(recursive=True)  # 获取所有孙子/子进程
+
+        # 先杀死所有子进程 (Java/C++)
+        for child in children:
+            try:
+                child.terminate()
+            except psutil.NoSuchProcess:
+                pass
+
+        # 等待子进程结束
+        _, alive = psutil.wait_procs(children, timeout=1)
+        for p in alive:
+            p.kill()  # 强制杀死
+
+        # 杀死父进程 (Python Wrapper)
+        parent.terminate()
+        parent.wait(1)
+
+    except psutil.NoSuchProcess:
+        pass
+
 def run_external_process(cmd):
     """通用的外部进程运行器"""
+    print(cmd)
     try:
         process = subprocess.Popen(
             cmd,
@@ -125,9 +175,8 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
         if p and p.is_alive():
             if name == survivor_name:
                 continue
-            p.terminate()
+            kill_process_tree(p.pid)
             p.join(timeout=1)
-            if p.is_alive(): p.kill()
 
     # 2. 垃圾回收 (关键：防止内存泄漏)
     gc.collect()
@@ -217,7 +266,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
     # max_running_time_min = inst_size // 25
-    max_running_time_min = 1  # TODO: ONLY FOR DEBUG
+    max_running_time_min = 3  # TODO: ONLY FOR DEBUG
 
     # 参数模版 (Template)
     # 将可变参数用占位符或在 build 函数中动态替换
@@ -227,8 +276,25 @@ if __name__ == '__main__':
     gamma = 30
     varphi = 40
 
+    # ails_cmd = [
+    #     "java", "-classpath", java_cp, ails_main,  # 假设入口
+    #     "-file", instance_path.as_posix(),
+    #     "-sharedCSV", shared_csv.as_posix(),
+    #     "-logPath", ails_log_path.as_posix(),
+    #     "-rounded", "true",
+    #     "-best", "0",
+    #     "-initSolution", "None",
+    #     "-limit", str(limit),  # second
+    #     "-stoppingCriterion", "Time",
+    #     "-dMax", str(dMax),
+    #     "-dMin", str(dMin),
+    #     "-gamma", str(gamma),
+    #     "-varphi", str(varphi),
+    #     "-startTime", str(start_time),
+    # ]
+
     ails_cmd = [
-        "java", "-classpath", java_cp, ails_main,  # 假设入口
+        "java", "-jar", java_cp,
         "-file", instance_path.as_posix(),
         "-sharedCSV", shared_csv.as_posix(),
         "-logPath", ails_log_path.as_posix(),
@@ -302,4 +368,6 @@ if __name__ == '__main__':
     finally:
         for p in process_dict.values():
             if p and p.is_alive():
-                p.terminate()
+                kill_process_tree(p.pid)
+                p.join()
+        gc.collect()
