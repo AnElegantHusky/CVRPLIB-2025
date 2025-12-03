@@ -93,6 +93,10 @@ add_executable(filo2
     solution/Solution.hpp
     solution/Solution.cpp
 
+    include/json.hpp
+    include/sqlite3.h
+    include/sqlite3.c
+
     main.cpp
     Parameters.hpp
     Renderer.hpp

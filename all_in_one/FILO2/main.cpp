@@ -41,6 +41,9 @@ int main(int argc, char* argv[]) {
 #endif
 
     cobra::Timer global_timer;
+    double pre_update_time = get_current_timestamp();
+    double update_interval = 5.;
+
 #ifdef VERBOSE
     cobra::Timer timer;
 #endif
@@ -68,11 +71,15 @@ int main(int argc, char* argv[]) {
     std::cout << "Running CLARKE&WRIGHT to generate an initial solution.\n";
     timer.reset();
 #endif
-    if (params.get_init_solution().empty()) {
+
+    bool loaded_from_db = cobra::Solution::load_best_from_db(params.get_shared_db(), best_solution);
+
+    if (!loaded_from_db) {
         cobra::clarke_and_wright(instance, best_solution, params.get_cw_lambda(), params.get_cw_neighbors());
     } else {
-        cobra::load_init_solution(best_solution, params.get_init_solution());
+        std::cout << "Loaded from db!" << std::endl;
     }
+    // cobra::clarke_and_wright(instance, best_solution, params.get_cw_lambda(), params.get_cw_neighbors());
 
 #ifdef VERBOSE
     std::cout << "Done in " << timer.elapsed_time<std::chrono::seconds>() << " seconds.\n";
@@ -327,14 +334,17 @@ int main(int argc, char* argv[]) {
 
             double crt_time = get_current_timestamp() - params.get_start_time();
 
-            cobra::Solution::store_solution_to_log_path(
-                instance, best_solution, params.get_inst_log_path(), crt_time);
-
-            cobra::Solution::store_solution_to_shared_csv(
-                instance, best_solution, params.get_shared_csv(), crt_time);
+            if (get_current_timestamp() - pre_update_time > update_interval) {
+                cobra::Solution::save_best_to_db(
+                    params.get_shared_db(),
+                    "filo2",
+                    best_solution,
+                    crt_time
+                    );
+                pre_update_time = get_current_timestamp();
+            }
 
             assert(best_solution == neighbor);
-
 
             gamma_vertices.clear();
             for (auto i = neighbor.get_svc_begin(); i != neighbor.get_svc_end(); i = neighbor.get_svc_next(i)) {

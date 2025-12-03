@@ -4,11 +4,17 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <sstream> // Added for string stream
+#include <string>  // Added for string manipulation
+#include "sqlite3.h" // Added for SQLite
+#include "json.hpp"
 
 #include "../base/FixedSizeValueStack.hpp"
 #include "../base/LRUCache.hpp"
 #include "../base/macro.hpp"
 #include "../instance/Instance.hpp"
+
+using json = nlohmann::json;
 
 namespace cobra {
 
@@ -77,6 +83,226 @@ namespace cobra {
 
         bool operator!=(const Solution &other) const {
             return !(*this == other);
+        }
+
+        // --------------------------------------------------------------------------
+        // SQLite Integration (Updated)
+        // --------------------------------------------------------------------------
+
+        static std::vector<std::vector<int>> parse_json_routes_internal(const std::string& json) {
+            std::vector<std::vector<int>> routes;
+            std::vector<int> current_route;
+            std::string num_buf;
+            bool inside_route = false;
+
+            for (char c : json) {
+                if (c == '[') {
+                    inside_route = true;
+                    current_route.clear();
+                } else if (c == ']') {
+                    if (!num_buf.empty()) {
+                        current_route.push_back(std::stoi(num_buf));
+                        num_buf.clear();
+                    }
+                    if (inside_route && !current_route.empty()) {
+                        routes.push_back(current_route);
+                        current_route.clear();
+                    }
+                    inside_route = false;
+                } else if (c == ',') {
+                    if (inside_route && !num_buf.empty()) {
+                        current_route.push_back(std::stoi(num_buf));
+                        num_buf.clear();
+                    }
+                } else if (isdigit(c) || c == '-') {
+                    num_buf += c;
+                }
+            }
+            return routes;
+        }
+
+        // Serialize current solution to JSON string: [[1, 2], [3, 4]]
+        std::string to_json_string() const {
+            std::stringstream ss;
+            ss << "[";
+            bool is_first_route = true;
+
+            for (auto route = get_first_route(); route != Solution::dummy_route; route = get_next_route(route)) {
+                if (!is_first_route) ss << ",";
+                ss << "[";
+                bool is_first_customer = true;
+                for (auto customer = get_first_customer(route); customer != instance.get_depot(); customer = get_next_vertex(customer)) {
+                    if (!is_first_customer) ss << ",";
+                    ss << customer;
+                    is_first_customer = false;
+                }
+                ss << "]";
+                is_first_route = false;
+            }
+            ss << "]";
+            return ss.str();
+        }
+
+        // Save best solution to SQLite (Replaces CSV storage)
+        // Returns true if successful
+        static bool save_best_to_db(const std::string &db_path, const std::string &algo_name,
+                                    const Solution &solution, double crt_time) {
+
+            sqlite3 *db;
+            char *errMsg = 0;
+            int rc;
+
+            // 1. Open Database
+            rc = sqlite3_open_v2(db_path.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+            if (rc) {
+                std::cerr << "[DB Error] Can't open database: " << sqlite3_errmsg(db) << "\n";
+                sqlite3_close(db);
+                return false;
+            }
+
+            // Set Busy Timeout (30s) to handle locks
+            sqlite3_busy_timeout(db, 30000);
+
+            rc = sqlite3_exec(db, "PRAGMA journal_mode=WAL;", 0, 0, 0);
+            if (rc != SQLITE_OK) {
+                std::cerr << "[DB Warning] Failed to set WAL mode: " << sqlite3_errmsg(db) << "\n";
+            }
+            sqlite3_exec(db, "PRAGMA synchronous=NORMAL;", 0, 0, 0);
+
+            // 2. Ensure Tables Exist (Safety check)
+            const char *create_sql =
+                "CREATE TABLE IF NOT EXISTS solution_history ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, algo_name TEXT, score REAL, solution TEXT, runningtime REAL);"
+                "CREATE TABLE IF NOT EXISTS global_best ("
+                "id INTEGER PRIMARY KEY, algo_name TEXT, score REAL, solution TEXT, runningtime REAL);"
+                "INSERT OR IGNORE INTO global_best (id, score) VALUES (1, 1e20);"; // Initialize if empty
+
+            rc = sqlite3_exec(db, create_sql, 0, 0, &errMsg);
+            if (rc != SQLITE_OK) {
+                std::cerr << "[DB Error] Init tables failed: " << errMsg << "\n";
+                sqlite3_free(errMsg);
+                sqlite3_close(db);
+                return false;
+            }
+
+            // 3. Serialize Data
+            std::string sol_json = solution.to_json_string();
+            double score = solution.get_cost();
+
+            // 4. Begin Transaction
+            sqlite3_exec(db, "BEGIN IMMEDIATE", 0, 0, 0);
+
+            // 5. Insert History
+            sqlite3_stmt *stmt;
+            const char *ins_sql = "INSERT INTO solution_history (algo_name, score, solution, runningtime) VALUES (?, ?, ?, ?)";
+            sqlite3_prepare_v2(db, ins_sql, -1, &stmt, 0);
+            sqlite3_bind_text(stmt, 1, algo_name.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_double(stmt, 2, score);
+            sqlite3_bind_text(stmt, 3, sol_json.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_double(stmt, 4, crt_time);
+
+            if (sqlite3_step(stmt) != SQLITE_DONE) {
+                std::cerr << "[DB Error] Insert history failed: " << sqlite3_errmsg(db) << "\n";
+            }
+            sqlite3_finalize(stmt);
+
+            // 6. Update Global Best (Minimization: update if New Score < Old Score)
+            // Note: The SQL ensures atomic check-and-update
+            const char *upd_sql = "UPDATE global_best SET score=?, solution=?, algo_name=?, runningtime=? "
+                                  "WHERE id=1 AND score > ?";
+
+            sqlite3_prepare_v2(db, upd_sql, -1, &stmt, 0);
+            sqlite3_bind_double(stmt, 1, score);
+            sqlite3_bind_text(stmt, 2, sol_json.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_text(stmt, 3, algo_name.c_str(), -1, SQLITE_TRANSIENT);
+            sqlite3_bind_double(stmt, 4, crt_time);
+            sqlite3_bind_double(stmt, 5, score); // Check logic: score > new_score
+
+            rc = sqlite3_step(stmt);
+            bool updated = (sqlite3_changes(db) > 0);
+            sqlite3_finalize(stmt);
+
+            // 7. Commit
+            if (rc == SQLITE_DONE) {
+                sqlite3_exec(db, "COMMIT", 0, 0, 0);
+            } else {
+                std::cerr << "[DB Error] Update failed: " << sqlite3_errmsg(db) << "\n";
+                sqlite3_exec(db, "ROLLBACK", 0, 0, 0);
+            }
+
+            sqlite3_close(db);
+            return true;
+        }
+
+        // [核心功能] 从 DB 加载最优解，并使用 append_route 逻辑重建
+        // 返回 true 表示成功加载并重建，false 表示没找到或数据库为空
+        static bool load_best_from_db(const std::string &db_path, Solution &solution) {
+            sqlite3 *db;
+            if (sqlite3_open_v2(db_path.c_str(), &db, SQLITE_OPEN_READONLY, NULL)) {
+                // 如果数据库文件不存在，直接返回 false，让外层去跑 Savings 算法
+                if (db) sqlite3_close(db);
+                return false;
+            }
+
+            sqlite3_busy_timeout(db, 30000); // 5秒超时
+
+            // 查询全局最优解
+            const char *sql = "SELECT solution, score FROM global_best WHERE id=1";
+            sqlite3_stmt *stmt;
+
+            std::string raw_json;
+            double score = 1e20;
+            bool found = false;
+
+            if (sqlite3_prepare_v2(db, sql, -1, &stmt, 0) == SQLITE_OK) {
+                if (sqlite3_step(stmt) == SQLITE_ROW) {
+                    const unsigned char *text = sqlite3_column_text(stmt, 0);
+                    score = sqlite3_column_double(stmt, 1);
+                    if (text && score < 1e19) {
+                        raw_json = reinterpret_cast<const char*>(text);
+                        found = true;
+                    }
+                }
+            }
+            sqlite3_finalize(stmt);
+            sqlite3_close(db);
+
+            if (!found || raw_json.empty()) {
+                return false;
+            }
+
+            // -----------------------------------------------------------
+            // 重建逻辑 (完全参考你提供的 load_init_solution)
+            // -----------------------------------------------------------
+
+            // 1. 解析 JSON 字符串为二维数组
+            auto j = json::parse(raw_json);
+            std::vector<std::vector<int>> init_solution = j.get<std::vector<std::vector<int>>>();
+
+            solution.reset();
+
+            for (const auto &route_vec : init_solution) {
+                if (route_vec.empty()) continue;
+
+                int first_cust = route_vec[0];
+
+                solution.build_one_customer_route<false>(first_cust);
+
+                int current_route_idx = solution.get_route_index(first_cust);
+
+                for (size_t k = 1; k < route_vec.size(); ++k) {
+                    int next_cust = route_vec[k];
+
+                    solution.build_one_customer_route<false>(next_cust);
+                    int next_route_idx = solution.get_route_index(next_cust);
+
+                    solution.append_route(current_route_idx, next_route_idx);
+
+                    current_route_idx = solution.get_route_index(first_cust);
+                }
+            }
+
+            return solution.is_feasible();
         }
 
         // Reset a solution. Currently a newly constructed solution object needs to be reset before usage. That's ugly and must be fixed.
@@ -787,96 +1013,6 @@ namespace cobra {
                 out_stream << "\n";
             }
             out_stream << "Cost " << std::to_string(solution.get_cost());
-        }
-
-        // Stores the solution to csv.
-        static void store_solution_to_log_path(const cobra::Instance &instance, const cobra::Solution &solution, const std::string &path, double crt_time) {
-            std::cout << "SAVE TO LOG ####### \n";
-
-            std::ofstream out_stream(path+"/best.csv", std::ios::app);
-
-            out_stream << crt_time << ",";
-            // get best distance
-            out_stream << solution.get_cost() << ",";
-
-            out_stream << "\"[";
-
-            bool is_first_route = true;
-
-            for (auto route = solution.get_first_route();
-                 route != cobra::Solution::dummy_route;
-                 route = solution.get_next_route(route)) {
-
-                if (!is_first_route) {
-                    out_stream << ","; // 路径之间的逗号
-                }
-
-                out_stream << "["; // 路径开始
-
-                bool is_first_customer = true;
-
-                for (auto customer = solution.get_first_customer(route);
-                    customer != instance.get_depot();
-                    customer = solution.get_next_vertex(customer)) {
-                    if (!is_first_customer) {
-                        out_stream << ",";
-                    }
-                    out_stream << customer;
-                    is_first_customer = false;
-                }
-                out_stream << "]";
-                is_first_route = false;
-            }
-
-            out_stream << "]\"\n";
-
-            out_stream.close();
-        }
-
-        // Stores the solution to csv.
-        static void store_solution_to_shared_csv(const cobra::Instance &instance, const cobra::Solution &solution, const std::string &path, double crt_time) {
-            std::cout << "SAVE TO SHARED ####### \n";
-
-            std::ofstream out_stream(path, std::ios::app);
-
-            out_stream << "filo2" << ",";
-
-            out_stream << crt_time << ",";
-            // get best distance
-            out_stream << solution.get_cost() << ",";
-
-            out_stream << "\"[";
-
-            bool is_first_route = true;
-
-            for (auto route = solution.get_first_route();
-                 route != cobra::Solution::dummy_route;
-                 route = solution.get_next_route(route)) {
-
-                if (!is_first_route) {
-                    out_stream << ","; // 路径之间的逗号
-                }
-
-                out_stream << "["; // 路径开始
-
-                bool is_first_customer = true;
-
-                for (auto customer = solution.get_first_customer(route);
-                    customer != instance.get_depot();
-                    customer = solution.get_next_vertex(customer)) {
-                    if (!is_first_customer) {
-                        out_stream << ",";
-                    }
-                    out_stream << customer;
-                    is_first_customer = false;
-                    }
-                out_stream << "]";
-                is_first_route = false;
-                 }
-
-            out_stream << "]\"\n";
-
-            out_stream.close();
         }
 
         // Applies the do-list 1 to solution.

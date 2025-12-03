@@ -76,23 +76,19 @@ public class Solution
         this.f = 0;
 
         // 2. Reset all routes to an empty state
-        // Based on the constructor, routes are already initialized with the Depot.
-        // We just need to reset their stats and links.
         for (int i = 0; i < routes.length; i++) {
             routes[i].totalDemand = 0;
             routes[i].numElements = 0;
             routes[i].fRoute = 0;
             routes[i].modified = true;
 
-            // Reset the Depot pointers for this route
-            // In the constructor, 'routes[i]' was created using 'this.depot'
-            // So routes[i].first refers to the Depot node specific to this route (or shared, depending on Route implementation)
             routes[i].first.prev = routes[i].first;
             routes[i].first.next = routes[i].first;
         }
 
         // 3. Build the solution based on the Integer List
         int currentRouteIndex = 0;
+        double currentRouteCost = 0.0;
 
         // Start with the Depot of the first route
         Node prevNode = routes[currentRouteIndex].first;
@@ -107,8 +103,13 @@ public class Solution
                 // Link the last customer back to the Depot (routes[i].first)
                 Node depotNode = routes[currentRouteIndex].first;
 
+                currentRouteCost += instance.dist(prevNode.name, depotNode.name);
+
                 prevNode.next = depotNode;
                 depotNode.prev = prevNode;
+
+                routes[currentRouteIndex].fRoute = currentRouteCost; // 保存到路线对象中
+                this.f += currentRouteCost;
 
                 this.numRoutes++;
 
@@ -116,6 +117,8 @@ public class Solution
                 if (i < initSolutionList.size() - 1) {
                     currentRouteIndex++;
                     prevNode = routes[currentRouteIndex].first; // Reset prevNode to the new route's Depot
+
+                    currentRouteCost = 0.0;
                 }
             } else {
                 // --- CUSTOMER NODE ---
@@ -123,6 +126,8 @@ public class Solution
                 // Retrieve the existing Node object from the 'solution' array.
                 // MAPPING LOGIC: Based on constructor, Customer ID 'k' is at index 'k-1'.
                 Node currentNode = this.solution[nodeId - 1];
+
+                currentRouteCost += instance.dist(prevNode.name, currentNode.name);
 
                 // 1. Assign route
                 currentNode.route = routes[currentRouteIndex];
@@ -133,7 +138,6 @@ public class Solution
 
                 // 3. Update Route Stats
                 routes[currentRouteIndex].numElements++;
-                // Ensure 'demand' is available in the Node object (loaded from Instance in constructor)
                 routes[currentRouteIndex].totalDemand += currentNode.demand;
 
                 // 5. Move pointer
@@ -231,7 +235,11 @@ public class Solution
         String str = "[";
         for(int i = 0; i < numRoutes; i++)
         {
-            str += routes[i].toListString() + ", ";
+            if (i < numRoutes - 1) {
+                str += routes[i].toListString() + ", ";
+            } else  {
+                str += routes[i].toListString();
+            }
         }
         str += "]";
         return str;

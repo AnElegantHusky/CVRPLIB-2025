@@ -23,10 +23,8 @@
 #define DEFAULT_SA_INIT_FACTOR (0.1)
 #define DEFAULT_SA_FINAL_FACTOR (0.01)
 
-#define DEFAULT_INIT_SOLUTION ("")
-#define DEFAULT_SHARED_CSV ("")
+#define DEFAULT_SHARED_DB ("")
 #define DEFAULT_START_TIME (1.0)
-#define DEFAULT_INST_LOG_PATH ("")
 #define DEFAULT_MAX_RUNNING_SEC (1.0)
 
 // Tokens.
@@ -46,10 +44,8 @@
 #define TOKEN_SA_INIT_FACTOR ("--sa-initial-factor")
 #define TOKEN_SA_FINAL_FACTOR ("--sa-final-factor")
 
-#define TOKEN_INIT_SOLUTION ("--init-solution")
-#define TOKEN_SHARED_CSV ("--shared-csv")
+#define TOKEN_SHARED_DB ("--shared-db")
 #define TOKEN_START_TIME ("--start-time")
-#define TOKEN_INST_LOG_PATH ("--inst-log-path")
 #define TOKEN_MAX_RUNNING_SEC ("--max-running-seconds")
 
 
@@ -132,20 +128,12 @@ public:
         return neighbors_num;
     }
 
-    inline std::string get_init_solution() const {
-        return init_solution;
-    }
-
-    inline std::string get_shared_csv() const {
-        return shared_csv;
+    inline std::string get_shared_db() const {
+        return shared_db;
     }
 
     inline double get_start_time() const {
         return start_time;
-    }
-
-    inline std::string get_inst_log_path() const {
-        return inst_log_path;
     }
 
     inline double get_max_running_sec() const {
@@ -185,14 +173,10 @@ public:
             sa_final_factor = std::stof(value);
         } else if (key == TOKEN_NEIGHBORS_NUM) {
             neighbors_num = std::stoi(value);
-        } else if (key == TOKEN_INIT_SOLUTION) { // TODO
-            init_solution = value;
-        } else if (key == TOKEN_SHARED_CSV) {
-            shared_csv = value;
+        } else if (key == TOKEN_SHARED_DB) {
+            shared_db = value;
         } else if (key == TOKEN_START_TIME) {
             start_time = std::stod(value);
-        } else if (key == TOKEN_INST_LOG_PATH) {
-            inst_log_path = value;
         } else if (key == TOKEN_MAX_RUNNING_SEC) {
             max_running_sec = std::stof(value);
         } else {
@@ -220,10 +204,8 @@ private:
     double sa_final_factor = DEFAULT_SA_FINAL_FACTOR;
     int neighbors_num = DEFAULT_NEIGHBORS_NUM;
 
-    std::string init_solution = DEFAULT_INIT_SOLUTION;
-    std::string shared_csv = DEFAULT_SHARED_CSV;
+    std::string shared_db = DEFAULT_SHARED_DB;
     double start_time = DEFAULT_START_TIME;
-    std::string inst_log_path = DEFAULT_INST_LOG_PATH;
     double max_running_sec = DEFAULT_MAX_RUNNING_SEC;
 };
 

@@ -16,13 +16,11 @@ public class InputParameters
 {
 	
 	private String file="";
-	private String sharedCSV="";
-	private String logPath="";
+	private String sharedDB="";
 	private boolean rounded=true;
 	private double limit=Double.MAX_VALUE;
 	private double best=0;
 	private Config config=new Config();
-    private List<Integer> initSolutionList=null;
     private double startTime=0.;
 
 	public void readingInput(String[] args)
@@ -34,10 +32,8 @@ public class InputParameters
 				switch(args[i])
 				{
 					case "-file": file=getAddress(args[i+1]);break;
-					case "-sharedCSV": sharedCSV=args[i+1];break;
-					case "-logPath": logPath=args[i+1];break;
+					case "-sharedDB": sharedDB=args[i+1];break;
 					case "-rounded": rounded=getRound(args[i+1]);break;
-                    case "-initSolution": initSolutionList=setInitSolutionList(args[i+1]);break;
                     case "-limit": limit=getLimit(args[i+1]);break;
                     case "-startTime": startTime=setStartTime(args[i+1]);break;
 					case "-best": best=getBest(args[i+1]);break;
@@ -123,11 +119,6 @@ public class InputParameters
         }
 
         return result;
-    }
-
-    public List<Integer> getInitSolutionList()
-    {
-        return initSolutionList;
     }
 
     public double setStartTime(String text)
@@ -236,12 +227,8 @@ public class InputParameters
 		return file;
 	}
 
-    public String getLogPath() {
-        return logPath;
-    }
-
-    public String getSharedCSV() {
-        return sharedCSV;
+    public String getSharedDB() {
+        return sharedDB;
     }
 
 	public boolean isRounded() {
