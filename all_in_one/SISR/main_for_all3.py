@@ -13,6 +13,7 @@ import json
 import psutil
 import sqlite3
 from pathlib import Path
+import argparse
 
 
 from sisr2_db import sisr_cvrp
@@ -259,6 +260,12 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
 # ================= 主程序入口 =================
 
 if __name__ == '__main__':
+    # python main_for_all3.py XLTEST-n1048-k139 20
+    parser = argparse.ArgumentParser()
+    parser.add_argument('instance_name', required=True, help='Instance name.')
+    parser.add_argument('running_time', type=int, required=True, help='Max running time in minutes.')
+    args = parser.parse_args()
+
     # 1. 强制 Spawn
     try:
         multiprocessing.set_start_method('spawn')
@@ -268,8 +275,9 @@ if __name__ == '__main__':
     # 路径与数据初始化 (简化版)
     # instance_name = 'XLTEST-n3101-k685'
     # instance_name = 'XLTEST-n2168-k625'
-    instance_name = 'XLTEST-n1048-k139'
+    # instance_name = 'XLTEST-n1048-k139'
     # instance_name = 'XLTEST-n8575-k343'
+    instance_name = args.instance_name
 
     # 使用 pathlib 拼接路径
     instance_path = ROOT_PATH / 'SISR' / 'data' / 'cvrplib_1019' / f'{instance_name}.vrp'
@@ -294,7 +302,8 @@ if __name__ == '__main__':
 
     start_time = time.time()
     # max_running_time_min = inst_size // 25
-    max_running_time_min = 20  # TODO: ONLY FOR DEBUG
+    # max_running_time_min = 20  # TODO: ONLY FOR DEBUG
+    max_running_time_min = args.running_time
 
     # 参数模版 (Template)
     # 将可变参数用占位符或在 build 函数中动态替换
@@ -364,7 +373,7 @@ if __name__ == '__main__':
 
     # 初始启动
     manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, {})
-    time.sleep(30) # warmup
+    time.sleep(3600) # warmup
 
     # 【优化2】文件监听循环
     try:
