@@ -5,6 +5,7 @@ import logging
 import subprocess
 import concurrent.futures
 from typing import Tuple
+import itertools
 
 # ================= 配置区域 =================
 
@@ -13,7 +14,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 2. AILSII Jar包路径 (假设在 bin 文件夹下)
 # JAR_NAME = "AILS-II_parallel_debug.jar"
-JAR_NAME = "AILSII_EoH.jar"
+JAR_NAME = "AILSII_origin.jar"
 
 
 JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
@@ -27,15 +28,28 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME)
 # 5. 硬编码的任务列表 (文件名, 时间限制秒)
 # 这些是根据你提供的 hgs 命令行提取的
 TARGET_TASKS = [
-    ("XLTEST-n1048-k139.vrp", 2460),
-    # ("XLTEST-n2168-k625.vrp", 5160),
-    # ("XLTEST-n3101-k685.vrp", 7440),
-    # ("XLTEST-n4245-k164.vrp", 10140),
-    # ("XLTEST-n5174-k170.vrp", 12360),
-    # ("XLTEST-n5649-k365.vrp", 13500),
-    # ("XLTEST-n6034-k1234.vrp", 14460),
-    # ("XLTEST-n8575-k343.vrp", 20580)
+    "XLTEST-n1048-k139.vrp",
+    "XLTEST-n2168-k625.vrp",
+    "XLTEST-n3101-k685.vrp",
+    "XLTEST-n4245-k164.vrp",
+    "XLTEST-n5174-k170.vrp",
+    "XLTEST-n5649-k365.vrp",
+    "XLTEST-n6034-k1234.vrp",
+    "XLTEST-n8575-k343.vrp"
 ]
+
+RUNTIME_LIMITS = [
+    3600 * 3,
+    3600 * 6,
+    3600 * 12,
+    3600 * 24,
+    3600 * 24 * 2,
+    3600 * 24 * 4
+]
+
+# RUNTIME_LIMITS = [i * 0.0001 for i in RUNTIME_LIMITS]  # 用于快速测试
+
+ALL_TARGET_TASKS = list(itertools.product(TARGET_TASKS, RUNTIME_LIMITS))
 
 # 6. 并行设置
 # None = 使用所有CPU核心。如果内存不足，请手动设置为整数，例如 4
@@ -45,7 +59,8 @@ MAX_WORKERS = None
 JAVA_XMS = "2000m"
 JAVA_XMX = "4000m"
 
-JAVA_EXE_PATH = "D:\\.jdks\\corretto-24.0.2\\bin\\java.exe"
+# JAVA_EXE_PATH = "D:\\.jdks\\corretto-24.0.2\\bin\\java.exe"
+JAVA_EXE_PATH = "java"
 
 # ===========================================
 
@@ -63,11 +78,11 @@ logging.basicConfig(
 )
 
 
-def run_single_task(task: Tuple[str, int]):
+def run_single_task(task_input):
     """
     运行单个 AILSII 任务
     """
-    instance_filename, time_limit = task
+    instance_filename, time_limit = task_input
     instance_path = os.path.join(INSTANCES_DIR, instance_filename)
 
     # 准备日志前缀
@@ -97,6 +112,7 @@ def run_single_task(task: Tuple[str, int]):
         "-file", instance_path,
         "-rounded", "true",
         "-stoppingCriterion", "Time",
+        "-output", f"remote_results/{JAR_NAME}-{time_limit}",
         "-limit", str(time_limit)
     ]
     # command = [
@@ -113,15 +129,15 @@ def run_single_task(task: Tuple[str, int]):
     # logging.info(f"CMD: {' '.join(command)}") # 如果需要调试命令可取消注释
 
     try:
-        # 4. 执行命令并重定向 stdout 到文件
-        with open(output_csv_path, 'w') as output_file:
-            subprocess.run(
-                command,
-                stdout=output_file,  # 将标准输出写入 .csv 文件
-                stderr=subprocess.PIPE,  # 捕获错误输出以便在日志显示
-                text=True,
-                check=True
-            )
+    #     # 4. 执行命令并重定向 stdout 到文件
+    #     with open(output_csv_path, 'w') as output_file:
+        subprocess.run(
+            command,
+            # stdout=output_file,  # 将标准输出写入 .csv 文件
+            stderr=subprocess.PIPE,  # 捕获错误输出以便在日志显示
+            # text=True,
+            # check=True
+        )
 
         # logging.info(f"{log_prefix} 完成。日志已保存至 {output_csv_path}")
 
@@ -152,7 +168,7 @@ def main():
         # else:
         #     logging.info("并行进程数: 自动 (所有核心)")
 
-        list(executor.map(run_single_task, TARGET_TASKS))
+        list(executor.map(run_single_task, ALL_TARGET_TASKS))
 
     # logging.info("--- 所有任务已结束 ---")
 
