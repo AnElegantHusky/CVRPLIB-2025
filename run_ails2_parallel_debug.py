@@ -13,20 +13,22 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 2. AILSII Jar包路径 (假设在 bin 文件夹下)
 # JAR_NAME = "AILS-II_parallel_debug.jar"
-JAR_NAME = "AILSII_EoH.jar"
+JAR_NAME = "AILS-II_parallel_1thread.jar"
 
 
 JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
 
 # 3. 实例文件所在文件夹 (根据你的命令行，这里是 XLDemo)
-INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
+INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLDEBUG")
 
 # 4. 结果输出根目录
-OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME)
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "debug_results", JAR_NAME)
 
 # 5. 硬编码的任务列表 (文件名, 时间限制秒)
 # 这些是根据你提供的 hgs 命令行提取的
 TARGET_TASKS = [
+    # ("XLTEST-n1048-k139.vrp", 600),
+
     ("XLTEST-n1048-k139.vrp", 2460),
     # ("XLTEST-n2168-k625.vrp", 5160),
     # ("XLTEST-n3101-k685.vrp", 7440),
@@ -45,7 +47,8 @@ MAX_WORKERS = None
 JAVA_XMS = "2000m"
 JAVA_XMX = "4000m"
 
-JAVA_EXE_PATH = "D:\\.jdks\\corretto-24.0.2\\bin\\java.exe"
+# JAVA_EXE_PATH = "D:\\.jdks\\corretto-24.0.2\\bin\\java.exe"
+JAVA_EXE_PATH = "java"
 
 # ===========================================
 

@@ -25,51 +25,93 @@ python run.py AILSII_perturbation1.jar --start-idx 0 --end-idx 10 --time-limit 1
 python run.py AILSII_perturbation2.jar --start-idx 0 --end-idx 10 --time-limit 10
 python run.py AILSII_deco.jar --start-idx 0 --end-idx 10 --time-limit 10
 ```
-# 请在不同服务器上分别运行以下命令
-```
-python run.py AILSII_origin.jar --start-idx 0 --end-idx 50
+
+
+[//]: # (# 请在不同服务器上分别运行以下命令)
+
+[//]: # (```)
+
+[//]: # (python run.py AILSII_origin.jar --start-idx 0 --end-idx 50)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (python run.py AILSII_origin.jar --start-idx 50 --end-idx 100)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (python run.py AILSII_perturbation1.jar --start-idx 0 --end-idx 50)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (python run.py AILSII_perturbation1.jar --start-idx 50 --end-idx 100)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (python run.py AILSII_perturbation2.jar --start-idx 0 --end-idx 50)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (python run.py AILSII_perturbation2.jar --start-idx 50 --end-idx 100)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (python run.py AILSII_deco.jar --start-idx 0 --end-idx 50)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # (python run.py AILSII_deco.jar --start-idx 50 --end-idx 100)
+
+[//]: # (```)
+
+# 请在服务器上运行以下代码（需要48个线程）
+```angular2html
+python run_ails2_parallel_timetest.py
 ```
 
-```
-python run.py AILSII_origin.jar --start-idx 50 --end-idx 100
-```
+[//]: # (# 测试EoH版本，请在不同服务器上分别运行以下命令)
 
-```
-python run.py AILSII_perturbation1.jar --start-idx 0 --end-idx 50
-```
+[//]: # (100个instances：在不同服务器上分别运行以下命令)
 
-```
-python run.py AILSII_perturbation1.jar --start-idx 50 --end-idx 100
-```
+[//]: # (```)
 
-```
-python run.py AILSII_perturbation2.jar --start-idx 0 --end-idx 50
-```
+[//]: # (python run.py AILSII_EoH.jar --start-idx 0 --end-idx 50)
 
-```
-python run.py AILSII_perturbation2.jar --start-idx 50 --end-idx 100
-```
+[//]: # (```)
 
-```
-python run.py AILSII_deco.jar --start-idx 0 --end-idx 50
-```
+[//]: # ()
+[//]: # (```)
 
-```
-python run.py AILSII_deco.jar --start-idx 50 --end-idx 100
-```
+[//]: # (python run.py AILSII_EoH.jar --start-idx 50 --end-idx 100)
 
-# 测试EoH版本，请在不同服务器上分别运行以下命令
-100个instances：在不同服务器上分别运行以下命令
-```
-python run.py AILSII_EoH.jar --start-idx 0 --end-idx 50
-```
+[//]: # (```)
 
-```
-python run.py AILSII_EoH.jar --start-idx 50 --end-idx 100
-```
-8个instances
-```
-python run_ails2_parallel.py
-```
+[//]: # (8个instances)
+
+[//]: # (```)
+
+[//]: # (python run_ails2_parallel.py)
+
+[//]: # (```)
 
 
