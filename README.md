@@ -90,9 +90,9 @@ sudo chmod +x ./bin/*
 
 [//]: # (```)
 
-# 请在服务器上运行以下代码（需要48个线程）
+# 请在不同服务器上分别运行以下代码
 ```angular2html
-python run_ails2_parallel_timetest.py
+python timetest_ails2_origin.py
 ```
 
 [//]: # (# 测试EoH版本，请在不同服务器上分别运行以下命令)

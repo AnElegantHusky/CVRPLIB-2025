@@ -14,7 +14,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 2. AILSII Jar包路径 (假设在 bin 文件夹下)
 # JAR_NAME = "AILS-II_parallel_debug.jar"
-JAR_NAME = "AILSII_origin.jar"
+JAR_NAME = "AILSII_perturbation2.jar"
 
 
 JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
@@ -23,7 +23,7 @@ JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
 INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 
 # 4. 结果输出根目录
-OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME)
+# OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME)
 
 # 5. 硬编码的任务列表 (文件名, 时间限制秒)
 # 这些是根据你提供的 hgs 命令行提取的
@@ -95,13 +95,13 @@ def run_single_task(task_input):
 
     # 2. 准备输出文件 (CSV)
     # AILSII 的控制台输出通常包含统计信息，原脚本将其重定向到 csv
-    output_csv_path = os.path.join(OUTPUT_DIR, f"{instance_filename}.csv")
-
-    try:
-        os.makedirs(OUTPUT_DIR, exist_ok=True)
-    except OSError as e:
-        logging.error(f"{log_prefix} 无法创建输出目录: {e}")
-        return
+    # output_csv_path = os.path.join(OUTPUT_DIR, f"{instance_filename}.csv")
+    #
+    # try:
+    #     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    # except OSError as e:
+    #     logging.error(f"{log_prefix} 无法创建输出目录: {e}")
+    #     return
 
     # 3. 构建命令
     # 对应原命令: java -jar ... bin/AILSII_CPU.jar -file ... -limit ...
