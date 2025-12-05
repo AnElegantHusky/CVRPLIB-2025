@@ -95,6 +95,18 @@ sudo chmod +x ./bin/*
 python timetest_ails2_origin.py
 ```
 
+```angular2html
+python timetest_ails2_deco.py
+```
+
+```angular2html
+python timetest_ails2_perturb1.py
+```
+
+```angular2html
+python timetest_ails2_perturb2.py
+```
+
 [//]: # (# 测试EoH版本，请在不同服务器上分别运行以下命令)
 
 [//]: # (100个instances：在不同服务器上分别运行以下命令)
