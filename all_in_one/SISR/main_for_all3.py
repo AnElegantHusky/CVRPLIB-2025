@@ -188,7 +188,7 @@ def kill_process_tree(pid):
 
 def run_external_process(cmd):
     """通用的外部进程运行器"""
-    # print(cmd)
+    print(cmd)
     try:
         process = subprocess.Popen(
             cmd,
@@ -262,8 +262,8 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
 if __name__ == '__main__':
     # python main_for_all3.py XLTEST-n1048-k139 20
     parser = argparse.ArgumentParser()
-    parser.add_argument('instance_name', required=True, help='Instance name.')
-    parser.add_argument('running_time', type=int, required=True, help='Max running time in minutes.')
+    parser.add_argument('instance_name', help='Instance name.')
+    parser.add_argument('running_time', type=int, help='Max running time in minutes.')
     args = parser.parse_args()
 
     # 1. 强制 Spawn

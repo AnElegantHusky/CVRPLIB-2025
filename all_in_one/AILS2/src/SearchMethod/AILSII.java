@@ -167,6 +167,7 @@ public class AILSII
             referenceSolution.loadInitSolution(initSolutionList);
         }
         bestSolution.clone(referenceSolution);
+        bestF = bestSolution.f;
 		while(!stoppingCriterion())
 		{
 			iterator++;
@@ -192,7 +193,7 @@ public class AILSII
 
 	public void evaluateSolution()
 	{
-		if((solution.f-bestF)<-epsilon) {
+        if((solution.f-bestF)<-epsilon) {
             bestF = solution.f;
 
             bestSolution.clone(solution);
