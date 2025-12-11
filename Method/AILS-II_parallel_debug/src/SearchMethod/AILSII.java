@@ -55,9 +55,10 @@ public class AILSII
     // ================ 修改结束 ================
 
 	//----------Problema------------
-	Solution solution,referenceSolution,bestSolution;
+	Solution solution,referenceSolution1, referenceSolution2, bestSolution;
 	
-	Instance instance;
+	Instance instance1;
+    Instance instance2;
 	Distance pairwiseDistance;
 	double bestF=Double.MAX_VALUE;
 	double executionMaximumLimit;
@@ -82,14 +83,21 @@ public class AILSII
 	
 	Perturbation[] pertubOperators;
 	Perturbation selectedPerturbation;
+
+    Perturbation perturbation1;
+    Perturbation perturbation2;
 	
-	FeasibilityPhase feasibilityOperator;
+	FeasibilityPhase feasibilityOperator1;
+    FeasibilityPhase feasibilityOperator2;
+
 	ConstructSolution constructSolution;
 	
-	LocalSearch localSearch;
+	LocalSearch localSearch1;
+    LocalSearch localSearch2;
 
 	InsertionHeuristic insertionHeuristic;
-	IntraLocalSearch intraLocalSearch;
+	IntraLocalSearch intraLocalSearch1;
+    IntraLocalSearch intraLocalSearch2;
 	AcceptanceCriterion acceptanceCriterion;
 //	----------Mare------------
 	DistAdjustment distAdjustment;
@@ -112,9 +120,11 @@ public class AILSII
     private ExecutorService executorService;
     private Config config; // 存储Config以供线程使用
 
-	public AILSII(Instance instance,InputParameters reader)
+	public AILSII(Instance instance1, Instance instance2, InputParameters reader)
 	{ 
-		this.instance=instance;
+		this.instance1 = instance1;
+        this.instance2 = instance2;
+
 		Config config=reader.getConfig();
 
         this.config = config; // 将局部的config存到类字段中
@@ -127,48 +137,72 @@ public class AILSII
 		this.epsilon=config.getEpsilon();
 		this.stoppingCriterionType=config.getStoppingCriterionType();
 		this.idealDist=new IdealDist();
-		this.solution =new Solution(instance,config);
-		this.referenceSolution =new Solution(instance,config);
-		this.bestSolution =new Solution(instance,config);
+		this.solution =new Solution(instance1,config);
+		this.referenceSolution1 = new Solution(instance1,config);
+        this.referenceSolution2 = new Solution(instance2,config);
+		this.bestSolution =new Solution(instance1,config);
 		this.numIterUpdate=config.getGamma();
 		
 		this.pairwiseDistance=new Distance();
 		
 		this.pertubOperators=new Perturbation[config.getPerturbation().length];
+
+        this.perturbation1 = this.pertubOperators[0];
+        this.perturbation2 = this.pertubOperators[1];
+
 		
 		this.distAdjustment=new DistAdjustment( idealDist, config, executionMaximumLimit);
 		
-		this.intraLocalSearch=new IntraLocalSearch(instance,config);
+		this.intraLocalSearch1 =new IntraLocalSearch(instance1,config);
+        this.intraLocalSearch2 = new IntraLocalSearch(instance2, config);
 		
-		this.localSearch=new LocalSearch(instance,config,intraLocalSearch);
+		this.localSearch1=new LocalSearch(instance1,config, intraLocalSearch1);
+        this.localSearch2=new LocalSearch(instance2,config, intraLocalSearch2);
 		
-		this.feasibilityOperator=new FeasibilityPhase(instance,config,intraLocalSearch);
+		this.feasibilityOperator1=new FeasibilityPhase(instance1,config, intraLocalSearch1);
+        this.feasibilityOperator2=new FeasibilityPhase(instance2,config, intraLocalSearch2);
 		
-		this.constructSolution=new ConstructSolution(instance,config);
+		this.constructSolution=new ConstructSolution(instance1,config);
 		
 		OmegaAdjustment newOmegaAdjustment;
 		for (int i = 0; i < config.getPerturbation().length; i++) 
 		{
-			newOmegaAdjustment=new OmegaAdjustment(config.getPerturbation()[i], config,instance.getSize(),idealDist);
+			newOmegaAdjustment=new OmegaAdjustment(config.getPerturbation()[i], config,instance1.getSize(),idealDist);
 			omegaSetup.put(config.getPerturbation()[i]+"", newOmegaAdjustment);
 		}
 		
-		this.acceptanceCriterion=new AcceptanceCriterion(instance,config,executionMaximumLimit);
+		this.acceptanceCriterion=new AcceptanceCriterion(instance1,config,executionMaximumLimit);
 
-		try 
-		{
-			for (int i = 0; i < pertubOperators.length; i++) 
-			{
-				this.pertubOperators[i]=(Perturbation) Class.forName("Perturbation."+config.getPerturbation()[i]).
-				getConstructor(Instance.class,Config.class,HashMap.class,IntraLocalSearch.class).
-				newInstance(instance,config,omegaSetup,intraLocalSearch);
-			}
-			
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException | NoSuchMethodException | SecurityException
-				| ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+//		try
+//		{
+//			for (int i = 0; i < pertubOperators.length; i++)
+//			{
+//				this.pertubOperators[i]=(Perturbation) Class.forName("Perturbation."+config.getPerturbation()[i]).
+//				getConstructor(Instance.class,Config.class,HashMap.class,IntraLocalSearch.class).
+//				newInstance(instance1,config,omegaSetup, intraLocalSearch1);
+//			}
+//
+//		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+//				| InvocationTargetException | NoSuchMethodException | SecurityException
+//				| ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
+
+        try {
+            this.perturbation1 = (Perturbation) Class.forName("Perturbation." + config.getPerturbation()[0])
+                    .getConstructor(Instance.class, Config.class, HashMap.class, IntraLocalSearch.class)
+                    .newInstance(instance1, config, omegaSetup, this.intraLocalSearch1);
+
+            // --- 初始化第二个扰动算子 (给线程 2) ---
+            // 使用: pertTypes[1] (如果存在), instance2, intraLocalSearch2
+            this.perturbation2 = (Perturbation) Class.forName("Perturbation." + config.getPerturbation()[1])
+                    .getConstructor(Instance.class, Config.class, HashMap.class, IntraLocalSearch.class)
+                    .newInstance(instance2, config, omegaSetup, this.intraLocalSearch2); // 【关键：传入 intraLocalSearch2】
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("扰动算子初始化失败", e);
+        }
 		
 		// ================ 修改开始：初始化输出目录 ================
 		// 初始化输出目录
@@ -339,15 +373,21 @@ public class AILSII
 
         totalWorkerCpuTime = 0L;
 
-		referenceSolution.numRoutes = instance.getMinNumberRoutes();
-		constructSolution.construct(referenceSolution);
+		referenceSolution1.numRoutes = instance1.getMinNumberRoutes();
+		constructSolution.construct(referenceSolution1);
 
-		feasibilityOperator.makeFeasible(referenceSolution);
-		localSearch.localSearch(referenceSolution, true);
+        referenceSolution2.numRoutes = instance2.getMinNumberRoutes();
+        constructSolution.construct(referenceSolution2);
+
+		feasibilityOperator1.makeFeasible(referenceSolution1);
+		localSearch1.localSearch(referenceSolution1, true);
+
+        feasibilityOperator2.makeFeasible(referenceSolution2);
+        localSearch2.localSearch(referenceSolution2, false);
 		
 		// ================ 修改开始：修复初始化问题 ================
 		// 先设置bestSolution
-		bestSolution.clone(referenceSolution);
+		bestSolution.clone(referenceSolution1);
 		bestF = bestSolution.f; // 使用实际的解成本，而不是Double.MAX_VALUE
 		
 		// ================ 修改开始：根据配置决定是否保存初始解 ================
@@ -361,22 +401,38 @@ public class AILSII
 		}
 		// ================ 修改结束 ================
 
-        IntraLocalSearch task2IntraLS = new IntraLocalSearch(instance, config);
+//        IntraLocalSearch task2IntraLS = new IntraLocalSearch(instance1, config);
+//        IntraLocalSearch task3IntraLS = new IntraLocalSearch(instance2, config);
 
         while (!stoppingCriterion()) {
             iterator++;
 
+            Callable<TaskResult> task1 = () -> {
+                long taskStartTime = threadMXBean.getCurrentThreadCpuTime(); // 任务2的CPU计时器
+
+                // 线程安全：创建此线程专属的 Solution 和搜索工具
+                Solution threadSolution = new Solution(instance1, config);
+                threadSolution.clone(referenceSolution1);
+                // 应用扰动和搜索
+                perturbation1.applyPerturbation(threadSolution);
+                feasibilityOperator1.makeFeasible(threadSolution);
+                localSearch1.localSearch(threadSolution, true);
+
+                long taskEndTime = threadMXBean.getCurrentThreadCpuTime(); // 任务2的CPU计时器结束
+                long taskCpuTime = taskEndTime - taskStartTime;
+                return new TaskResult(threadSolution, taskCpuTime); // 返回结果和CPU时间
+            };
 
             Callable<TaskResult> task2 = () -> {
                 long taskStartTime = threadMXBean.getCurrentThreadCpuTime(); // 任务2的CPU计时器
 
                 // 线程安全：创建此线程专属的 Solution 和搜索工具
-                Solution threadSolution = new Solution(instance, config);
-                threadSolution.clone(referenceSolution);
+                Solution threadSolution = new Solution(instance2, config);
+                threadSolution.clone(referenceSolution2);
                 // 应用扰动和搜索
-                pertubOperators[1].applyPerturbation(threadSolution);
-                feasibilityOperator.makeFeasible(threadSolution);
-                localSearch.localSearch(threadSolution, true);
+                perturbation2.applyPerturbation(threadSolution);
+                feasibilityOperator2.makeFeasible(threadSolution);
+                localSearch2.localSearch(threadSolution, true);
 
                 long taskEndTime = threadMXBean.getCurrentThreadCpuTime(); // 任务2的CPU计时器结束
                 long taskCpuTime = taskEndTime - taskStartTime;
@@ -384,15 +440,15 @@ public class AILSII
             };
 
             // 2. 提交任务 (Future<TaskResult>)
-//            Future<TaskResult> future1 = executorService.submit(task1);
+            Future<TaskResult> future1 = executorService.submit(task1);
             Future<TaskResult> future2 = executorService.submit(task2);
 
-//            TaskResult result1 = null;
+            TaskResult result1 = null;
             TaskResult result2 = null;
 
             // 3. 获取结果
             try {
-//                result1 = future1.get();
+                result1 = future1.get();
                 result2 = future2.get();
             } catch (InterruptedException | ExecutionException e) {
                 System.err.println("一个扰动线程执行失败: " + e.getMessage());
@@ -402,11 +458,11 @@ public class AILSII
 
             // 4. 将两个工作线程的 CPU 时间计入总和
             // 这是“总 CPU 时间”方案
-//            totalWorkerCpuTime += result1.cpuTime;
-//            totalWorkerCpuTime += result2.cpuTime;
-
-//            totalWorkerCpuTime += Math.max(result1.cpuTime, result2.cpuTime);
+            totalWorkerCpuTime += result1.cpuTime;
             totalWorkerCpuTime += result2.cpuTime;
+
+            totalWorkerCpuTime += Math.max(result1.cpuTime, result2.cpuTime);
+//            totalWorkerCpuTime += result2.cpuTime;
 
 
             /* * 备选方案：如果你*真的*想要 "CPU makespan" (一种非标准度量)
@@ -416,31 +472,32 @@ public class AILSII
 
 
             // 5. 比较两个结果，选出最好的
-//            Solution solution1 = result1.solution;
+            Solution solution1 = result1.solution;
             Solution solution2 = result2.solution;
             Solution bestOfTwo = solution2;
             Perturbation perturbationUsed;
 
-//            if (solution1.f < solution2.f) {
-//                bestOfTwo = solution1;
-//                perturbationUsed = pertubOperators[0];
-//            } else {
-//                bestOfTwo = solution2;
-//                perturbationUsed = pertubOperators[1];
-//            }
+            if (solution1.f < solution2.f) {
+                bestOfTwo = solution1;
+                perturbationUsed = perturbation1;
+            } else {
+                bestOfTwo = solution2;
+                perturbationUsed = perturbation2;
+            }
 
-            perturbationUsed = pertubOperators[1];
+//            perturbationUsed = pertubOperators[1];
 
 
             // 6. 像以前一样继续...
             solution.clone(bestOfTwo);
-            distanceLS = pairwiseDistance.pairwiseSolutionDistance(solution, referenceSolution);
+            distanceLS = pairwiseDistance.pairwiseSolutionDistance(solution, referenceSolution1);
             evaluateSolution();
             distAdjustment.distAdjustment(totalWorkerCpuTime);
             perturbationUsed.getChosenOmega().setDistance(distanceLS);
-            if (acceptanceCriterion.acceptSolution(solution, totalWorkerCpuTime))
-                referenceSolution.clone(solution);
-
+            if (acceptanceCriterion.acceptSolution(solution, totalWorkerCpuTime)) {
+                referenceSolution1.clone(solution);
+                referenceSolution2.clone(solution);
+            }
             // ================ 修改结束 ================
         }
 
@@ -577,9 +634,10 @@ public class AILSII
 		InputParameters reader = new InputParameters();
 		reader.readingInput(args);
 		
-		Instance instance = new Instance(reader);
+		Instance instance1 = new Instance(reader);
+        Instance instance2 = new Instance(reader);
 		
-		AILSII ailsII = new AILSII(instance, reader);
+		AILSII ailsII = new AILSII(instance1, instance2, reader);
 		
 		// ================ 修改开始：从命令行参数获取实例名称 ================
 		String instanceName = "default";
@@ -659,7 +717,7 @@ public class AILSII
 		String str="";
 		for (int i = 0; i < pertubOperators.length; i++) 
 		{
-			str+="\n"+omegaSetup.get(this.pertubOperators[i].perturbationType+""+referenceSolution.numRoutes);
+			str+="\n"+omegaSetup.get(this.pertubOperators[i].perturbationType+""+referenceSolution1.numRoutes);
 		}
 		return str;
 	}
