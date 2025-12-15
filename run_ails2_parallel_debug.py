@@ -13,13 +13,13 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 2. AILSII Jar包路径 (假设在 bin 文件夹下)
 # JAR_NAME = "AILS-II_parallel_debug.jar"
-JAR_NAME = "AILS-II_parallel_1thread.jar"
+JAR_NAME = "AILS-II_parallel_demo.jar"
 
 
 JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
 
 # 3. 实例文件所在文件夹 (根据你的命令行，这里是 XLDemo)
-INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLDEBUG")
+INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLDemo")
 
 # 4. 结果输出根目录
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "debug_results", JAR_NAME)
@@ -29,10 +29,10 @@ OUTPUT_DIR = os.path.join(SCRIPT_DIR, "debug_results", JAR_NAME)
 TARGET_TASKS = [
     # ("XLTEST-n1048-k139.vrp", 600),
 
-    ("XLTEST-n1048-k139.vrp", 2460),
+    # ("XLTEST-n1048-k139.vrp", 2460),
     # ("XLTEST-n2168-k625.vrp", 5160),
     # ("XLTEST-n3101-k685.vrp", 7440),
-    # ("XLTEST-n4245-k164.vrp", 10140),
+    ("XLTEST-n4245-k164.vrp", 10140),
     # ("XLTEST-n5174-k170.vrp", 12360),
     # ("XLTEST-n5649-k365.vrp", 13500),
     # ("XLTEST-n6034-k1234.vrp", 14460),
@@ -100,7 +100,8 @@ def run_single_task(task: Tuple[str, int]):
         "-file", instance_path,
         "-rounded", "true",
         "-stoppingCriterion", "Time",
-        "-limit", str(time_limit)
+        "-limit", str(time_limit),
+        "-threads", "10"
     ]
     # command = [
     #     "java", "-jar",

@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import re
 
 def plot_search_curves(instance_name, algorithm_names, base_dir='.', output_dir='.', show_plot=False):
     """
@@ -210,5 +211,118 @@ def plot_best_fitness(instance_name, algorithm_names, base_dir='.', output_dir='
     output_filename = os.path.join(output_dir, f"plot_best_fitness_{instance_name}.png")
     plt.savefig(output_filename)
     print(f"--- 绘图完成: {instance_name}, 图像已保存至 {output_filename} ---")
+    if show_plot:
+        plt.show()
+
+
+def plot_gap_scatter(instance_names, algorithm_names, base_dir='.', output_dir='.', show_plot=False):
+    """
+    Plots a scatter plot showing the gap (%) of each method relative to the best
+    found fitness for each instance, indexed by the number of customers.
+
+    X-axis: Customer Number (extracted from instance name)
+    Y-axis: Gap (%) = (Method Fitness - Best Fitness in Instance) / Best Fitness in Instance * 100
+    """
+
+    results = []
+
+    print("--- Starting Gap Analysis ---")
+
+    # 1. Collect best fitness for every instance and every method
+    for instance in instance_names:
+        # Extract customer number using regex: finds digits after '-n'
+        match = re.search(r'-n(\d+)-', instance)
+        if match:
+            customer_num = int(match.group(1))
+        else:
+            print(f"Warning: Could not extract customer number from {instance}. Skipping.")
+            continue
+
+        instance_best_values = {}
+
+        for method in algorithm_names:
+            method_dir = os.path.join(base_dir, method)
+            if not os.path.isdir(method_dir):
+                continue
+
+            # Find matching CSV file
+            file_path = None
+            for file in os.listdir(method_dir):
+                if file.endswith('.csv') and instance in file:
+                    file_path = os.path.join(method_dir, file)
+                    break
+
+            if file_path:
+                try:
+                    data = pd.read_csv(
+                        file_path,
+                        sep='[;,]',
+                        header=None,
+                        names=['time', 'fitness'],
+                        engine='python',
+                        on_bad_lines='skip'
+                    )
+                    if not data.empty:
+                        # Best fitness is the minimum value found in the 'fitness' column
+                        best_val = pd.to_numeric(data['fitness'], errors='coerce').min()
+                        if not pd.isna(best_val):
+                            instance_best_values[method] = best_val
+                except Exception as e:
+                    print(f"Error reading {file_path}: {e}")
+
+        # 2. Calculate Gaps for this instance
+        if instance_best_values:
+            # The baseline is the minimum fitness found among all methods for this instance
+            min_fitness_in_instance = min(instance_best_values.values())
+
+            for method, val in instance_best_values.items():
+                gap = ((val - min_fitness_in_instance) / min_fitness_in_instance) * 100
+                results.append({
+                    'customer_num': customer_num,
+                    'method': method,
+                    'gap': gap,
+                    'instance': instance
+                })
+
+    if not results:
+        print("No valid data found to plot gaps.")
+        return
+
+    # 3. Process data for plotting
+    df = pd.DataFrame(results)
+    # Sort by customer number for a logical X-axis flow
+    df = df.sort_values(by='customer_num')
+
+    plt.figure(figsize=(12, 7))
+
+    # 4. Plotting
+    # Group by method so each algorithm gets its own color/legend entry
+    for method in algorithm_names:
+        method_df = df[df['method'] == method]
+        if not method_df.empty:
+            plt.scatter(
+                method_df['customer_num'],
+                method_df['gap'],
+                label=method,
+                alpha=0.7,
+                edgecolors='w',
+                s=60
+            )
+
+    plt.xlabel('Number of Customers')
+    plt.ylabel('Gap (%)')
+    plt.title('Algorithm Gap Analysis by Instance Scale')
+    plt.legend(title='Method')
+    plt.grid(True, linestyle='--', alpha=0.5)
+
+    # Ensure Y-axis starts at 0 or slightly below for clarity
+    plt.ylim(bottom=-0.5)
+
+    # 5. Save and Show
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, 'gap_analysis_scatter.png')
+    plt.savefig(output_path)
+    print(f"--- Gap analysis complete. Plot saved to {output_path} ---")
+
     if show_plot:
         plt.show()

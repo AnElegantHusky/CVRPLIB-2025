@@ -13,7 +13,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 2. AILSII Jar包路径 (假设在 bin 文件夹下)
 # JAR_NAME = "AILS-II_parallel_debug.jar"
-JAR_NAME = "AILSII_EoH.jar"
+JAR_NAME = "AILSII_omegaMax.jar"
 
 
 JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
@@ -22,19 +22,19 @@ JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
 INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 
 # 4. 结果输出根目录
-OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME)
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME).removesuffix('.jar')
 
 # 5. 硬编码的任务列表 (文件名, 时间限制秒)
 # 这些是根据你提供的 hgs 命令行提取的
 TARGET_TASKS = [
     ("XLTEST-n1048-k139.vrp", 2460),
-    # ("XLTEST-n2168-k625.vrp", 5160),
-    # ("XLTEST-n3101-k685.vrp", 7440),
-    # ("XLTEST-n4245-k164.vrp", 10140),
-    # ("XLTEST-n5174-k170.vrp", 12360),
-    # ("XLTEST-n5649-k365.vrp", 13500),
-    # ("XLTEST-n6034-k1234.vrp", 14460),
-    # ("XLTEST-n8575-k343.vrp", 20580)
+    ("XLTEST-n2168-k625.vrp", 5160),
+    ("XLTEST-n3101-k685.vrp", 7440),
+    ("XLTEST-n4245-k164.vrp", 10140),
+    ("XLTEST-n5174-k170.vrp", 12360),
+    ("XLTEST-n5649-k365.vrp", 13500),
+    ("XLTEST-n6034-k1234.vrp", 14460),
+    ("XLTEST-n8575-k343.vrp", 20580)
 ]
 
 # 6. 并行设置
@@ -97,7 +97,8 @@ def run_single_task(task: Tuple[str, int]):
         "-file", instance_path,
         "-rounded", "true",
         "-stoppingCriterion", "Time",
-        "-limit", str(time_limit)
+        "-limit", str(time_limit),
+        '-output', output_csv_path,
     ]
     # command = [
     #     "java", "-jar",
@@ -114,14 +115,14 @@ def run_single_task(task: Tuple[str, int]):
 
     try:
         # 4. 执行命令并重定向 stdout 到文件
-        with open(output_csv_path, 'w') as output_file:
-            subprocess.run(
-                command,
-                stdout=output_file,  # 将标准输出写入 .csv 文件
-                stderr=subprocess.PIPE,  # 捕获错误输出以便在日志显示
-                text=True,
-                check=True
-            )
+        # with open(output_csv_path, 'w') as output_file:
+        subprocess.run(
+            command,
+            # stdout=output_file,  # 将标准输出写入 .csv 文件
+            # stderr=subprocess.PIPE,  # 捕获错误输出以便在日志显示
+            text=True,
+            check=True
+        )
 
         # logging.info(f"{log_prefix} 完成。日志已保存至 {output_csv_path}")
 
