@@ -46,8 +46,6 @@ python run.py AILSII_continue.jar --start-idx 0 --end-idx 50
 
 python run.py AILSII_continue.jar --start-idx 50 --end-idx 100
 
-python run.py AILSII_continue.jar --start-idx 0 --end-idx 10
-
 ```
 
 [//]: # ()
