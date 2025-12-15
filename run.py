@@ -34,6 +34,11 @@ MAX_WORKERS = None
 
 # --- 配置结束 ---
 
+def removesuffix(text, suffix):
+    if suffix and text.endswith(suffix):
+        return text[:-len(suffix)]
+    return text
+
 
 def setup_logging():
     """配置日志系统，同时输出到文件和控制台"""
@@ -62,7 +67,7 @@ def get_command_args(method_path: str, instance_path: str, time_limit: int) -> O
         Optional[None]: 如果此方法未定义命令，返回None，将跳过执行
     """
 
-    instance_name = os.path.basename(instance_path).removesuffix('.vrp')
+    instance_name = removesuffix(str(os.path.basename(instance_path)), '.vrp')
 
     # 获取可执行文件的基本名称，用于判断
     method_name = os.path.basename(method_path)
