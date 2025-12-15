@@ -3,7 +3,7 @@
 # 编译
 ```
 sudo chmod +x ./scripts/*
-./scripts/compile.sh
+./scripts/AILS-II_continue.sh
 sudo chmod +x ./bin/* 
 ```
 
@@ -33,20 +33,22 @@ sudo chmod +x ./bin/*
 [//]: # (```)
 
 
-[//]: # (# 请在不同服务器上分别运行以下命令)
+# 请在不同服务器上分别运行以下命令
 
-[//]: # (```)
+```
 
-[//]: # (python run.py AILSII_origin.jar --start-idx 0 --end-idx 50)
+python run.py AILSII_continue.jar --start-idx 0 --end-idx 50
 
-[//]: # (```)
+```
 
 [//]: # ()
-[//]: # (```)
+```
 
-[//]: # (python run.py AILSII_origin.jar --start-idx 50 --end-idx 100)
+python run.py AILSII_continue.jar --start-idx 50 --end-idx 100
 
-[//]: # (```)
+python run.py AILSII_continue.jar --start-idx 0 --end-idx 10
+
+```
 
 [//]: # ()
 [//]: # (```)
@@ -90,22 +92,34 @@ sudo chmod +x ./bin/*
 
 [//]: # (```)
 
-# 请在不同服务器上分别运行以下代码
-```angular2html
-python timetest_ails2_origin.py
-```
+[//]: # (# 请在不同服务器上分别运行以下代码)
 
-```angular2html
-python timetest_ails2_deco.py
-```
+[//]: # (```angular2html)
 
-```angular2html
-python timetest_ails2_perturb1.py
-```
+[//]: # (python timetest_ails2_origin.py)
 
-```angular2html
-python timetest_ails2_perturb2.py
-```
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```angular2html)
+
+[//]: # (python timetest_ails2_deco.py)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```angular2html)
+
+[//]: # (python timetest_ails2_perturb1.py)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```angular2html)
+
+[//]: # (python timetest_ails2_perturb2.py)
+
+[//]: # (```)
 
 [//]: # (# 测试EoH版本，请在不同服务器上分别运行以下命令)
 
