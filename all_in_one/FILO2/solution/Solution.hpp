@@ -128,11 +128,11 @@ namespace cobra {
             bool is_first_route = true;
 
             for (auto route = get_first_route(); route != Solution::dummy_route; route = get_next_route(route)) {
-                if (!is_first_route) ss << ",";
+                if (!is_first_route) ss << ", ";
                 ss << "[";
                 bool is_first_customer = true;
                 for (auto customer = get_first_customer(route); customer != instance.get_depot(); customer = get_next_vertex(customer)) {
-                    if (!is_first_customer) ss << ",";
+                    if (!is_first_customer) ss << ", ";
                     ss << customer;
                     is_first_customer = false;
                 }

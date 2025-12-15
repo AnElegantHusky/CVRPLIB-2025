@@ -41,6 +41,7 @@ public class AILSII
 	Solution solution,referenceSolution,bestSolution;
 	List<Integer> initSolutionList;
     double startTime;
+    double crtRunningTime;
 	Instance instance;
 	Distance pairwiseDistance;
 	double bestF=Double.MAX_VALUE;
@@ -93,9 +94,10 @@ public class AILSII
 
         this.sharedDB = reader.getSharedDB();
         this.preUpdate = Instant.now();
-        this.updateInterval = 5;
+        this.updateInterval = 30;
 
         this.startTime = reader.getStartTime();
+        this.crtRunningTime = reader.getCrtRunningTime();
 
 		Config config=reader.getConfig();
 		this.optimal=reader.getBest();
@@ -184,7 +186,7 @@ public class AILSII
 
 			selectedPerturbation.getChosenOmega().setDistance(distanceLS);//update
 
-			if(acceptanceCriterion.acceptSolution(solution))
+			if(acceptanceCriterion.acceptSolution(solution, crtRunningTime))
 				referenceSolution.clone(solution);
 		}
 
@@ -198,7 +200,8 @@ public class AILSII
 
             bestSolution.clone(solution);
             iteratorMF = iterator;
-            timeAF = (double) (System.currentTimeMillis() - first) / 1000;
+//            timeAF = (double) (System.currentTimeMillis() - first) / 1000;
+            timeAF = ((double)System.currentTimeMillis() - this.startTime * 1000) / 1000;
 
             if (print) {
                 System.out.println("solution quality: " + bestF

@@ -188,7 +188,8 @@ def kill_process_tree(pid):
 
 def run_external_process(cmd):
     """通用的外部进程运行器"""
-    print(cmd)
+    # print(cmd)
+    print(' '.join(cmd))
     try:
         process = subprocess.Popen(
             cmd,
@@ -202,9 +203,19 @@ def run_external_process(cmd):
         print(f"[Exception] Failed to run {cmd[0]}: {e}")
 
 
+def update_cmd_arg(base_cmd, flag, value):
+    """通用的参数替换函数，替代 index 查找"""
+    cmd = base_cmd.copy()
+    try:
+        idx = cmd.index(flag)
+        cmd[idx + 1] = str(value)
+    except ValueError:
+        pass
+    return cmd
+
 # ================= 核心管理逻辑 =================
 
-def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_info):
+def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_info, start_time):
     """
     智能管理进程重启。
     process_dict: {'sisr': proc, 'ails': proc, ...}
@@ -214,12 +225,13 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
     survivor_name = best_info.get('algo_name')
 
     # 1. 终止非幸存者进程
-    for name, p in process_dict.items():
+    for name, p in list(process_dict.items()):
         if p and p.is_alive():
             if name == survivor_name:
                 continue
             kill_process_tree(p.pid)
             p.join(timeout=1)
+            del process_dict[name]
 
     # 2. 垃圾回收 (关键：防止内存泄漏)
     gc.collect()
@@ -227,6 +239,7 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
     # 3. 重启被终止的进程
     # --- AILS2 (Java) ---
     if not process_dict.get('ails2') or not process_dict['ails2'].is_alive():
+        cmd = update_cmd_arg(ails_template, "-crtRunningTime", time.time() - start_time)
         p = multiprocessing.Process(
             target=run_external_process,
             args=(ails_template,),
@@ -312,6 +325,7 @@ if __name__ == '__main__':
     dMin = 15
     gamma = 30
     varphi = 40
+    crtRunningTime = 0.
 
     # ails_cmd = [
     #     "java", "-classpath", java_cp, ails_main,  # 假设入口
@@ -340,6 +354,7 @@ if __name__ == '__main__':
         "-best", "0",
         "-initSolution", "None",
         "-limit", str(limit),  # second
+        "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
         "-dMin", str(dMin),
@@ -372,8 +387,9 @@ if __name__ == '__main__':
     process_dict = {'ails2': None, 'filo2': None, 'sisr': None}
 
     # 初始启动
-    manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, {})
+    manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, {}, start_time)
     time.sleep(3600) # warmup
+    # time.sleep(60) # warmup
 
     # 【优化2】文件监听循环
     try:
@@ -385,7 +401,7 @@ if __name__ == '__main__':
                 if global_best_info and crt_best_dist > global_best_info['score']:
                     print(global_best_info['algo_name'], global_best_info['score'])
                     crt_best_dist = global_best_info['score']
-                    manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, global_best_info)
+                    manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, global_best_info, start_time)
             except Exception as e:
                 # 4. 详细异常信息输出
                 exc_type, exc_value, exc_traceback = sys.exc_info()  # 获取完整异常信息

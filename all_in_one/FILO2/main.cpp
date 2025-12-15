@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
     cobra::Timer global_timer;
     double pre_update_time = get_current_timestamp();
-    double update_interval = 5.;
+    double update_interval = 30.;
 
 #ifdef VERBOSE
     cobra::Timer timer;

@@ -35,7 +35,7 @@ public class AcceptanceCriterion
 		this.executionMaximumLimit=executionMaximumLimit;
 	}
 	
-	public boolean acceptSolution(Solution solution)
+	public boolean acceptSolution(Solution solution, double crtRunningTime)
 	{
 		if(globalIterator==0)
 			ini=System.currentTimeMillis();
@@ -69,7 +69,8 @@ public class AcceptanceCriterion
 			case Time: 	if(globalIterator%numIterUpdate==0)
 								{
 									double maxTime=executionMaximumLimit;
-									double current=(double)(System.currentTimeMillis()-ini)/1000;
+//									double current=(double)(System.currentTimeMillis()-ini)/1000;
+									double current=crtRunningTime + (double)(System.currentTimeMillis()-ini)/1000;
 									double timePercentage=current/maxTime;
 									double total=(double)globalIterator/timePercentage;
 									
