@@ -48,9 +48,6 @@ public class InputParameters
 					case "-dMin": config.setDMin(getDMin(args[i+1]));break;
 					case "-gamma": config.setGamma(getGamma(args[i+1]));break;
 					case "-varphi": config.setVarphi(getVarphi(args[i+1]));break;
-					case "-etaMax": config.setEtaMax(getEtaMax(args[i+1]));break;
-					case "-etaMin": config.setEtaMin(getEtaMin(args[i+1]));break;
-					case "-epsilon": config.setEpsilon(getEpsilon(args[i+1]));break;
 				}
 			}
 		} 
@@ -253,36 +250,6 @@ public class InputParameters
 		return dMin;
 	}
 
-	private double getEpsilon(String text) {
-		try {
-			return Double.valueOf(text);
-		} catch (NumberFormatException e) {
-			System.err.println("The -epsilon parameter must contain a valid real value.");
-			return 0.01;          // 给个体面的默认值
-		}
-	}
-
-
-	private double getEtaMax(String text) {
-		try {
-			return Double.valueOf(text);
-		} catch (NumberFormatException e) {
-			System.err.println("The -etaMax parameter must contain a valid real value.");
-			return 1.0;          // 默认
-		}
-	}
-
-	private double getEtaMin(String text) {
-		try {
-			return Double.valueOf(text);
-		} catch (NumberFormatException e) {
-			System.err.println("The -etaMin parameter must contain a valid real value.");
-			return 0.01;         // 默认
-		}
-	}
-
-
-	
 	public StoppingCriterionType getStoppingCriterion(String text)
 	{
 		StoppingCriterionType stoppingCriterion=StoppingCriterionType.Time;
