@@ -26,8 +26,8 @@ LOG_FILE = os.path.join(SCRIPT_DIR, "log", "experiment_log.log")
 os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
 
 # 默认值：5天 (如果命令行未指定)
-# DEFAULT_TIME_LIMIT = 4 * 24 * 3600  # 单位为秒
-DEFAULT_TIME_LIMIT = 10  # 单位为秒
+DEFAULT_TIME_LIMIT = 4 * 24 * 3600  # 单位为秒
+# DEFAULT_TIME_LIMIT = 10  # 单位为秒
 
 MAX_WORKERS = None
 

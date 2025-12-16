@@ -15,14 +15,20 @@ mkdir bin
 
 ./scripts/AILS-II_origin.sh
 
-##################################################
-./scripts/AILS-II_perturbation1.sh
+./scripts/AILS-II_origin_wall.sh
+
+./scripts/AILS-II_parallel_v2.sh
+
+
 
 ##################################################
-./scripts/AILS-II_perturbation2.sh
+#./scripts/AILS-II_perturbation1.sh
 
 ##################################################
-./scripts/AILS-II_deco.sh
+#./scripts/AILS-II_perturbation2.sh
+
+##################################################
+#./scripts/AILS-II_deco.sh
 
 ##################################################
 #./scripts/AILS-II_EoH.sh
