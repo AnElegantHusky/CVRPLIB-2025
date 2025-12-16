@@ -22,6 +22,9 @@ public class InputParameters
 	private double best=0;
 	private Config config=new Config();
     private double startTime=0.;
+    private double crtRunningTime=0.;
+    private long updateInterval=5;
+    private double etaMax=1.;
 
 	public void readingInput(String[] args)
 	{
@@ -36,6 +39,9 @@ public class InputParameters
 					case "-rounded": rounded=getRound(args[i+1]);break;
                     case "-limit": limit=getLimit(args[i+1]);break;
                     case "-startTime": startTime=setStartTime(args[i+1]);break;
+                    case "-crtRunningTime": crtRunningTime=setCrtRunningTime(args[i+1]);break;
+                    case "-updateInterval": updateInterval=setUpdateInterval(args[i+1]);break;
+                    case "-etaMax": etaMax=setEtaMax(args[i+1]);break;
 					case "-best": best=getBest(args[i+1]);break;
 					case "-stoppingCriterion": config.setStoppingCriterionType(getStoppingCriterion(args[i+1]));break;
 					case "-dMax": config.setDMax(getDMax(args[i+1]));break;
@@ -133,6 +139,42 @@ public class InputParameters
             System.err.println("The -startTime parameter must contain a valid real value.");
         }
         return startTime;
+    }
+
+    public double setCrtRunningTime(String text)
+    {
+        try
+        {
+            crtRunningTime=Double.valueOf(text);
+        }
+        catch (java.lang.NumberFormatException e) {
+            System.err.println("The -crtRunningTime parameter must contain a valid real value.");
+        }
+        return crtRunningTime;
+    }
+
+    public long setUpdateInterval(String text)
+    {
+        try
+        {
+            updateInterval=Long.parseLong(text);
+        }
+        catch (java.lang.NumberFormatException e) {
+            System.err.println("The -updateInterval parameter must contain a valid integer value.");
+        }
+        return updateInterval;
+    }
+
+    public double setEtaMax(String text)
+    {
+        try
+        {
+            etaMax=Double.valueOf(text);
+        }
+        catch (java.lang.NumberFormatException e) {
+            System.err.println("The -etaMax parameter must contain a valid real value.");
+        }
+        return etaMax;
     }
 
 	public double getLimit(String text)
@@ -272,6 +314,12 @@ public class InputParameters
 	}
 
     public double getStartTime() { return startTime; }
+
+    public double getCrtRunningTime() { return crtRunningTime; }
+
+    public double getEtaMax() { return etaMax; }
+
+    public long getUpdateInterval() { return updateInterval; }
 
 	public double getBest() {
 		return best;

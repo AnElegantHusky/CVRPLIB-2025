@@ -128,11 +128,11 @@ namespace cobra {
             bool is_first_route = true;
 
             for (auto route = get_first_route(); route != Solution::dummy_route; route = get_next_route(route)) {
-                if (!is_first_route) ss << ",";
+                if (!is_first_route) ss << ", ";
                 ss << "[";
                 bool is_first_customer = true;
                 for (auto customer = get_first_customer(route); customer != instance.get_depot(); customer = get_next_vertex(customer)) {
-                    if (!is_first_customer) ss << ",";
+                    if (!is_first_customer) ss << ", ";
                     ss << customer;
                     is_first_customer = false;
                 }
@@ -1067,6 +1067,8 @@ namespace cobra {
 
         // Returns whether the solution is CVRP feasible. This is a very expensive procedure. Must only be used for debugging purposes.
         bool is_feasible(const bool error_on_load_infeasible = true, const bool verbose = false) const;
+
+        void copy_(const Solution &source) {this->copy(source);}
 
     private:
         // Performs a deep copy a the given source solution. It should not really be used too often if the instance is big.

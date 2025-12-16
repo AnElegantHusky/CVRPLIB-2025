@@ -117,6 +117,14 @@ class SharedDB:
 
             conn.execute("CREATE INDEX IF NOT EXISTS idx_algo_time ON solution_history (algo_name, runningtime);")
 
+            conn.execute("""
+                         CREATE TABLE IF NOT EXISTS survivor_stats
+                         (
+                             algo_name TEXT PRIMARY KEY,
+                             seed_count INTEGER DEFAULT 0
+                         );
+                         """)
+
             conn.commit()
 
     def get_status(self):
@@ -127,6 +135,28 @@ class SharedDB:
             row = conn.execute("SELECT score, algo_name, runningtime, solution FROM global_best WHERE id=1").fetchone()
             global_best_info = dict(row) if row else None
         return global_best_info
+
+    def log_survivor(self, algo_name):
+        """记录哪个算法提供了用于重置的初始解"""
+        if not algo_name: return
+        with self.get_connection() as conn:
+            conn.execute("""
+                INSERT INTO survivor_stats (algo_name, seed_count) 
+                VALUES (?, 1) 
+                ON CONFLICT(algo_name) DO UPDATE SET seed_count = seed_count + 1
+            """, (algo_name,))
+            conn.commit()
+
+    def print_stats(self):
+        """打印最终统计结果"""
+        with self.get_connection() as conn:
+            rows = conn.execute("SELECT algo_name, count FROM best_stats ORDER BY count DESC").fetchall()
+            print("\n" + "="*20 + " Final Statistics " + "="*20)
+            print(f"{'Algorithm Name':<30} | {'Best Solution Updates':<10}")
+            print("-" * 45)
+            for row in rows:
+                print(f"{row['algo_name']:<30} | {row['count']:<10}")
+            print("="*45 + "\n")
 
 # ================= 辅助函数 =================
 
@@ -139,12 +169,13 @@ def smart_decode(byte_data):
 
 # ================= Worker 封装 =================
 
-def run_sisr(data, vehicle_capcity, file, shared_db, start_time, max_running_time_min):
+def run_sisr(data, vehicle_capcity, file, shared_db, start_time, max_running_time_min, update_interval):
     sisr_cvrp(
         data, vehicle_capcity,
         inst_name=file,
         shared_db=shared_db,
         start_time=start_time,
+        update_interval=update_interval,
         n_iter=4_00000,  # 4_000
         max_running_time=max_running_time_min / 60,  # hour
         # max_running_time = 1/3600, # hour
@@ -188,7 +219,8 @@ def kill_process_tree(pid):
 
 def run_external_process(cmd):
     """通用的外部进程运行器"""
-    print(cmd)
+    # print(cmd)
+    print(' '.join(cmd))
     try:
         process = subprocess.Popen(
             cmd,
@@ -202,9 +234,19 @@ def run_external_process(cmd):
         print(f"[Exception] Failed to run {cmd[0]}: {e}")
 
 
+def update_cmd_arg(base_cmd, flag, value):
+    """通用的参数替换函数，替代 index 查找"""
+    cmd = base_cmd.copy()
+    try:
+        idx = cmd.index(flag)
+        cmd[idx + 1] = str(value)
+    except ValueError:
+        pass
+    return cmd
+
 # ================= 核心管理逻辑 =================
 
-def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_info):
+def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo_template, best_info, start_time):
     """
     智能管理进程重启。
     process_dict: {'sisr': proc, 'ails': proc, ...}
@@ -214,26 +256,50 @@ def manage_workers(process_dict, sisr_args, ails_template, filo_template, best_i
     survivor_name = best_info.get('algo_name')
 
     # 1. 终止非幸存者进程
-    for name, p in process_dict.items():
+    for name, p in list(process_dict.items()):
         if p and p.is_alive():
             if name == survivor_name:
                 continue
             kill_process_tree(p.pid)
             p.join(timeout=1)
+            del process_dict[name]
 
     # 2. 垃圾回收 (关键：防止内存泄漏)
     gc.collect()
 
-    # 3. 重启被终止的进程
-    # --- AILS2 (Java) ---
-    if not process_dict.get('ails2') or not process_dict['ails2'].is_alive():
-        p = multiprocessing.Process(
-            target=run_external_process,
-            args=(ails_template,),
-            name="ails2"
-        )
-        p.start()
-        process_dict['ails2'] = p
+    # # 3. 重启被终止的进程
+    # # --- AILS2 (Java) ---
+    # if not process_dict.get('ails2') or not process_dict['ails2'].is_alive():
+    #     cmd = update_cmd_arg(ails_template, "-crtRunningTime", time.time() - start_time)
+    #     p = multiprocessing.Process(
+    #         target=run_external_process,
+    #         args=(ails_template,),
+    #         name="ails2"
+    #     )
+    #     p.start()
+    #     process_dict['ails2'] = p
+
+    # 2. 重启/启动 AILS2 多实例
+    for config in ails_configs:
+        unique_name = config['name']
+
+        # 只有当该进程不存在或已死时才启动
+        if not process_dict.get(unique_name) or not process_dict[unique_name].is_alive():
+            # 构建该特定配置的命令
+            cmd = list(ails_common_args)  # 复制通用部分
+
+            # 添加/覆盖特定参数
+            cmd.extend(["-etaMax", str(config['etaMax'])])
+            cmd.extend(["-limit", str(config['limit'])])
+            cmd.extend(["-crtRunningTime", str(time.time() - start_time)])
+
+            p = multiprocessing.Process(
+                target=run_external_process,
+                args=(cmd,),
+                name=unique_name
+            )
+            p.start()
+            process_dict[unique_name] = p
 
     # --- FILO2 (C++) ---
     if not process_dict.get('filo2') or not process_dict['filo2'].is_alive():
@@ -307,11 +373,28 @@ if __name__ == '__main__':
 
     # 参数模版 (Template)
     # 将可变参数用占位符或在 build 函数中动态替换
-    limit = max_running_time_min * 60
+    # limit = max_running_time_min * 60
+    # limit_min = 5
+    update_interval_sec = 5
+    warmup_sec = 30
+    # etaMax = 1
     dMax = 30
     dMin = 15
     gamma = 30
     varphi = 40
+    crtRunningTime = 0.
+
+    # 1. 定义多种 AILS2 配置
+    ails_configs = [
+        {'name': f'AILS2_etaMax001_limit24h',   'etaMax': 0.01, 'limit': 24*60*60},
+        {'name': 'AILS2_etaMax005_limit24h',   'etaMax': 0.05, 'limit': 24*60*60},
+        {'name': 'AILS2_etaMax01_limit24h',   'etaMax': 0.1, 'limit': 24*60*60},
+        {'name': 'AILS2_etaMax1_limit10min',   'etaMax': 1, 'limit': 10*60},
+        {'name': 'AILS2_etaMax1_limit1h',   'etaMax': 1, 'limit': 1*60*60},
+        {'name': 'AILS2_etaMax1_limit2h',   'etaMax': 1, 'limit': 2*60*60},
+        {'name': 'AILS2_etaMax1_limit4h',   'etaMax': 1, 'limit': 4*60*60},
+        {'name': 'AILS2_etaMax1_limit8h',   'etaMax': 1, 'limit': 8*60*60},
+    ]
 
     # ails_cmd = [
     #     "java", "-classpath", java_cp, ails_main,  # 假设入口
@@ -339,13 +422,16 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(limit),  # second
+        # "-limit", str(limit_min * 60),  # second
+        "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
         "-dMin", str(dMin),
         "-gamma", str(gamma),
         "-varphi", str(varphi),
         "-startTime", str(start_time),
+        "-updateInterval", str(update_interval_sec),
+        # "-etaMax", str(etaMax),
     ]
 
     filo_exe_name = "filo2.exe" if os.name == "nt" else "filo2"
@@ -356,7 +442,8 @@ if __name__ == '__main__':
         instance_path.as_posix(),
         "--shared-db", shared_db_path.as_posix(),
         "--start-time", str(start_time),
-        "--max-running-seconds", str(max_running_time_min * 60)
+        "--max-running-seconds", str(max_running_time_min * 60),
+        "--update-interval-seconds", str(update_interval_sec)
     ]
 
     sisr_args = [
@@ -366,14 +453,16 @@ if __name__ == '__main__':
         str(shared_db_path),
         start_time,
         max_running_time_min,
+        update_interval_sec,
     ]
 
     # 进程字典
-    process_dict = {'ails2': None, 'filo2': None, 'sisr': None}
+    # process_dict = {'ails2': None, 'filo2': None, 'sisr': None}
+    process_dict = {}
 
     # 初始启动
-    manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, {})
-    time.sleep(3600) # warmup
+    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, {}, start_time)
+    time.sleep(warmup_sec) # warmup
 
     # 【优化2】文件监听循环
     try:
@@ -385,7 +474,10 @@ if __name__ == '__main__':
                 if global_best_info and crt_best_dist > global_best_info['score']:
                     print(global_best_info['algo_name'], global_best_info['score'])
                     crt_best_dist = global_best_info['score']
-                    manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, global_best_info)
+
+                    db_handler.log_survivor(global_best_info['algo_name'])
+
+                    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, global_best_info, start_time)
             except Exception as e:
                 # 4. 详细异常信息输出
                 exc_type, exc_value, exc_traceback = sys.exc_info()  # 获取完整异常信息

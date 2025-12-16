@@ -26,6 +26,7 @@
 #define DEFAULT_SHARED_DB ("")
 #define DEFAULT_START_TIME (1.0)
 #define DEFAULT_MAX_RUNNING_SEC (1.0)
+#define DEFAULT_UPDATE_INTERVAL_SEC (5.0)
 
 // Tokens.
 #define TOKEN_OUTPATH ("--outpath")
@@ -47,6 +48,7 @@
 #define TOKEN_SHARED_DB ("--shared-db")
 #define TOKEN_START_TIME ("--start-time")
 #define TOKEN_MAX_RUNNING_SEC ("--max-running-seconds")
+#define TOKEN_UPDATE_INTERVAL_SEC ("--update-interval-seconds")
 
 
 class Parameters {
@@ -140,6 +142,10 @@ public:
         return max_running_sec;
     }
 
+    inline double get_update_interval_sec() const {
+        return update_interval_sec;
+    }
+
     void set(const std::string& key, const std::string& value) {
 
         if (key == TOKEN_OUTPATH) {
@@ -179,6 +185,8 @@ public:
             start_time = std::stod(value);
         } else if (key == TOKEN_MAX_RUNNING_SEC) {
             max_running_sec = std::stof(value);
+        } else if (key == TOKEN_UPDATE_INTERVAL_SEC) {
+            update_interval_sec = std::stod(value);
         } else {
             std::cout << "Error: unknown argument '" << key << "'. Try --help for more information.\n";
             exit(EXIT_SUCCESS);
@@ -207,6 +215,7 @@ private:
     std::string shared_db = DEFAULT_SHARED_DB;
     double start_time = DEFAULT_START_TIME;
     double max_running_sec = DEFAULT_MAX_RUNNING_SEC;
+    double update_interval_sec = DEFAULT_UPDATE_INTERVAL_SEC;
 };
 
 
