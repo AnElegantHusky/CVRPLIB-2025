@@ -24,6 +24,7 @@ public class InputParameters
     private double startTime=0.;
     private double crtRunningTime=0.;
     private long updateInterval=5;
+    private double etaMax=1.;
 
 	public void readingInput(String[] args)
 	{
@@ -40,6 +41,7 @@ public class InputParameters
                     case "-startTime": startTime=setStartTime(args[i+1]);break;
                     case "-crtRunningTime": crtRunningTime=setCrtRunningTime(args[i+1]);break;
                     case "-updateInterval": updateInterval=setUpdateInterval(args[i+1]);break;
+                    case "-etaMax": etaMax=setEtaMax(args[i+1]);break;
 					case "-best": best=getBest(args[i+1]);break;
 					case "-stoppingCriterion": config.setStoppingCriterionType(getStoppingCriterion(args[i+1]));break;
 					case "-dMax": config.setDMax(getDMax(args[i+1]));break;
@@ -161,6 +163,18 @@ public class InputParameters
         return updateInterval;
     }
 
+    public double setEtaMax(String text)
+    {
+        try
+        {
+            etaMax=Double.valueOf(text);
+        }
+        catch (java.lang.NumberFormatException e) {
+            System.err.println("The -etaMax parameter must contain a valid real value.");
+        }
+        return etaMax;
+    }
+
 	public double getLimit(String text)
 	{
 		try 
@@ -270,6 +284,8 @@ public class InputParameters
     public double getStartTime() { return startTime; }
 
     public double getCrtRunningTime() { return crtRunningTime; }
+
+    public double getEtaMax() { return etaMax; }
 
     public long getUpdateInterval() { return updateInterval; }
 

@@ -101,6 +101,8 @@ public class AILSII
         this.updateInterval = reader.getUpdateInterval();
 
 		Config config=reader.getConfig();
+        config.setEtaMax(reader.getEtaMax());
+
 		this.optimal=reader.getBest();
 		this.executionMaximumLimit=reader.getTimeLimit();
 
@@ -222,7 +224,7 @@ public class AILSII
             String algoName = String.format("ails2_etaMax%.3f_stoppingTime%.2f", acceptanceCriterion.getEtaMax(), this.executionMaximumLimit);
             SQLiteHelper.saveBest(this.sharedDB, timeAF, recordSolution.f, recordSolution.toListString(), algoName);
             SQLiteHelper.saveAcceptanceParams(this.sharedDB, algoName, recordSolution.numRoutes, iterator, acceptanceCriterion.getEta(), selectedPerturbation.omega);
-            System.out.println(algoName);
+//            System.out.println(algoName);
             this.preUpdate = Instant.now();
         }
 	}

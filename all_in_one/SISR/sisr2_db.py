@@ -159,6 +159,7 @@ def sisr_cvrp(
         inst_name: str,
         shared_db: str,
         start_time,
+        update_interval,
         max_running_time: float,
         n_iter: int,
         n_iter_fleet: int = None,
@@ -783,7 +784,7 @@ def sisr_cvrp(
 
     temperature = init_T
     pre_update_time = time.time()
-    update_interval = 30
+    update_interval = update_interval
     # the algorithm
     for i_iter in range(n_iter):
         if obj_n_routes is not None and len(last_routes) > obj_n_routes and (i_iter + 1) % fleet_gap == 0:
