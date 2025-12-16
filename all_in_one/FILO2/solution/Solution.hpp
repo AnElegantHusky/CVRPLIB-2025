@@ -1068,6 +1068,8 @@ namespace cobra {
         // Returns whether the solution is CVRP feasible. This is a very expensive procedure. Must only be used for debugging purposes.
         bool is_feasible(const bool error_on_load_infeasible = true, const bool verbose = false) const;
 
+        void copy_(const Solution &source) {this->copy(source);}
+
     private:
         // Performs a deep copy a the given source solution. It should not really be used too often if the instance is big.
         void copy(const Solution &source) {

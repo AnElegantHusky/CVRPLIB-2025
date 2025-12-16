@@ -98,11 +98,69 @@ public class SQLiteHelper {
         }
     }
 
+    public static boolean saveAcceptanceParams(String dbPath, String algoName, int k, int iteration, double eta, double omega) {
+        String url = getConnectionString(dbPath); // 假设 getConnectionString 已定义
+
+        // 定义表结构：如果不存在则创建
+        String createTableSql = "CREATE TABLE IF NOT EXISTS acceptance_history (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "algo_name TEXT, " +
+                "global_iterator INTEGER, " +
+                "eta REAL, " +
+                "omega REAL, " +
+                "k INTEGER " +
+                ");";
+
+        // 插入数据的 SQL
+        String insertSql = "INSERT INTO acceptance_history" +
+                "(id, algo_name, global_iterator, eta, omega, k) " +
+                "VALUES (1, ?, ?, ?, ?, ?) " +
+                "ON CONFLICT(id) DO UPDATE SET " +
+                "algo_name = EXCLUDED.algo_name, " +
+                "global_iterator = EXCLUDED.global_iterator, " +
+                "eta = EXCLUDED.eta, " +
+                "omega = EXCLUDED.omega, " +
+                "k = EXCLUDED.k";
+
+        try (Connection conn = DriverManager.getConnection(url)) {
+            conn.setAutoCommit(false); // 开启事务
+
+            try (Statement stmt = conn.createStatement()) {
+                // 1. 确保表存在
+                stmt.execute(createTableSql);
+
+                // 2. 插入参数记录
+                try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
+                    pstmt.setString(1, algoName);
+                    pstmt.setInt(2, iteration);
+                    pstmt.setDouble(3, eta);
+                    pstmt.setDouble(4, omega);
+                    pstmt.setInt(5, k);
+
+                    pstmt.executeUpdate();
+                }
+
+                conn.commit();
+                return true;
+
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            System.err.println("[DB Error - AcceptanceCriterion] " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
     /**
      * 加载最优解
      * 使用 Gson 将 JSON 字符串反序列化为 Java List
      */
     public static Map<String, Object> loadBest(String dbPath) {
+
         String url = getConnectionString(dbPath);
         String sql = "SELECT score, solution, algo_name, runningtime FROM global_best WHERE id=1";
 

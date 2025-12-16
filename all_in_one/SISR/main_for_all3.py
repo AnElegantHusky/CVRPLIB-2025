@@ -139,12 +139,13 @@ def smart_decode(byte_data):
 
 # ================= Worker 封装 =================
 
-def run_sisr(data, vehicle_capcity, file, shared_db, start_time, max_running_time_min):
+def run_sisr(data, vehicle_capcity, file, shared_db, start_time, max_running_time_min, update_interval):
     sisr_cvrp(
         data, vehicle_capcity,
         inst_name=file,
         shared_db=shared_db,
         start_time=start_time,
+        update_interval=update_interval,
         n_iter=4_00000,  # 4_000
         max_running_time=max_running_time_min / 60,  # hour
         # max_running_time = 1/3600, # hour
@@ -321,6 +322,8 @@ if __name__ == '__main__':
     # 参数模版 (Template)
     # 将可变参数用占位符或在 build 函数中动态替换
     limit = max_running_time_min * 60
+    update_interval_sec = 5
+    warmup_sec = 30
     dMax = 30
     dMin = 15
     gamma = 30
@@ -361,6 +364,7 @@ if __name__ == '__main__':
         "-gamma", str(gamma),
         "-varphi", str(varphi),
         "-startTime", str(start_time),
+        "-updateInterval", str(update_interval_sec),
     ]
 
     filo_exe_name = "filo2.exe" if os.name == "nt" else "filo2"
@@ -371,7 +375,8 @@ if __name__ == '__main__':
         instance_path.as_posix(),
         "--shared-db", shared_db_path.as_posix(),
         "--start-time", str(start_time),
-        "--max-running-seconds", str(max_running_time_min * 60)
+        "--max-running-seconds", str(max_running_time_min * 60),
+        "--update-interval-seconds", str(update_interval_sec)
     ]
 
     sisr_args = [
@@ -381,6 +386,7 @@ if __name__ == '__main__':
         str(shared_db_path),
         start_time,
         max_running_time_min,
+        update_interval_sec,
     ]
 
     # 进程字典
@@ -388,8 +394,7 @@ if __name__ == '__main__':
 
     # 初始启动
     manage_workers(process_dict, sisr_args, ails_cmd, filo_cmd, {}, start_time)
-    time.sleep(3600) # warmup
-    # time.sleep(60) # warmup
+    time.sleep(warmup_sec) # warmup
 
     # 【优化2】文件监听循环
     try:

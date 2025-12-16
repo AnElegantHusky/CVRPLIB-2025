@@ -44,6 +44,8 @@ def plot_csv(file_path, instance_name, setting, save_path):
         # label=algo 用于自动生成图例
         plt.plot(subset['runningtime'], subset['score'], marker='o', linestyle='-', linewidth=2, label=algo, c=color_dict[algo])
 
+        print(setting, instance_name, algo, list(subset['score'])[-1], list(subset['runningtime'])[-1])
+
     # --- 3. 图表美化 ---
     plt.title(setting+'  '+instance_name, fontsize=14, fontweight='bold')  # 设置标题
     plt.xlabel('Running Time (seconds)', fontsize=12)  # 设置X轴标签
@@ -61,7 +63,8 @@ def plot_csv(file_path, instance_name, setting, save_path):
     plt.show()
 
 if __name__ == '__main__':
-    root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/CVRPLIB20251211')
+    # root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/CVRPLIB20251211')
+    root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/CVRPLIB20251215')
 
     for root, dirs, files in os.walk(root_path):
         if 'XLTEST' in root:
@@ -71,9 +74,9 @@ if __name__ == '__main__':
             setting = None
             save_path = Path(root).resolve().parent
             if 'noah125' == server:
-                setting = 'V3.1 5d'
+                setting = 'V3.2 5d'
             elif 'noah163' == server:
-                setting = 'V3.1 1d'
+                setting = 'V3.2 1d'
             if 'log_buffer' != log:
                 continue
             for file in files:

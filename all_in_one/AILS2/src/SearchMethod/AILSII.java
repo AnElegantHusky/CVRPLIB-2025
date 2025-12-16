@@ -38,7 +38,7 @@ import Solution.Solution;
 public class AILSII
 {
 	//----------Problema------------
-	Solution solution,referenceSolution,bestSolution;
+	Solution solution,referenceSolution,bestSolution,recordSolution;
 	List<Integer> initSolutionList;
     double startTime;
     double crtRunningTime;
@@ -94,10 +94,11 @@ public class AILSII
 
         this.sharedDB = reader.getSharedDB();
         this.preUpdate = Instant.now();
-        this.updateInterval = 30;
+        this.updateInterval = reader.getUpdateInterval();
 
         this.startTime = reader.getStartTime();
         this.crtRunningTime = reader.getCrtRunningTime();
+        this.updateInterval = reader.getUpdateInterval();
 
 		Config config=reader.getConfig();
 		this.optimal=reader.getBest();
@@ -109,6 +110,7 @@ public class AILSII
 		this.solution =new Solution(instance,config);
 		this.referenceSolution =new Solution(instance,config);
 		this.bestSolution =new Solution(instance,config);
+		this.recordSolution =new Solution(instance,config);
 		this.numIterUpdate=config.getGamma();
 
 		this.pairwiseDistance=new Distance();
@@ -202,6 +204,7 @@ public class AILSII
             iteratorMF = iterator;
 //            timeAF = (double) (System.currentTimeMillis() - first) / 1000;
             timeAF = ((double)System.currentTimeMillis() - this.startTime * 1000) / 1000;
+            recordSolution.clone(bestSolution);
 
             if (print) {
                 System.out.println("solution quality: " + bestF
@@ -212,12 +215,15 @@ public class AILSII
                         + " omega: " + deci.format(selectedPerturbation.omega)
                         + " time: " + timeAF
                 );
-                // .db output
-                if (Instant.now().getEpochSecond() - preUpdate.getEpochSecond() > this.updateInterval) {
-                    SQLiteHelper.saveBest(this.sharedDB, timeAF, bestF, bestSolution.toListString(), "ails2");
-                    this.preUpdate = Instant.now();
-                }
             }
+        }
+        // .db output
+        if (Instant.now().getEpochSecond() - preUpdate.getEpochSecond() > this.updateInterval && recordSolution.f >= bestF) {
+            String algoName = String.format("ails2_etaMax%.3f_stoppingTime%.2f", acceptanceCriterion.getEtaMax(), this.executionMaximumLimit);
+            SQLiteHelper.saveBest(this.sharedDB, timeAF, recordSolution.f, recordSolution.toListString(), algoName);
+            SQLiteHelper.saveAcceptanceParams(this.sharedDB, algoName, recordSolution.numRoutes, iterator, acceptanceCriterion.getEta(), selectedPerturbation.omega);
+            System.out.println(algoName);
+            this.preUpdate = Instant.now();
         }
 	}
 
@@ -229,7 +235,7 @@ public class AILSII
 									return true;
 								break;
 
-			case Time: 	if(bestF<=optimal||executionMaximumLimit<(System.currentTimeMillis()-first)/1000)
+			case Time: 	if(bestF<=optimal||this.crtRunningTime+executionMaximumLimit<(System.currentTimeMillis()-first)/1000)
 							return true;
 						break;
 		}

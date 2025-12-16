@@ -42,13 +42,13 @@ int main(int argc, char* argv[]) {
 
     cobra::Timer global_timer;
     double pre_update_time = get_current_timestamp();
-    double update_interval = 30.;
 
 #ifdef VERBOSE
     cobra::Timer timer;
 #endif
 
     const auto params = Parameters(argc, argv);
+    double update_interval = params.get_update_interval_sec();
 
 #ifdef VERBOSE
     std::cout << "Pre-processing the instance.\n";
@@ -66,6 +66,8 @@ int main(int argc, char* argv[]) {
     const cobra::Instance instance = std::move(maybe_instance.value());
 
     auto best_solution = cobra::Solution(instance, std::min(instance.get_vertices_num(), params.get_solution_cache_size()));
+    auto record_solution = cobra::Solution(instance, std::min(instance.get_vertices_num(), params.get_solution_cache_size()));
+
 
 #ifdef VERBOSE
     std::cout << "Running CLARKE&WRIGHT to generate an initial solution.\n";
@@ -332,17 +334,7 @@ int main(int argc, char* argv[]) {
             neighbor.apply_do_list1(best_solution);  // latest changes
             neighbor.clear_do_list2();
 
-            double crt_time = get_current_timestamp() - params.get_start_time();
-
-            if (get_current_timestamp() - pre_update_time > update_interval) {
-                cobra::Solution::save_best_to_db(
-                    params.get_shared_db(),
-                    "filo2",
-                    best_solution,
-                    crt_time
-                    );
-                pre_update_time = get_current_timestamp();
-            }
+            record_solution.copy_(best_solution);
 
             assert(best_solution == neighbor);
 
@@ -375,6 +367,18 @@ int main(int argc, char* argv[]) {
                     move_generators.set_active_percentage(gamma, gamma_vertices);
                 }
             }
+        }
+
+        double crt_time = get_current_timestamp() - params.get_start_time();
+
+        if (get_current_timestamp() - pre_update_time > update_interval &&  record_solution.get_cost() >= best_solution.get_cost()) {
+            cobra::Solution::save_best_to_db(
+                params.get_shared_db(),
+                "filo2",
+                record_solution,
+                crt_time
+                );
+            pre_update_time = get_current_timestamp();
         }
 
         const auto seed_shake_value = omega[walk_seed];
