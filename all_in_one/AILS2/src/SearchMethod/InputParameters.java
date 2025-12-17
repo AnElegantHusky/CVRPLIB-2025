@@ -48,7 +48,6 @@ public class InputParameters
 					case "-dMin": config.setDMin(getDMin(args[i+1]));break;
 					case "-gamma": config.setGamma(getGamma(args[i+1]));break;
 					case "-varphi": config.setVarphi(getVarphi(args[i+1]));break;
-					
 				}
 			}
 		} 
@@ -250,7 +249,7 @@ public class InputParameters
 		}
 		return dMin;
 	}
-	
+
 	public StoppingCriterionType getStoppingCriterion(String text)
 	{
 		StoppingCriterionType stoppingCriterion=StoppingCriterionType.Time;
