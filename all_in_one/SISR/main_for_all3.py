@@ -63,6 +63,9 @@ AILS2_PATH = ROOT_PATH / 'AILS2'
 # FILO2_PATH = ROOT_PATH / 'FILO2' / 'build'
 FILO2_PATH = ROOT_PATH / 'FILO2' / 'cmake-build-debug' # TODO
 
+# HGS-TV C++ 路径（根据你的实际构建目录调整）
+HGS_TV_PATH = ROOT_PATH / 'HGS-TV' / 'build'
+
 
 # ================= 数据库管理类 (DB Handler) =================
 
@@ -246,7 +249,7 @@ def update_cmd_arg(base_cmd, flag, value):
 
 # ================= 核心管理逻辑 =================
 
-def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo_template, best_info, start_time):
+def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo_template, hgs_template, best_info, start_time):
     """
     智能管理进程重启。
     process_dict: {'sisr': proc, 'ails': proc, ...}
@@ -310,6 +313,17 @@ def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo
         )
         p.start()
         process_dict['filo2'] = p
+
+    # --- HGS-TV (C++) ---
+    if hgs_template is not None:
+        if not process_dict.get('HGS-TV') or not process_dict['HGS-TV'].is_alive():
+            p = multiprocessing.Process(
+                target=run_external_process,
+                args=(hgs_template,),
+                name="HGS-TV"
+            )
+            p.start()
+            process_dict['HGS-TV'] = p
 
     # --- SISR ---
     if not process_dict.get('sisr') or not process_dict['sisr'].is_alive():
@@ -446,6 +460,22 @@ if __name__ == '__main__':
         "--update-interval-seconds", str(update_interval_sec)
     ]
 
+    # --- HGS-TV (C++) 命令 ---
+    hgs_exe_name = "hgs.exe" if os.name == "nt" else "hgs"
+    hgs_exe = HGS_TV_PATH / hgs_exe_name
+
+    hgs_cmd = [
+        str(hgs_exe),
+        instance_path.as_posix(),
+        "-sharedDB", shared_db_path.as_posix(),
+        "-startTime", str(start_time),
+        "-t", str(max_running_time_min * 60),
+        "-type", "Uchoa",
+        "-seed", "1",
+        "-deco", "BarycentreClustering",
+        "-updateInterval", str(update_interval_sec),
+    ]
+
     sisr_args = [
         data,
         vehicle_capacity,
@@ -457,11 +487,11 @@ if __name__ == '__main__':
     ]
 
     # 进程字典
-    # process_dict = {'ails2': None, 'filo2': None, 'sisr': None}
+    # process_dict = {'ails2': None, 'filo2': None, 'sisr': None, 'HGS-TV': None}
     process_dict = {}
 
-    # 初始启动
-    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, {}, start_time)
+    # 初始启动：同时启动 AILS2 / FILO2 / SISR / HGS-TV
+    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, {}, start_time)
     time.sleep(warmup_sec) # warmup
 
     # 【优化2】文件监听循环
@@ -477,7 +507,7 @@ if __name__ == '__main__':
 
                     db_handler.log_survivor(global_best_info['algo_name'])
 
-                    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, global_best_info, start_time)
+                    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, global_best_info, start_time)
             except Exception as e:
                 # 4. 详细异常信息输出
                 exc_type, exc_value, exc_traceback = sys.exc_info()  # 获取完整异常信息
