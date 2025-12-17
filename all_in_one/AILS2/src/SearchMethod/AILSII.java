@@ -38,7 +38,8 @@ import Solution.Solution;
 public class AILSII
 {
 	//----------Problema------------
-	Solution solution,referenceSolution,bestSolution,recordSolution;
+	Solution solution,referenceSolution,bestSolution;
+    boolean improved;
 	List<Integer> initSolutionList;
     double startTime;
     double crtRunningTime;
@@ -112,7 +113,7 @@ public class AILSII
 		this.solution =new Solution(instance,config);
 		this.referenceSolution =new Solution(instance,config);
 		this.bestSolution =new Solution(instance,config);
-		this.recordSolution =new Solution(instance,config);
+        this.improved=false;
 		this.numIterUpdate=config.getGamma();
 
 		this.pairwiseDistance=new Distance();
@@ -206,7 +207,7 @@ public class AILSII
             iteratorMF = iterator;
 //            timeAF = (double) (System.currentTimeMillis() - first) / 1000;
             timeAF = ((double)System.currentTimeMillis() - this.startTime * 1000) / 1000;
-            recordSolution.clone(bestSolution);
+            improved = true;
 
             if (print) {
                 System.out.println("solution quality: " + bestF
@@ -220,10 +221,11 @@ public class AILSII
             }
         }
         // .db output
-        if (Instant.now().getEpochSecond() - preUpdate.getEpochSecond() > this.updateInterval && recordSolution.f >= bestF) {
+        if (Instant.now().getEpochSecond() - preUpdate.getEpochSecond() > this.updateInterval && improved) {
+            improved = false;
             String algoName = String.format("ails2_etaMax%.3f_stoppingTime%.2f", acceptanceCriterion.getEtaMax(), this.executionMaximumLimit);
-            SQLiteHelper.saveBest(this.sharedDB, timeAF, recordSolution.f, recordSolution.toListString(), algoName);
-            SQLiteHelper.saveAcceptanceParams(this.sharedDB, algoName, recordSolution.numRoutes, iterator, acceptanceCriterion.getEta(), selectedPerturbation.omega);
+            SQLiteHelper.saveBest(this.sharedDB, timeAF, bestSolution.f, bestSolution.toListString(), algoName);
+//            SQLiteHelper.saveAcceptanceParams(this.sharedDB, algoName, bestSolution.numRoutes, iterator, acceptanceCriterion.getEta(), selectedPerturbation.omega);
 //            System.out.println(algoName);
             this.preUpdate = Instant.now();
         }

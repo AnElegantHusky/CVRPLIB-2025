@@ -785,6 +785,8 @@ def sisr_cvrp(
     temperature = init_T
     pre_update_time = time.time()
     update_interval = update_interval
+    improved = False
+
     # the algorithm
     for i_iter in range(n_iter):
         if obj_n_routes is not None and len(last_routes) > obj_n_routes and (i_iter + 1) % fleet_gap == 0:
@@ -809,13 +811,7 @@ def sisr_cvrp(
             if len(current_routes) < len(best_routes) or current_distance < best_distance:
                 best_distance = current_distance
                 best_routes = current_routes
-                if time.time() - pre_update_time > update_interval:
-                    save_best(db_path=shared_db,
-                              running_time=crt_running_time,
-                              score=int(best_distance),
-                              solution=best_routes,
-                              algo_name='sisr')
-                    pre_update_time = time.time()
+                improved = True
 
                 if crt_running_time / 3600 >= max_running_time:
                     return best_distance, best_routes
@@ -824,6 +820,16 @@ def sisr_cvrp(
                     break
             last_distance = current_distance
             last_routes = current_routes
+
+        if (time.time() - pre_update_time > update_interval) and improved:
+            improved = False
+            save_best(db_path=shared_db,
+                      running_time=crt_running_time,
+                      score=int(best_distance),
+                      solution=best_routes,
+                      algo_name='sisr')
+            pre_update_time = time.time()
+
 
         # Equation (1)
         temperature *= alpha_T  # Basically temperature = previous_temperature X c

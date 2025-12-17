@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 
     auto best_solution = cobra::Solution(instance, std::min(instance.get_vertices_num(), params.get_solution_cache_size()));
     auto record_solution = cobra::Solution(instance, std::min(instance.get_vertices_num(), params.get_solution_cache_size()));
-
+    bool record_improved = false;
 
 #ifdef VERBOSE
     std::cout << "Running CLARKE&WRIGHT to generate an initial solution.\n";
@@ -82,6 +82,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Loaded from db!" << std::endl;
     }
     // cobra::clarke_and_wright(instance, best_solution, params.get_cw_lambda(), params.get_cw_neighbors());
+    record_solution.copy_(best_solution);
 
 #ifdef VERBOSE
     std::cout << "Done in " << timer.elapsed_time<std::chrono::seconds>() << " seconds.\n";
@@ -137,6 +138,7 @@ int main(int argc, char* argv[]) {
 #endif
 
         best_solution = routemin(instance, best_solution, rand_engine, move_generators, kmin, routemin_iterations, tolerance);
+        record_solution.copy_(best_solution);
 
 #ifdef VERBOSE
         std::cout << "Final solution: obj = " << best_solution.get_cost() << ", n. routes = " << best_solution.get_routes_num() << "\n";
@@ -335,6 +337,7 @@ int main(int argc, char* argv[]) {
             neighbor.clear_do_list2();
 
             record_solution.copy_(best_solution);
+            record_improved = true;
 
             assert(best_solution == neighbor);
 
@@ -371,7 +374,8 @@ int main(int argc, char* argv[]) {
 
         double crt_time = get_current_timestamp() - params.get_start_time();
 
-        if (get_current_timestamp() - pre_update_time > update_interval &&  record_solution.get_cost() >= best_solution.get_cost()) {
+        if (get_current_timestamp() - pre_update_time > update_interval && record_improved) {
+            record_improved = false;
             cobra::Solution::save_best_to_db(
                 params.get_shared_db(),
                 "filo2",

@@ -375,8 +375,8 @@ if __name__ == '__main__':
     # 将可变参数用占位符或在 build 函数中动态替换
     # limit = max_running_time_min * 60
     # limit_min = 5
-    update_interval_sec = 5
-    warmup_sec = 30
+    update_interval_sec = 10
+    warmup_sec = 60
     # etaMax = 1
     dMax = 30
     dMin = 15
