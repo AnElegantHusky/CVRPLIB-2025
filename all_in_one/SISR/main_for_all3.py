@@ -343,7 +343,9 @@ if __name__ == '__main__':
     # python main_for_all3.py XLTEST-n1048-k139 20
     parser = argparse.ArgumentParser()
     parser.add_argument('instance_name', help='Instance name.')
-    parser.add_argument('running_time', type=int, help='Max running time in minutes.')
+    parser.add_argument('running_time_min', type=int, help='Max running time in minutes.')
+    parser.add_argument('warmup_sec', type=int, help='Warmup time in seconds.')
+    parser.add_argument('update_interval_sec', type=int, help='Update interval in seconds.')
     args = parser.parse_args()
 
     # 1. 强制 Spawn
@@ -383,14 +385,14 @@ if __name__ == '__main__':
     start_time = time.time()
     # max_running_time_min = inst_size // 25
     # max_running_time_min = 20  # TODO: ONLY FOR DEBUG
-    max_running_time_min = args.running_time
+    max_running_time_min = args.running_time_min
 
     # 参数模版 (Template)
     # 将可变参数用占位符或在 build 函数中动态替换
     # limit = max_running_time_min * 60
     # limit_min = 5
-    update_interval_sec = 10
-    warmup_sec = 60
+    update_interval_sec = args.update_interval_sec
+    warmup_sec = args.warmup_sec
     # etaMax = 1
     dMax = 30
     dMin = 15
@@ -429,7 +431,7 @@ if __name__ == '__main__':
 
     ails_cmd = [
         "java",
-        "--enable-native-access=ALL-UNNAMED", # handle the warning
+        # "--enable-native-access=ALL-UNNAMED", # handle the warning
         "-jar", java_cp,
         "-file", instance_path.as_posix(),
         "-sharedDB", shared_db_path.as_posix(),
