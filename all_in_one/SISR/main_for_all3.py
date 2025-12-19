@@ -393,8 +393,7 @@ if __name__ == '__main__':
     # limit_min = 5
     update_interval_sec = args.update_interval_sec
     warmup_sec = args.warmup_sec
-    db_check_interval_sec = 15
-    assert db_check_interval_sec <= update_interval_sec // 2
+    db_check_interval_sec = min(15, update_interval_sec/2)
     # etaMax = 1
     dMax = 30
     dMin = 15
