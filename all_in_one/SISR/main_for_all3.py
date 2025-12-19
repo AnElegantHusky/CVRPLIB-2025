@@ -393,6 +393,8 @@ if __name__ == '__main__':
     # limit_min = 5
     update_interval_sec = args.update_interval_sec
     warmup_sec = args.warmup_sec
+    db_check_interval_sec = 15
+    assert db_check_interval_sec <= update_interval_sec // 2
     # etaMax = 1
     dMax = 30
     dMin = 15
@@ -525,7 +527,7 @@ if __name__ == '__main__':
                 )
                 # 打印详细报错（也可写入日志文件）
                 print(f"[Monitor Error] {error_detail}")
-            time.sleep(1)  # 轮询间隔，不要太频繁
+            time.sleep(db_check_interval_sec)  # 轮询间隔，不要太频繁
 
     except KeyboardInterrupt:
         print("Stopping...")
