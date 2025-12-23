@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 import re
 
 def plot_search_curves(instance_name, algorithm_names, base_dir='.', output_dir='.', show_plot=False):
@@ -326,3 +327,347 @@ def plot_gap_scatter(instance_names, algorithm_names, base_dir='.', output_dir='
 
     if show_plot:
         plt.show()
+
+
+def plot_gap_scatter_from_sol(instance_names, algorithm_names, base_dir='.', output_dir='.', show_plot=False,
+                              point_size=60, point_alpha=0.7):
+    """
+    绘制基于 .sol 文件中最终 Cost 的 Gap 散点图。
+
+    参数:
+    instance_names (list): 实例名称列表 (如 ['CVRP-n100-k10', ...])
+    algorithm_names (list): 算法名称列表
+    base_dir (str): 数据根目录
+    output_dir (str): 图片保存目录
+    show_plot (bool): 是否在运行后直接显示图片
+    point_size (int): 散点大小 (默认 60)
+    point_alpha (float): 散点透明度 (0.0 - 1.0, 默认 0.7)
+    """
+
+    results = []
+
+    print("--- 开始绘制 Gap 分析 (基于 .sol 文件) ---")
+
+    # 1. 遍历所有实例
+    for instance in instance_names:
+        # 尝试从实例名中提取客户数量 (假设格式包含 -n数字-)
+        match = re.search(r'-n(\d+)-', instance)
+        if match:
+            customer_num = int(match.group(1))
+        else:
+            print(f"警告: 无法从实例名 {instance} 中提取客户数量，跳过此实例。")
+            continue
+
+        instance_best_values = {}
+
+        # 2. 遍历该实例下的所有算法目录
+        for method in algorithm_names:
+            method_dir = os.path.join(base_dir, method)
+            if not os.path.isdir(method_dir):
+                continue
+
+            # 查找匹配的 .sol 文件
+            file_path = None
+            if os.path.exists(method_dir):
+                for file in os.listdir(method_dir):
+                    if file.endswith('.sol') and instance in file:
+                        file_path = os.path.join(method_dir, file)
+                        break
+
+            # 读取 .sol 文件并解析 Cost
+            if file_path:
+                try:
+                    fitness_val = None
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        lines = f.readlines()
+                        # 倒序查找，因为结果通常在最后
+                        for line in reversed(lines):
+                            if line.strip().startswith("Cost"):
+                                # 假设格式为 "Cost 1234.56"
+                                parts = line.strip().split()
+                                if len(parts) >= 2:
+                                    fitness_val = float(parts[1])
+                                    break
+
+                    if fitness_val is not None:
+                        instance_best_values[method] = fitness_val
+                    else:
+                        print(f"警告: {file_path} 中未找到 'Cost' 行。")
+
+                except Exception as e:
+                    print(f"错误: 读取 {file_path} 时发生异常: {e}")
+
+        # 3. 计算 Gap (相对百分比误差)
+        if instance_best_values:
+            # 找出当前实例在所有算法中的最小值 (Best Known)
+            min_fitness_in_instance = min(instance_best_values.values())
+
+            for method, val in instance_best_values.items():
+                if min_fitness_in_instance == 0:
+                    gap = 0.0
+                else:
+                    gap = ((val - min_fitness_in_instance) / min_fitness_in_instance) * 100
+
+                results.append({
+                    'customer_num': customer_num,
+                    'method': method,
+                    'gap': gap,
+                    'instance': instance
+                })
+
+    # 4. 绘图准备
+    if not results:
+        print("未找到有效数据，无法绘制 Gap 图。")
+        return
+
+    df = pd.DataFrame(results)
+    # 按客户数量排序 X 轴
+    df = df.sort_values(by='customer_num')
+
+    plt.figure(figsize=(12, 7))
+
+    # 5. 绘制散点图
+    for method in algorithm_names:
+        method_df = df[df['method'] == method]
+        if not method_df.empty:
+            plt.scatter(
+                method_df['customer_num'],
+                method_df['gap'],
+                label=method,
+                s=point_size,  # 使用自定义大小
+                alpha=point_alpha,  # 使用自定义透明度
+                edgecolors='w',  # 白色边缘增加对比度
+                linewidths=0.8
+            )
+
+    plt.xlabel('Number of Customers')
+    plt.ylabel('Gap (%)')
+    plt.title('Algorithm Gap Analysis by Instance Scale (.sol Files)')
+    plt.legend(title='Method')
+    plt.grid(True, linestyle='--', alpha=0.5)
+
+    # 为了美观，让 Y 轴稍微往下延伸一点点
+    plt.ylim(bottom=-0.5)
+
+    # 6. 保存输出
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, 'gap_analysis_scatter_sol.png')
+    plt.savefig(output_path, dpi=300)  # dpi=300 提高保存清晰度
+    print(f"--- Gap 分析完成. 图像已保存至 {output_path} ---")
+
+    if show_plot:
+        plt.show()
+
+
+def get_rank_statistics(instance_names, algorithm_names, base_dir='.', output_csv=None):
+    """
+    统计每个算法在所有实例中获得各名次的次数。
+
+    逻辑：
+    1. 读取所有实例下所有算法的 Fitness (基于 .sol 文件)。
+    2. 对每个实例内部的算法进行排名 (数值越小排名越高)。
+       * 采用 'dense' 排名策略: 如果 A=100, B=100, C=110，则 A和B并列第1，C为第2。
+    3. 统计每个算法获得 "Rank 1", "Rank 2" ... 的总次数。
+
+    参数:
+    output_csv (str, optional): 如果提供路径，将结果表格保存为 CSV 文件。
+
+    返回:
+    pd.DataFrame: 包含排名统计的表格。行是算法名，列是名次(1, 2, 3...)。
+    """
+
+    print("--- 开始统计算法排名情况 (基于 .sol 文件) ---")
+
+    # 用于存储原始数据的列表: [{'Instance': 'xx', 'Method': 'algo1', 'Fitness': 123}, ...]
+    raw_data = []
+
+    # 1. 数据收集 (复用之前的读取逻辑)
+    for instance in instance_names:
+        for method in algorithm_names:
+            method_dir = os.path.join(base_dir, method)
+            if not os.path.isdir(method_dir):
+                continue
+
+            # 查找 .sol 文件
+            file_path = None
+            if os.path.exists(method_dir):
+                for file in os.listdir(method_dir):
+                    if file.endswith('.sol') and instance in file:
+                        file_path = os.path.join(method_dir, file)
+                        break
+
+            # 解析 Cost
+            if file_path:
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        lines = f.readlines()
+                        for line in reversed(lines):
+                            if line.strip().startswith("Cost"):
+                                parts = line.strip().split()
+                                if len(parts) >= 2:
+                                    fitness = float(parts[1])
+                                    raw_data.append({
+                                        'Instance': instance,
+                                        'Method': method,
+                                        'Fitness': fitness
+                                    })
+                                    break
+                except Exception:
+                    pass  # 读取失败则忽略，视为该算法在该实例无结果
+
+    if not raw_data:
+        print("未找到有效数据。")
+        return pd.DataFrame()
+
+    # 2. 转换为 DataFrame 进行处理
+    df_raw = pd.DataFrame(raw_data)
+
+    # 3. 计算排名
+    # group_obj 是按 Instance 分组后的对象
+    # transform 保持行数不变，直接在原表后追加一列 Rank
+    # method='dense' 意味着: 100, 100, 110 -> Rank 1, 1, 2 (而不是 1, 1, 3)
+    df_raw['Rank'] = df_raw.groupby('Instance')['Fitness'].rank(method='dense', ascending=True)
+
+    # 将 Rank 转为整数 (1.0 -> 1)
+    df_raw['Rank'] = df_raw['Rank'].astype(int)
+
+    # 4. 生成交叉表 (Crosstab) 统计频次
+    # index=算法名, columns=名次, values=出现次数(计数)
+    rank_table = pd.crosstab(df_raw['Method'], df_raw['Rank'])
+
+    # 5. 美化表格
+    # 补全可能缺失的列（比如只有 Rank 1 和 3，没有 2，虽然 dense 模式下很少见，但防万一）
+    # 并添加列名前缀，变成 "Rank 1", "Rank 2"
+    rank_table.columns = [f'Rank {c}' for c in rank_table.columns]
+
+    # 6. 保存或打印
+    print("\n--- 排名统计表 (Rank Statistics) ---")
+    print(rank_table)
+
+    if output_csv:
+        rank_table.to_csv(output_csv)
+        print(f"表格已保存至: {output_csv}")
+
+    return rank_table
+
+
+def get_average_gap_statistics(instance_names, algorithm_names, base_dir='.', output_csv=None, baseline=None):
+    """
+    计算每个算法在所有实例上的平均 Gap (%)。
+
+    逻辑：
+    1. 遍历每个实例，读取所有算法的 Cost。
+    2. 确定基准值 (Reference Value):
+       - 如果 baseline 为 None: 取当前实例所有算法中的最小值 (Best Found)。
+       - 如果 baseline 为 str: 取对应算法在该实例下的 Cost。
+       - 如果 baseline 为 dict: 取 dict[instance_name] 的值。
+    3. 计算每个算法的 Gap = (Cost - Reference) / Reference * 100。
+    4. 统计平均值。
+
+    参数:
+    baseline (str or dict, optional):
+        - str: 指定某个算法名称作为基准 (需在 algorithm_names 中)。
+        - dict: {instance_name: cost} 指定每个实例的已知最优解。
+        - None: 默认模式，使用当前对比组中的最小值作为基准。
+    """
+    print(f"--- 开始计算平均 Gap (基于 .sol 文件) | Baseline模式: {baseline if baseline else 'Best Found'} ---")
+
+    gap_data = []
+
+    # 1. 遍历所有实例
+    for instance in instance_names:
+        instance_costs = {}
+
+        # 2. 读取该实例下所有算法的 Cost
+        for method in algorithm_names:
+            method_dir = os.path.join(base_dir, method)
+            file_path = None
+
+            # 查找 .sol 文件
+            if os.path.isdir(method_dir):
+                for file in os.listdir(method_dir):
+                    if file.endswith('.sol') and instance in file:
+                        file_path = os.path.join(method_dir, file)
+                        break
+
+            # 解析 Cost
+            if file_path:
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        lines = f.readlines()
+                        # 倒序查找 Cost，防止文件头有干扰信息
+                        for line in reversed(lines):
+                            if line.strip().startswith("Cost"):
+                                parts = line.strip().split()
+                                if len(parts) >= 2:
+                                    instance_costs[method] = float(parts[1])
+                                    break
+                except Exception:
+                    pass
+
+        # 3. 确定基准值 (Base Value)
+        if not instance_costs:
+            continue
+
+        base_val = None
+
+        # --- 新增逻辑: 确定 Base Value ---
+        if baseline is None:
+            # 默认逻辑: 取当前发现的最小值
+            base_val = min(instance_costs.values())
+
+        elif isinstance(baseline, str):
+            # 模式: 指定某个算法作为基准
+            if baseline in instance_costs:
+                base_val = instance_costs[baseline]
+            else:
+                # 如果当前实例下，基准算法没有解，则跳过该实例的统计，或者您也可以选择报错
+                # print(f"警告: 实例 {instance} 缺少基准算法 {baseline} 的结果，跳过。")
+                continue
+
+        elif isinstance(baseline, dict):
+            # 模式: 传入了外部的 BKS 字典
+            base_val = baseline.get(instance)
+            if base_val is None:
+                continue
+
+        # 4. 计算当前实例的 Gap
+        # 必须确保 base_val 有效且不为 0 (防止除以0错误)
+        if base_val is not None:
+            for method, cost in instance_costs.items():
+                if base_val == 0:
+                    # 如果基准值为0，且cost也是0，gap为0；否则无法计算(无穷大)
+                    gap = 0.0 if cost == 0 else np.inf
+                else:
+                    # 公式: (Cost - Base) / Base * 100
+                    gap = ((cost - base_val) / base_val) * 100
+
+                gap_data.append({
+                    'Method': method,
+                    'Gap': gap,
+                    'Instance': instance
+                })
+
+    if not gap_data:
+        print("未找到有效数据或无法建立基准。")
+        return pd.DataFrame()
+
+    # 5. 汇总计算平均值
+    df_gaps = pd.DataFrame(gap_data)
+
+    # 按方法分组，计算 Gap 的平均值
+    df_avg = df_gaps.groupby('Method')['Gap'].mean().reset_index()
+    df_avg.rename(columns={'Gap': 'Average Gap (%)'}, inplace=True)
+
+    # 按平均 Gap 从小到大排序
+    df_avg = df_avg.sort_values(by='Average Gap (%)')
+
+    # 6. 输出结果
+    print("\n--- 平均 Gap 统计表 ---")
+    print(df_avg)
+
+    if output_csv:
+        df_avg.to_csv(output_csv, index=False)
+        print(f"统计表已保存至: {output_csv}")
+
+    return df_avg
