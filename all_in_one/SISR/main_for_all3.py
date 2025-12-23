@@ -256,12 +256,15 @@ def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo
     best_info: {'algo': 'algo_name', 'sol': [...], 'dist': 123.4}
     """
 
-    survivor_name = best_info.get('algo_name')
+    survivor_name_list = [
+        best_info.get('algo_name'),
+        'AILS2',
+    ]
 
     # 1. 终止非幸存者进程
     for name, p in list(process_dict.items()):
         if p and p.is_alive():
-            if name == survivor_name:
+            if name in survivor_name_list:
                 continue
             kill_process_tree(p.pid)
             p.join(timeout=1)
@@ -326,15 +329,15 @@ def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo
             process_dict['HGS-TV'] = p
 
     # --- SISR ---
-    if not process_dict.get('sisr') or not process_dict['sisr'].is_alive():
-        # 更新参数（这里需要根据你的实际 sisr 函数签名调整）
-        p = multiprocessing.Process(
-            target=run_sisr,
-            args=(*sisr_args,),
-            name="sisr"
-        )
-        p.start()
-        process_dict['sisr'] = p
+    # if not process_dict.get('sisr') or not process_dict['sisr'].is_alive():
+    #     # 更新参数（这里需要根据你的实际 sisr 函数签名调整）
+    #     p = multiprocessing.Process(
+    #         target=run_sisr,
+    #         args=(*sisr_args,),
+    #         name="sisr"
+    #     )
+    #     p.start()
+    #     process_dict['sisr'] = p
 
 
 # ================= 主程序入口 =================
@@ -403,14 +406,18 @@ if __name__ == '__main__':
 
     # 1. 定义多种 AILS2 配置
     ails_configs = [
+        {'name': f'AILS2', 'etaMax': 1, 'limit': 24 * 60 * 60},
+
+        {'name': f'AILS2_etaMax0005_limit24h', 'etaMax': 0.005, 'limit': 24*60*60},
         {'name': f'AILS2_etaMax001_limit24h',   'etaMax': 0.01, 'limit': 24*60*60},
+        {'name': f'AILS2_etaMax002_limit24h', 'etaMax': 0.02, 'limit': 24*60*60},
         {'name': 'AILS2_etaMax005_limit24h',   'etaMax': 0.05, 'limit': 24*60*60},
-        {'name': 'AILS2_etaMax01_limit24h',   'etaMax': 0.1, 'limit': 24*60*60},
-        {'name': 'AILS2_etaMax1_limit10min',   'etaMax': 1, 'limit': 10*60},
+        # {'name': 'AILS2_etaMax01_limit24h',   'etaMax': 0.1, 'limit': 24*60*60},
+        # {'name': 'AILS2_etaMax1_limit10min',   'etaMax': 1, 'limit': 10*60},
         {'name': 'AILS2_etaMax1_limit1h',   'etaMax': 1, 'limit': 1*60*60},
         {'name': 'AILS2_etaMax1_limit2h',   'etaMax': 1, 'limit': 2*60*60},
         {'name': 'AILS2_etaMax1_limit4h',   'etaMax': 1, 'limit': 4*60*60},
-        {'name': 'AILS2_etaMax1_limit8h',   'etaMax': 1, 'limit': 8*60*60},
+        # {'name': 'AILS2_etaMax1_limit8h',   'etaMax': 1, 'limit': 8*60*60},
     ]
 
     # ails_cmd = [
