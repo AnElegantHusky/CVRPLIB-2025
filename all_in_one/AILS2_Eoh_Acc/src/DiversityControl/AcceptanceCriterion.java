@@ -172,4 +172,13 @@ public class AcceptanceCriterion {
     public void setEta(double eta) {
         this.threshold = Math.max(this.minThreshold, Math.min(eta, this.maxThreshold));
     }
+
+    /**
+     * Returns the maximum acceptance threshold (etaMax), which is the upper bound for the threshold.
+     *
+     * @return The maximum threshold value.
+     */
+    public double getEtaMax() {
+        return this.maxThreshold;
+    }
 }
