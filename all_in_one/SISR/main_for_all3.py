@@ -56,10 +56,28 @@ java_cp_list = [
 
 java_cp = os.pathsep.join(str(p) for p in java_cp_list)
 
+java_cp_eoh_acc_list = [
+    ROOT_PATH / 'AILS2_Eoh_Acc' / 'target' / 'AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar',      # TODO
+
+    # ROOT_PATH / 'AILS2' / 'target' / 'classes',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'commons-csv-1.10.0.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.10.2.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.14.0.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'commons-io-2.15.1.jar',
+]
+
+java_cp_eoh_acc = os.pathsep.join(str(p) for p in java_cp_list)         # TODO
+
+
+
+
 ails_main = "SearchMethod.AILSII"
 
 # Java/C++ 路径配置 (建议放入配置文件或环境变量)
 AILS2_PATH = ROOT_PATH / 'AILS2'
+
+AILS2_EoH_ACC_PATH = ROOT_PATH / 'AILS2_Eoh_Acc'        # TODO 1 增加新方法目录
+
 # FILO2_PATH = ROOT_PATH / 'FILO2' / 'build'
 FILO2_PATH = ROOT_PATH / 'FILO2' / 'cmake-build-debug' # TODO
 
@@ -249,7 +267,7 @@ def update_cmd_arg(base_cmd, flag, value):
 
 # ================= 核心管理逻辑 =================
 
-def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo_template, hgs_template, best_info, start_time):
+def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo_template, hgs_template, ails_eoh_acc_template, best_info, start_time):
     """
     智能管理进程重启。
     process_dict: {'sisr': proc, 'ails': proc, ...}
@@ -306,6 +324,16 @@ def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo
             )
             p.start()
             process_dict[unique_name] = p
+
+    if not process_dict.get('ails2_eoh_acc') or not process_dict['ails2_eoh_acc'].is_alive():       # TODO:
+        # 构建该特定配置的命令
+        p = multiprocessing.Process(
+            target=run_external_process,
+            args=(ails_eoh_acc_template,),
+            name='ails2_eoh_acc'
+        )
+        p.start()
+        process_dict['ails2_eoh_acc'] = p
 
     # --- FILO2 (C++) ---
     if not process_dict.get('filo2') or not process_dict['filo2'].is_alive():
@@ -458,6 +486,26 @@ if __name__ == '__main__':
         # "-etaMax", str(etaMax),
     ]
 
+    ails_eoh_acc_cmd = [                            # TODO: AILSII不同版本新增cmd
+        "java",
+        # "--enable-native-access=ALL-UNNAMED", # handle the warning
+        "-jar", java_cp_eoh_acc,
+        "-file", instance_path.as_posix(),
+        "-sharedDB", shared_db_path.as_posix(),
+        "-rounded", "true",
+        "-best", "0",
+        "-initSolution", "None",
+        "-limit", str(24*60*60),  # second
+        "-crtRunningTime", str(crtRunningTime),  # second
+        "-stoppingCriterion", "Time",
+        "-dMax", str(dMax),
+        "-dMin", str(dMin),
+        "-gamma", str(gamma),
+        "-varphi", str(varphi),
+        "-startTime", str(start_time),
+        "-updateInterval", str(update_interval_sec),
+    ]
+
     filo_exe_name = "filo2.exe" if os.name == "nt" else "filo2"
     filo_exe = FILO2_PATH / filo_exe_name
 
@@ -499,7 +547,7 @@ if __name__ == '__main__':
     process_dict = {}
 
     # 初始启动：同时启动 AILS2 / FILO2 / SISR / HGS-TV
-    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, {}, start_time)
+    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, ails_eoh_acc_cmd, {}, start_time)
     time.sleep(warmup_sec) # warmup
 
     # 【优化2】文件监听循环
@@ -515,7 +563,7 @@ if __name__ == '__main__':
 
                     db_handler.log_survivor(global_best_info['algo_name'])
 
-                    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, global_best_info, start_time)
+                    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, ails_eoh_acc_cmd, global_best_info, start_time)
             except Exception as e:
                 # 4. 详细异常信息输出
                 exc_type, exc_value, exc_traceback = sys.exc_info()  # 获取完整异常信息

@@ -223,7 +223,7 @@ public class AILSII
         // .db output
         if (Instant.now().getEpochSecond() - preUpdate.getEpochSecond() > this.updateInterval && improved) {
             improved = false;
-            String algoName = String.format("ails2_etaMax%.3f_stoppingTime%.2f", acceptanceCriterion.getEtaMax(), this.executionMaximumLimit);
+            String algoName = "ails2_eoh_acc";
             SQLiteHelper.saveBest(this.sharedDB, timeAF, bestSolution.f, bestSolution.toListString(), algoName);
 //            SQLiteHelper.saveAcceptanceParams(this.sharedDB, algoName, bestSolution.numRoutes, iterator, acceptanceCriterion.getEta(), selectedPerturbation.omega);
 //            System.out.println(algoName);
