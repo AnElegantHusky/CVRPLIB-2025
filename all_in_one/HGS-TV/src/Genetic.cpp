@@ -184,10 +184,9 @@ namespace genvrp {
 
                 // 若距离上次 DB 写入的时间不足 updateInterval，则暂不写入
                 if((runningTimeForDb - lastDbUpdateTime) >= params.dbUpdateIntervalSec) {
+                    // 只向共享 DB 推送“可行”的全局最优解，避免不可行解污染其他算法。
+                    // 如果当前还没有找到可行解（getBestFound 返回空），本次就不写入 DB。
                     std::optional<const Individual*> bestIndiv = population.getBestFound();
-                    if(!bestIndiv) {
-                        bestIndiv = population.getBestInfeasible();
-                    }
 
                     if(bestIndiv) {
                         HgsDbConfig cfg{params.pathToSharedDb, "HGS-TV"};

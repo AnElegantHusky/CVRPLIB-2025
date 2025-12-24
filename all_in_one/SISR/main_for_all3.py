@@ -481,8 +481,6 @@ if __name__ == '__main__':
         "-startTime", str(start_time),
         "-t", str(max_running_time_min * 60),
         "-type", "Uchoa",
-        "-seed", "1",
-        "-deco", "BarycentreClustering",
         "-updateInterval", str(update_interval_sec),
     ]
 
