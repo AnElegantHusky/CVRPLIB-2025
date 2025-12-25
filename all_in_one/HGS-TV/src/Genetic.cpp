@@ -97,6 +97,8 @@ namespace genvrp {
         double lastDbUpdateTime = 0.0;
         // 自上次 DB 更新以来，是否出现过新的最优解（用于触发按需写库，与 FILO2 / AILS2 对齐）。
         bool improvedSinceLastDbUpdate = false;
+        // 保存找到改进解时的最优解副本（类似 FILO2 的 record_solution），确保写入数据库时使用已确认改进的解
+        std::optional<Individual> recordBestSolution;
 
 		// While the iteration termination criteria are not met:
         while(nbIter < params.ga.maxIter && nbIterNonProd < params.ga.maxIterNonProd) {
@@ -153,6 +155,13 @@ namespace genvrp {
                 // 标记：自上次 DB 更新以来出现过改进
                 improvedSinceLastDbUpdate = true;
 
+                // 立即保存当前最优解的副本（类似 FILO2 的 record_solution），确保写入数据库时使用已确认改进的解
+                // 这样可以避免在找到改进解和写入数据库之间，bestSolutionOverall 被更新为更差的解
+                std::optional<const Individual*> currentBest = population.getBestFound();
+                if(currentBest && currentBest.value()->isFeasible) {
+                    recordBestSolution = *currentBest.value();
+                }
+
                 // Update the stats about new best solutions.
                 if(params.stats.recordBestSolutionUpdates) {
                     const std::clock_t timeAtUpdate = std::clock();
@@ -184,15 +193,15 @@ namespace genvrp {
 
                 // 若距离上次 DB 写入的时间不足 updateInterval，则暂不写入
                 if((runningTimeForDb - lastDbUpdateTime) >= params.dbUpdateIntervalSec) {
-                    // 只向共享 DB 推送“可行”的全局最优解，避免不可行解污染其他算法。
-                    // 如果当前还没有找到可行解（getBestFound 返回空），本次就不写入 DB。
-                    std::optional<const Individual*> bestIndiv = population.getBestFound();
-
-                    if(bestIndiv) {
+                    // 使用已保存的改进解（类似 FILO2 的 record_solution），而不是重新获取 bestSolutionOverall
+                    // 这样可以确保写入数据库的解是已确认改进的解，避免 bestSolutionOverall 被更新为更差的解
+                    if(recordBestSolution && recordBestSolution.value().isFeasible) {
                         HgsDbConfig cfg{params.pathToSharedDb, "HGS-TV"};
-                        saveBestIndividualToDb(cfg, **bestIndiv, runningTimeForDb);
+                        saveBestIndividualToDb(cfg, recordBestSolution.value(), runningTimeForDb);
                         lastDbUpdateTime = runningTimeForDb;
                         improvedSinceLastDbUpdate = false;
+                        // 清空已保存的解，等待下次改进
+                        recordBestSolution.reset();
                     }
                 }
             }

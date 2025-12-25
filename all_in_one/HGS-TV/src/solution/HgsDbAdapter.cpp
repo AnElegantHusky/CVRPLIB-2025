@@ -131,6 +131,13 @@ namespace genvrp {
             return false;
         }
 
+        // 只写入可行解，避免不可行解污染数据库
+        if(!indiv.isFeasible) {
+            std::cerr << "[HGS-DB] Skipping infeasible solution (penalizedCost=" << indiv.cost.penalizedCost 
+                      << ", distance=" << indiv.cost.distance << ")\n";
+            return false;
+        }
+
         sqlite3* db = nullptr;
         char* errMsg = nullptr;
 
@@ -170,11 +177,13 @@ namespace genvrp {
         }
 
         const std::string solJson = routesToJsonString(routes);
+        // 对于可行解，penalizedCost 和 distance 几乎相等，使用 penalizedCost 保持一致性
         const double score = indiv.cost.penalizedCost;
 
+        // Begin Transaction
         sqlite3_exec(db, "BEGIN IMMEDIATE", nullptr, nullptr, nullptr);
 
-        // Insert history entry.
+        // Insert History (无条件插入，与 FILO2 逻辑一致)
         sqlite3_stmt* stmt = nullptr;
         const char* insSql =
             "INSERT INTO solution_history (algo_name, score, solution, runningtime) VALUES (?, ?, ?, ?)";
@@ -189,7 +198,8 @@ namespace genvrp {
         }
         sqlite3_finalize(stmt);
 
-        // Update global_best if improved.
+        // Update Global Best (Minimization: update if New Score < Old Score)
+        // Note: The SQL ensures atomic check-and-update
         const char* updSql =
             "UPDATE global_best SET score = ?, solution = ?, algo_name = ?, runningtime = ? "
             "WHERE id = 1 AND score > ?";
@@ -199,15 +209,17 @@ namespace genvrp {
         sqlite3_bind_text(stmt, 2, solJson.c_str(), -1, SQLITE_TRANSIENT);
         sqlite3_bind_text(stmt, 3, cfg.algoName.c_str(), -1, SQLITE_TRANSIENT);
         sqlite3_bind_double(stmt, 4, elapsedTime);
-        sqlite3_bind_double(stmt, 5, score);
+        sqlite3_bind_double(stmt, 5, score); // Check logic: score > new_score
 
         rc = sqlite3_step(stmt);
+        bool updated = (sqlite3_changes(db) > 0);
         sqlite3_finalize(stmt);
 
+        // Commit
         if(rc == SQLITE_DONE) {
             sqlite3_exec(db, "COMMIT", nullptr, nullptr, nullptr);
         } else {
-            std::cerr << "[HGS-DB] Update global_best failed: " << sqlite3_errmsg(db) << "\n";
+            std::cerr << "[HGS-DB] Update failed: " << sqlite3_errmsg(db) << "\n";
             sqlite3_exec(db, "ROLLBACK", nullptr, nullptr, nullptr);
         }
 
