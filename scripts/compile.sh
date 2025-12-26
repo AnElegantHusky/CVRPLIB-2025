@@ -19,7 +19,10 @@ mkdir bin
 #
 #./scripts/AILS-II_parallel_v2.sh
 
-./scripts/AILS-II_main.sh
+#./scripts/AILS-II_main.sh
+
+#./scripts/AILS2_EoH_Acc.sh
+./scripts/AILS2_EoH_Omega.sh
 
 
 ##################################################

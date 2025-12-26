@@ -15,7 +15,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 METHODS_DIR = os.path.join(SCRIPT_DIR, "bin")
 
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results")
-RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results', 'AILSII_origin')
+RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-bks', 'AILSII_origin_5d')
 
 
 # 2. 定义实例文件（instances）所在的文件夹
@@ -85,7 +85,13 @@ def get_command_args(method_path: str, instance_path: str, time_limit: int) -> O
         return ["java", "-jar", "-Xms2000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path,
                 "-stoppingCriterion", "Time", "-limit", limit_str, "-output", f"remote_results/{method_name}", "-resume",  f'{os.path.join(RESUME_DIR, instance_name)}.sol']
 
-    if 'AILSII' in method_name:
+    elif "AILS2" in method_name:
+        print('RESUME_DIR:', RESUME_DIR)
+        return ["java", "-jar", "-Xms2000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path,
+                "-stoppingCriterion", "Time", "-limit", limit_str, "-output", f"remote_results/{method_name}", "-resume",  f'{os.path.join(RESUME_DIR, instance_name)}.sol']
+
+
+    elif 'AILSII' in method_name:
         return ["java", "-jar", "-Xms2000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path, "-rounded",
                 "true", "-stoppingCriterion", "Time", "-limit", limit_str, "-output", f"remote_results/{method_name}"]
 

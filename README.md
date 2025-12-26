@@ -35,16 +35,28 @@ sudo chmod +x ./bin/*
 
 # 请在不同服务器上分别运行以下命令
 
-86400
+345600
 ```
 
-python run.py AILSII_main.jar --start-idx 0 --end-idx 50 --time-limit 86400
+python run.py AILS2_EoH_Acc.jar --start-idx 0 --end-idx 50 --time-limit 345600 
 
 ```
 
 ```
 
-python run.py AILSII_main.jar --start-idx 50 --end-idx 100 --time-limit 86400
+python run.py AILS2_EoH_Acc.jar --start-idx 50 --end-idx 100 --time-limit 345600
+
+```
+
+```
+
+python run.py AILS2_EoH_Omega.jar --start-idx 0 --end-idx 50 --time-limit 345600
+
+```
+
+```
+
+python run.py AILS2_EoH_Omega.jar --start-idx 50 --end-idx 100 --time-limit 345600
 
 ```
 
