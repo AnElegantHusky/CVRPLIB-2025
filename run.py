@@ -15,7 +15,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 METHODS_DIR = os.path.join(SCRIPT_DIR, "bin")
 
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results")
-RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-bks', 'AILSII_origin_5d')
+RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-5days', 'AILSII_origin_5d')
 
 
 # 2. 定义实例文件（instances）所在的文件夹

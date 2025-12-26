@@ -38,25 +38,25 @@ sudo chmod +x ./bin/*
 345600
 ```
 
-python run.py AILS2_EoH_Acc.jar --start-idx 0 --end-idx 50 --time-limit 345600 
+nohup python run.py AILS2_EoH_Acc.jar --start-idx 0 --end-idx 50 --time-limit 345600 > output.log 2>&1 &
 
 ```
 
 ```
 
-python run.py AILS2_EoH_Acc.jar --start-idx 50 --end-idx 100 --time-limit 345600
+nohup python run.py AILS2_EoH_Acc.jar --start-idx 50 --end-idx 100 --time-limit 345600 > output.log 2>&1 &
 
 ```
 
 ```
 
-python run.py AILS2_EoH_Omega.jar --start-idx 0 --end-idx 50 --time-limit 345600
+nohup python run.py AILS2_EoH_Omega.jar --start-idx 0 --end-idx 50 --time-limit 345600 > output.log 2>&1 &
 
 ```
 
 ```
 
-python run.py AILS2_EoH_Omega.jar --start-idx 50 --end-idx 100 --time-limit 345600
+nohup python run.py AILS2_EoH_Omega.jar --start-idx 50 --end-idx 100 --time-limit 345600 > output.log 2>&1 &
 
 ```
 
