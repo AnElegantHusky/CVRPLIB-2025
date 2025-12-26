@@ -35,33 +35,41 @@ sudo chmod +x ./bin/*
 
 # 请在不同服务器上分别运行以下命令
 
-
+86400
 ```
 
-python run.py AILSII_origin.jar --start-idx 0 --end-idx 50 --time-limit 86400
-
-```
-
-```
-
-python run.py AILSII_origin.jar --start-idx 50 --end-idx 100 --time-limit 86400
+python run.py AILSII_main.jar --start-idx 0 --end-idx 50 --time-limit 86400
 
 ```
 
 ```
 
-python run.py AILSII_origin_wall.jar --start-idx 0 --end-idx 50 --time-limit 86400
+python run.py AILSII_main.jar --start-idx 50 --end-idx 100 --time-limit 86400
 
 ```
 
-```
+[//]: # (```)
 
-python run.py AILSII_origin_wall.jar --start-idx 50 --end-idx 100 --time-limit 86400
+[//]: # ()
+[//]: # (python run.py AILSII_origin_wall.jar --start-idx 0 --end-idx 50 --time-limit 86400)
 
-```
+[//]: # ()
+[//]: # (```)
 
-```
+[//]: # ()
+[//]: # (```)
 
-python run_ails2_parallel_threading.py
+[//]: # ()
+[//]: # (python run.py AILSII_origin_wall.jar --start-idx 50 --end-idx 100 --time-limit 86400)
 
-```
+[//]: # ()
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # ()
+[//]: # (python run_ails2_parallel_threading.py)
+
+[//]: # ()
+[//]: # (```)

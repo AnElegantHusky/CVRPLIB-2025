@@ -13,12 +13,13 @@ mkdir bin
 #
 ###################################################
 
-./scripts/AILS-II_origin.sh
+#./scripts/AILS-II_origin.sh
+#
+#./scripts/AILS-II_origin_wall.sh
+#
+#./scripts/AILS-II_parallel_v2.sh
 
-./scripts/AILS-II_origin_wall.sh
-
-./scripts/AILS-II_parallel_v2.sh
-
+./scripts/AILS-II_main.sh
 
 
 ##################################################
