@@ -21,7 +21,7 @@ mkdir bin
 
 #./scripts/AILS-II_main.sh
 
-#./scripts/AILS2_EoH_Acc.sh
+./scripts/AILS2_EoH_Acc.sh
 ./scripts/AILS2_EoH_Omega.sh
 
 
