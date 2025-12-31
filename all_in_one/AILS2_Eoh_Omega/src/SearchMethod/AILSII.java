@@ -191,7 +191,7 @@ public class AILSII
 
 			selectedPerturbation.getChosenOmega().setDistance(distanceLS);//update
 
-			if(acceptanceCriterion.acceptSolution(solution))
+			if(acceptanceCriterion.acceptSolution(solution, crtRunningTime))
 				referenceSolution.clone(solution);
 		}
 
