@@ -21,9 +21,10 @@ mkdir bin
 
 #./scripts/AILS-II_main.sh
 
-./scripts/AILS2_EoH_Acc.sh
-./scripts/AILS2_EoH_Omega.sh
+#./scripts/AILS2_EoH_Acc.sh
+#./scripts/AILS2_EoH_Omega.sh
 
+./scripts/AILS2_Eta_Cycle.sh
 
 ##################################################
 #./scripts/AILS-II_perturbation1.sh

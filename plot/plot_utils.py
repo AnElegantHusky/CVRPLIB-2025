@@ -463,32 +463,22 @@ def get_rank_statistics(instance_names, algorithm_names, base_dir='.', output_cs
     """
     统计每个算法在所有实例中获得各名次的次数。
 
-    逻辑：
-    1. 读取所有实例下所有算法的 Fitness (基于 .sol 文件)。
-    2. 对每个实例内部的算法进行排名 (数值越小排名越高)。
-       * 采用 'dense' 排名策略: 如果 A=100, B=100, C=110，则 A和B并列第1，C为第2。
-    3. 统计每个算法获得 "Rank 1", "Rank 2" ... 的总次数。
-
-    参数:
-    output_csv (str, optional): 如果提供路径，将结果表格保存为 CSV 文件。
-
-    返回:
-    pd.DataFrame: 包含排名统计的表格。行是算法名，列是名次(1, 2, 3...)。
+    微调更新:
+    - 区分 'Strict Rank 1' (该实例唯一的第1名) 和 'Tied Rank 1' (并列第1名)。
+    - 其他名次 (Rank 2, Rank 3...) 保持原样。
     """
 
-    print("--- 开始统计算法排名情况 (基于 .sol 文件) ---")
+    print("--- 开始统计算法排名情况 (区分 Strict/Tied Rank 1) ---")
 
-    # 用于存储原始数据的列表: [{'Instance': 'xx', 'Method': 'algo1', 'Fitness': 123}, ...]
     raw_data = []
 
-    # 1. 数据收集 (复用之前的读取逻辑)
+    # 1. 数据收集 (保持原逻辑不变)
     for instance in instance_names:
         for method in algorithm_names:
             method_dir = os.path.join(base_dir, method)
             if not os.path.isdir(method_dir):
                 continue
 
-            # 查找 .sol 文件
             file_path = None
             if os.path.exists(method_dir):
                 for file in os.listdir(method_dir):
@@ -496,7 +486,6 @@ def get_rank_statistics(instance_names, algorithm_names, base_dir='.', output_cs
                         file_path = os.path.join(method_dir, file)
                         break
 
-            # 解析 Cost
             if file_path:
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
@@ -513,32 +502,67 @@ def get_rank_statistics(instance_names, algorithm_names, base_dir='.', output_cs
                                     })
                                     break
                 except Exception:
-                    pass  # 读取失败则忽略，视为该算法在该实例无结果
+                    pass
 
     if not raw_data:
         print("未找到有效数据。")
         return pd.DataFrame()
 
-    # 2. 转换为 DataFrame 进行处理
+    # 2. 转换为 DataFrame
     df_raw = pd.DataFrame(raw_data)
 
-    # 3. 计算排名
-    # group_obj 是按 Instance 分组后的对象
-    # transform 保持行数不变，直接在原表后追加一列 Rank
-    # method='dense' 意味着: 100, 100, 110 -> Rank 1, 1, 2 (而不是 1, 1, 3)
-    df_raw['Rank'] = df_raw.groupby('Instance')['Fitness'].rank(method='dense', ascending=True)
+    # 3. 计算基础排名 (Dense Rank)
+    # method='dense': 100, 100, 110 -> Rank 1, 1, 2
+    df_raw['Rank'] = df_raw.groupby('Instance')['Fitness'].rank(method='dense', ascending=True).astype(int)
 
-    # 将 Rank 转为整数 (1.0 -> 1)
-    df_raw['Rank'] = df_raw['Rank'].astype(int)
+    # --- 新增逻辑: 区分 Strict 和 Tied Rank 1 ---
 
-    # 4. 生成交叉表 (Crosstab) 统计频次
-    # index=算法名, columns=名次, values=出现次数(计数)
-    rank_table = pd.crosstab(df_raw['Method'], df_raw['Rank'])
+    # 3.1 统计每个实例中有多少个 Rank 1
+    # 筛选出Rank为1的行，按实例分组计数
+    rank1_counts = df_raw[df_raw['Rank'] == 1].groupby('Instance')['Method'].count()
 
-    # 5. 美化表格
-    # 补全可能缺失的列（比如只有 Rank 1 和 3，没有 2，虽然 dense 模式下很少见，但防万一）
-    # 并添加列名前缀，变成 "Rank 1", "Rank 2"
-    rank_table.columns = [f'Rank {c}' for c in rank_table.columns]
+    # 3.2 定义生成标签的函数
+    def get_rank_label(row):
+        rank = row['Rank']
+        instance = row['Instance']
+
+        if rank == 1:
+            # 查一下当前实例有几个第1名
+            # 如果字典中找不到(理论不可能)，默认给0
+            count = rank1_counts.get(instance, 0)
+            if count == 1:
+                return "Strict Rank 1"  # 唯一的第1
+            else:
+                return "Tied Rank 1"  # 并列的第1
+        else:
+            return f"Rank {rank}"  # 其他名次，如 "Rank 2"
+
+    # 3.3 应用标签
+    df_raw['Rank_Label'] = df_raw.apply(get_rank_label, axis=1)
+
+    # 4. 生成交叉表 (Crosstab)
+    # 使用新的 Rank_Label 作为列
+    rank_table = pd.crosstab(df_raw['Method'], df_raw['Rank_Label'])
+
+    # 5. 美化表格 (列排序)
+    # 默认的列排序是字母顺序，会导致 "Rank 10" 排在 "Rank 2" 前面，且 Strict/Tied 位置乱
+    # 我们需要自定义排序: Strict 1 -> Tied 1 -> Rank 2 -> Rank 3 ...
+
+    current_cols = rank_table.columns.tolist()
+
+    # 分离出特殊列和普通Rank列
+    special_cols = []
+    if 'Strict Rank 1' in current_cols: special_cols.append('Strict Rank 1')
+    if 'Tied Rank 1' in current_cols: special_cols.append('Tied Rank 1')
+
+    # 提取剩余的 "Rank X" 列并按数字排序
+    other_cols = [c for c in current_cols if c not in special_cols]
+    # 提取字符串中的数字进行排序 (防止 Rank 10 排在 Rank 2 前面)
+    other_cols.sort(key=lambda x: int(x.split()[-1]) if x.split()[-1].isdigit() else 999)
+
+    # 组合最终列顺序
+    final_cols = special_cols + other_cols
+    rank_table = rank_table[final_cols]
 
     # 6. 保存或打印
     print("\n--- 排名统计表 (Rank Statistics) ---")
@@ -549,8 +573,6 @@ def get_rank_statistics(instance_names, algorithm_names, base_dir='.', output_cs
         print(f"表格已保存至: {output_csv}")
 
     return rank_table
-
-
 def get_average_gap_statistics(instance_names, algorithm_names, base_dir='.', output_csv=None, baseline=None):
     """
     计算每个算法在所有实例上的平均 Gap (%)。
