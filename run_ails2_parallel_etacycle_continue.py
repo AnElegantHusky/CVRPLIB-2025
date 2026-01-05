@@ -25,7 +25,7 @@ INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 # 4. 结果输出根目录
 # etaMax = 0.2
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results", JAR_NAME).removesuffix('.jar')
-RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-5days', 'AILSII_origin_5d')
+RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-5days/AILS2_Eta_Continue', 'AILSII_origin_5d')
 
 # 5. 硬编码的任务列表 (文件名, 时间限制秒)
 # 这些是根据你提供的 hgs 命令行提取的
@@ -60,7 +60,7 @@ for instance in TARGET_INSTANCES:
     for cycle in CYCLE:
         for eta in ETA_MAX:
             time_limit = 24 * 3600  # 1 day
-            # time_limit = 1  # 1 day
+            # time_limit = 10  # 1 day
             TASK_LIST.append((instance, time_limit, cycle, eta, "true"))
 
 # 6. 并行设置

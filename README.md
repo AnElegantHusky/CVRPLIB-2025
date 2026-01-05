@@ -49,6 +49,12 @@ nohup python run_ails2_parallel_etacycle_continue.py --start_idx 48 --end_idx 96
 
 ```
 
+```
+
+nohup python run.py AILSII_continue.jar --start-idx 50 --end-idx 100 --time-limit 86400 > output.log 2>&1 &
+
+```
+
 [//]: # (```)
 
 [//]: # ()

@@ -26,6 +26,8 @@ mkdir bin
 
 ./scripts/AILS2_Eta_Cycle.sh
 
+./scripts/AILS-II_continue.sh
+
 ##################################################
 #./scripts/AILS-II_perturbation1.sh
 
