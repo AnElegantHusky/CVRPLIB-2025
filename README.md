@@ -39,13 +39,13 @@ sudo chmod +x ./bin/*
 
 ```
 
-nohup python run_ails2_parallel_etacycle.py --start_idx 0 --end_idx 48 > output.log 2>&1 &
+nohup python run_ails2_parallel_etacycle_continue.py --start_idx 0 --end_idx 48 > output.log 2>&1 &
 
 ```
 
 ```
 
-nohup python run_ails2_parallel_etacycle.py --start_idx 48 --end_idx 96 > output.log 2>&1 &
+nohup python run_ails2_parallel_etacycle_continue.py --start_idx 48 --end_idx 96 > output.log 2>&1 &
 
 ```
 

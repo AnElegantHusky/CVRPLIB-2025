@@ -5,6 +5,7 @@ import logging
 import subprocess
 import concurrent.futures
 from typing import Tuple
+import argparse
 
 # ================= 配置区域 =================
 
@@ -22,29 +23,53 @@ JAR_PATH = os.path.join(SCRIPT_DIR, "bin", JAR_NAME)
 INSTANCES_DIR = os.path.join(SCRIPT_DIR, "XLTEST")
 
 # 4. 结果输出根目录
-OUTPUT_DIR = os.path.join(SCRIPT_DIR, "local_results", JAR_NAME).removesuffix('.jar') + '_continue'
+# etaMax = 0.2
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results", JAR_NAME).removesuffix('.jar')
 RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-5days', 'AILSII_origin_5d')
 
 # 5. 硬编码的任务列表 (文件名, 时间限制秒)
 # 这些是根据你提供的 hgs 命令行提取的
-TARGET_TASKS = [
-    ("XLTEST-n1048-k139.vrp", 2460, 246, 0.8, "true"),
-    # ("XLTEST-n2168-k625.vrp", 5160),
-    # ("XLTEST-n3101-k685.vrp", 7440),
-    # ("XLTEST-n4245-k164.vrp", 10140),
-    # ("XLTEST-n5174-k170.vrp", 12360),
-    # ("XLTEST-n5649-k365.vrp", 13500),
-    # ("XLTEST-n6034-k1234.vrp", 14460),
-    # ("XLTEST-n8575-k343.vrp", 20580)
+# TARGET_TASKS = [
+#     # ("XLTEST-n1048-k139.vrp", 2460, 246, 0.8, "true"),
+#     # ("XLTEST-n2168-k625.vrp", 5160),
+#     # ("XLTEST-n3101-k685.vrp", 7440),
+#     # ("XLTEST-n4245-k164.vrp", 10140),
+#     # ("XLTEST-n5174-k170.vrp", 12360),
+#     # ("XLTEST-n5649-k365.vrp", 13500),
+#     # ("XLTEST-n6034-k1234.vrp", 14460),
+#     ("XLTEST-n8575-k343.vrp", 20580, 2058, etaMax, "true")
+# ]
+
+TARGET_INSTANCES = [
+    "XLTEST-n1048-k139.vrp",
+    "XLTEST-n2168-k625.vrp",
+    "XLTEST-n3101-k685.vrp",
+    "XLTEST-n4245-k164.vrp",
+    "XLTEST-n5174-k170.vrp",
+    "XLTEST-n5649-k365.vrp",
+    "XLTEST-n6034-k1234.vrp",
+    "XLTEST-n8575-k343.vrp",
 ]
+
+CYCLE = [3600, 1800]
+
+ETA_MAX = [1, 0.75, 0.5, 0.25, 0.1, 0.05]
+
+TASK_LIST = []
+for instance in TARGET_INSTANCES:
+    for cycle in CYCLE:
+        for eta in ETA_MAX:
+            time_limit = 24 * 3600  # 1 day
+            # time_limit = 1  # 1 day
+            TASK_LIST.append((instance, time_limit, cycle, eta, "true"))
 
 # 6. 并行设置
 # None = 使用所有CPU核心。如果内存不足，请手动设置为整数，例如 4
 MAX_WORKERS = None
 
 # 7. Java 堆内存设置
-JAVA_XMS = "2000m"
-JAVA_XMX = "4000m"
+JAVA_XMS = "6000m"
+JAVA_XMX = "6000m"
 
 JAVA_EXE_PATH = "D:\\.jdks\\corretto-24.0.2\\bin\\java.exe"
 
@@ -64,7 +89,7 @@ logging.basicConfig(
 )
 
 
-def run_single_task(task: Tuple[str, int]):
+def run_single_task(task: Tuple[str, int, int, float, str]):
     """
     运行单个 AILSII 任务
     """
@@ -82,7 +107,8 @@ def run_single_task(task: Tuple[str, int]):
 
     # 2. 准备输出文件 (CSV)
     # AILSII 的控制台输出通常包含统计信息，原脚本将其重定向到 csv
-    output_csv_path = os.path.join(OUTPUT_DIR, f"{instance_filename}.csv")
+    # output_csv_path = os.path.join(OUTPUT_DIR + f'_{cycle}_{resetEta}', f"{instance_filename}.csv")
+    output_csv_path = OUTPUT_DIR + f'_continue_{cycle}_{resetEta}'
 
     try:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -141,6 +167,11 @@ def run_single_task(task: Tuple[str, int]):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="AILSII 专项测试脚本")
+    parser.add_argument('--start_idx', type=int, default=0, help='任务起始索引 (包含)')
+    parser.add_argument('--end_idx', type=int, default=None, help='任务结束索引 (不包含，默认为列表末尾)')
+    args = parser.parse_args()
+
     logging.info("--- AILSII 专项测试脚本启动 ---")
     # logging.info(f"目标任务数: {len(TARGET_TASKS)}")
 
@@ -152,6 +183,7 @@ def main():
         logging.critical(f"找不到实例文件夹: {INSTANCES_DIR}")
         return
 
+    target_tasks = TASK_LIST[args.start_idx: args.end_idx]
     # 使用进程池并行执行
     with concurrent.futures.ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
         # if MAX_WORKERS:
@@ -159,7 +191,7 @@ def main():
         # else:
         #     logging.info("并行进程数: 自动 (所有核心)")
 
-        list(executor.map(run_single_task, TARGET_TASKS))
+        list(executor.map(run_single_task, target_tasks))
 
     # logging.info("--- 所有任务已结束 ---")
 

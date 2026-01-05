@@ -329,8 +329,101 @@ def plot_gap_scatter(instance_names, algorithm_names, base_dir='.', output_dir='
         plt.show()
 
 
+def get_fitness_table(instance_names, algorithm_names, base_dir='.', output_csv=None):
+    """
+    生成一个表格，展示每个实例在每个算法下的最终 Fitness (Cost)。
+
+    结构:
+    - 行 (Index): Instance Name
+    - 列 (Columns): Method Name
+    - 值 (Value): Fitness / Cost (从 .sol 文件读取)
+
+    参数:
+    instance_names (list): 实例名称列表。
+    algorithm_names (list): 算法名称列表。
+    base_dir (str): 数据根目录。
+    output_csv (str, optional): 如果提供路径，将结果保存为 CSV 文件。
+
+    返回:
+    pd.DataFrame: 包含 Fitness 数据的 DataFrame。
+    """
+
+    print(f"--- 开始生成 Fitness 表格 (基于 .sol 文件) ---")
+
+    rows_data = []
+
+    # 1. 遍历所有实例 (每一行)
+    for instance in instance_names:
+        # 初始化当前行的数据字典，第一列是实例名
+        current_row = {'Instance': instance}
+
+        # 2. 遍历该实例下的所有算法 (每一列)
+        for method in algorithm_names:
+            method_dir = os.path.join(base_dir, method)
+            fitness_val = None  # 默认为 None (NaN)
+
+            # --- 复用 plot_gap_scatter_from_sol 的文件查找逻辑 ---
+            file_path = None
+            if os.path.isdir(method_dir):
+                for file in os.listdir(method_dir):
+                    # 查找包含实例名且以 .sol 结尾的文件
+                    if file.endswith('.sol') and instance in file:
+                        file_path = os.path.join(method_dir, file)
+                        break
+
+            # --- 复用 plot_gap_scatter_from_sol 的解析逻辑 ---
+            if file_path:
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        lines = f.readlines()
+                        # 倒序查找，因为结果通常在最后
+                        for line in reversed(lines):
+                            if line.strip().startswith("Cost"):
+                                # 假设格式为 "Cost 1234.56"
+                                parts = line.strip().split()
+                                if len(parts) >= 2:
+                                    fitness_val = float(parts[1])
+                                    break
+                except Exception as e:
+                    print(f"错误: 读取 {file_path} 时发生异常: {e}")
+
+            # 将找到的值存入当前行字典，键为算法名称
+            current_row[method] = fitness_val
+
+        rows_data.append(current_row)
+
+    # 3. 构建 DataFrame
+    df = pd.DataFrame(rows_data)
+
+    # 将 'Instance' 列设为索引
+    if not df.empty and 'Instance' in df.columns:
+        df.set_index('Instance', inplace=True)
+
+        # 按照算法名称列表的顺序重新排列列 (确保列顺序一致)
+        # 过滤掉列表中存在但 DataFrame 里没有的列（防止报错）
+        existing_cols = [col for col in algorithm_names if col in df.columns]
+        df = df[existing_cols]
+
+    print("\n--- Fitness 表格预览 ---")
+    print(df.head())  # 打印前几行预览
+
+    # 4. 保存结果
+    if output_csv:
+        try:
+            # 如果目录包含子文件夹，确保文件夹存在
+            output_dir_path = os.path.dirname(output_csv)
+            if output_dir_path:
+                os.makedirs(output_dir_path, exist_ok=True)
+
+            df.to_csv(output_csv)
+            print(f"--- 表格已保存至: {output_csv} ---")
+        except Exception as e:
+            print(f"错误: 保存 CSV 失败: {e}")
+
+    return df
+
 def plot_gap_scatter_from_sol(instance_names, algorithm_names, base_dir='.', output_dir='.', show_plot=False,
-                              point_size=60, point_alpha=0.7):
+                              point_size=60, point_alpha=0.7, star_method=None):
     """
     绘制基于 .sol 文件中最终 Cost 的 Gap 散点图。
 
@@ -430,6 +523,10 @@ def plot_gap_scatter_from_sol(instance_names, algorithm_names, base_dir='.', out
     for method in algorithm_names:
         method_df = df[df['method'] == method]
         if not method_df.empty:
+            if star_method is not None and method == star_method:
+                marker = 's'
+            else:
+                marker = 'o'
             plt.scatter(
                 method_df['customer_num'],
                 method_df['gap'],
@@ -437,7 +534,8 @@ def plot_gap_scatter_from_sol(instance_names, algorithm_names, base_dir='.', out
                 s=point_size,  # 使用自定义大小
                 alpha=point_alpha,  # 使用自定义透明度
                 edgecolors='w',  # 白色边缘增加对比度
-                linewidths=0.8
+                linewidths=0.8,
+                marker=marker
             )
 
     plt.xlabel('Number of Customers')
