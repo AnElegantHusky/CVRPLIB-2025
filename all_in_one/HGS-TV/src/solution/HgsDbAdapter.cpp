@@ -212,7 +212,6 @@ namespace genvrp {
         sqlite3_bind_double(stmt, 5, score); // Check logic: score > new_score
 
         rc = sqlite3_step(stmt);
-        bool updated = (sqlite3_changes(db) > 0);
         sqlite3_finalize(stmt);
 
         // Commit

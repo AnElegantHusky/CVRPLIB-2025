@@ -61,10 +61,8 @@ namespace genvrp {
             initIndiv->giantTour = std::move(tour);
         }
 
-        // Evaluate and optionally improve the injected solution so that
-        // it is consistent with the current penalty parameters.
-        initIndiv->evaluateCompleteCost();
-        localSearch.run(initIndiv.get(), params.ga.penaltyCapacity, params.ga.penaltyDuration);
+        // Evaluate the injected solution (without local search).
+        // Since A is guaranteed to be feasible from global_best, we directly evaluate and add it to the population.
         initIndiv->evaluateCompleteCost();
 
         addInitialIndividual(std::move(initIndiv));
