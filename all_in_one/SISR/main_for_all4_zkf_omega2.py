@@ -69,6 +69,18 @@ java_cp_eoh_acc_list = [
 java_cp_eoh_acc = os.pathsep.join(str(p) for p in java_cp_eoh_acc_list)         # TODO  zkf 更改庆隆原先的问题
 
 
+java_cp_eoh_acc_large_list = [
+    ROOT_PATH / 'AILS2_Eoh_Acc_large' / 'target' / 'AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar',      # TODO
+
+    # ROOT_PATH / 'AILS2' / 'target' / 'classes',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'commons-csv-1.10.0.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.10.2.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'junit-jupiter-api-5.14.0.jar',
+    # ROOT_PATH / 'AILS2' / 'libs' / 'commons-io-2.15.1.jar',
+]
+
+java_cp_eoh_acc_large = os.pathsep.join(str(p) for p in java_cp_eoh_acc_large_list)         # TODO  zkf 更改庆隆原先的问题
+
 
 java_cp_eoh_omega_list = [
     ROOT_PATH / 'AILS2_Eoh_Omega' / 'target' / 'AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar',    #这里需要现场编译
@@ -119,6 +131,7 @@ ails_main = "SearchMethod.AILSII"
 AILS2_PATH = ROOT_PATH / 'AILS2'
 
 AILS2_EoH_ACC_PATH = ROOT_PATH / 'AILS2_Eoh_Acc'        # TODO 1 增加新方法目录
+AILS2_EoH_ACC_large_PATH = ROOT_PATH / 'AILS2_Eoh_Acc_large'        # TODO 1 增加新方法目录
 AILS2_EoH_OMEGA_PATH = ROOT_PATH / 'AILS2_Eoh_Omega'    # zkf: 添加替换eoh设计的omega方法目录
 AILS2_EoH_OMEGA2_PATH = ROOT_PATH / 'AILS2_Eoh_Omega2'    # zkf: 添加替换eoh设计的omega方法目录
 AILS2_EoH_OMEGA_ACC_PATH = ROOT_PATH / 'AILS2_Eoh_Omega_Acc'    # zkf: 添加替换eoh设计的omega和acc方法目录
@@ -339,7 +352,19 @@ def update_cmd_arg(base_cmd, flag, value):
 
 # ================= 核心管理逻辑 =================
 
-def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo_template, hgs_template, ails_eoh_acc_template, ails_eoh_omega2_template, ails_eoh_omega_template, ails_eoh_omega_acc_template,best_info, start_time):  # add new template
+def manage_workers(process_dict,
+                   sisr_args,
+                   ails_common_args,
+                   ails_configs,
+                   filo_template,
+                   hgs_template,
+                   ails_eoh_acc_template,
+                   ails_eoh_omega2_template,
+                   ails_eoh_omega_template,
+                   ails_eoh_omega_acc_template,
+                   best_info,
+                   start_time,
+                   ails_eoh_acc_large_template=None):  # add new template
     """
     智能管理进程重启。
     process_dict: {'sisr': proc, 'ails': proc, ...}
@@ -406,6 +431,17 @@ def manage_workers(process_dict, sisr_args, ails_common_args, ails_configs, filo
         )
         p.start()
         process_dict['ails2_eoh_acc'] = p
+
+    if ails_eoh_acc_large_template:
+        if not process_dict.get('ails2_eoh_acc_large') or not process_dict['ails2_eoh_acc_large'].is_alive():       # TODO:
+            # 构建该特定配置的命令
+            p = multiprocessing.Process(
+                target=run_external_process,
+                args=(ails_eoh_acc_large_template,),
+                name='ails2_eoh_acc_large'
+            )
+            p.start()
+            process_dict['ails2_eoh_acc_large'] = p
 
     if not process_dict.get('ails2_eoh_omega') or not process_dict['ails2_eoh_omega'].is_alive():       #add omega
         # 构建该特定配置的命令
@@ -612,6 +648,27 @@ if __name__ == '__main__':
         "-updateInterval", str(writing_interval_sec),
     ]
 
+    ails_eoh_acc_large_cmd = [  # TODO: AILSII不同版本新增cmd
+        "java",
+        # "--enable-native-access=ALL-UNNAMED", # handle the warning
+        "-jar", java_cp_eoh_acc_large,
+        "-file", instance_path.as_posix(),
+        "-sharedDB", shared_db_path.as_posix(),
+        "-rounded", "true",
+        "-best", "0",
+        "-initSolution", "None",
+        "-limit", str(4 * 60 * 60),  # second
+        "-crtRunningTime", str(crtRunningTime),  # second
+        "-stoppingCriterion", "Time",
+        "-dMax", str(dMax),
+        "-dMin", str(dMin),
+        "-gamma", str(gamma),
+        "-varphi", str(varphi),
+        "-startTime", str(start_time),
+        "-updateInterval", str(writing_interval_sec),
+        "-etaMax", "1",
+    ]
+
     ails_eoh_omega_cmd = [                            # TODO: AILSII不同版本新增cmd
         "java",
         # "--enable-native-access=ALL-UNNAMED", # handle the warning
@@ -717,7 +774,20 @@ if __name__ == '__main__':
     process_dict = {}
 
     # 初始启动：同时启动 AILS2 / FILO2 / SISR / HGS-TV
-    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, ails_eoh_acc_cmd, ails_eoh_omega_cmd, ails_eoh_omega2_cmd, ails_eoh_omega_acc_cmd,{}, start_time)
+    manage_workers(process_dict,
+                   sisr_args,
+                   ails_cmd,
+                   ails_configs,
+                   filo_cmd,
+                   hgs_cmd,
+                   ails_eoh_acc_cmd,
+                   ails_eoh_omega_cmd,
+                   ails_eoh_omega2_cmd,
+                   ails_eoh_omega_acc_cmd,
+
+                   {},
+                   start_time,
+                   ails_eoh_acc_large_template=ails_eoh_acc_large_cmd)
     time.sleep(warmup_sec) # warmup
 
     # 【优化2】文件监听循环
@@ -740,7 +810,19 @@ if __name__ == '__main__':
                     crt_best_info['algo_name'] = global_best_info['algo_name']
 
 
-                    manage_workers(process_dict, sisr_args, ails_cmd, ails_configs, filo_cmd, hgs_cmd, ails_eoh_acc_cmd, ails_eoh_omega_cmd, ails_eoh_omega2_cmd, ails_eoh_omega_acc_cmd,global_best_info, start_time)
+                    manage_workers(process_dict,
+                                   sisr_args,
+                                   ails_cmd,
+                                   ails_configs,
+                                   filo_cmd,
+                                   hgs_cmd,
+                                   ails_eoh_acc_cmd,
+                                   ails_eoh_omega_cmd,
+                                   ails_eoh_omega2_cmd,
+                                   ails_eoh_omega_acc_cmd,
+                                   global_best_info,
+                                   start_time,
+                                   ails_eoh_acc_large_template=ails_eoh_acc_large_cmd)
             except Exception as e:
                 # 4. 详细异常信息输出
                 exc_type, exc_value, exc_traceback = sys.exc_info()  # 获取完整异常信息
