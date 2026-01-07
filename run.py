@@ -15,7 +15,7 @@ SCRIPT_DIR = os.path.abspath(os.path.dirname(__file__))
 METHODS_DIR = os.path.join(SCRIPT_DIR, "bin")
 
 OUTPUT_DIR = os.path.join(SCRIPT_DIR, "remote_results")
-RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-5days', 'Mahdi_baseline')
+RESUME_DIR = os.path.join(SCRIPT_DIR, 'remote_results/test-5days', 'AILSII_origin_5d')
 
 
 # 2. 定义实例文件（instances）所在的文件夹
@@ -80,7 +80,7 @@ def get_command_args(method_path: str, instance_path: str, time_limit: int) -> O
     # 使用传入的 time_limit 变量
     limit_str = f"{time_limit}"
 
-    if "AILSII_continue.jar" in method_name:
+    if "continue" in method_name:
         print('RESUME_DIR:', RESUME_DIR)
         return ["java", "-jar", "-Xms4000m", "-Xmx4000m", f"bin/{method_name}", "-file", instance_path,
                 "-stoppingCriterion", "Time", "-limit", limit_str, "-output", f"remote_results/{method_name}", "-resume",  f'{os.path.join(RESUME_DIR, instance_name)}.sol']

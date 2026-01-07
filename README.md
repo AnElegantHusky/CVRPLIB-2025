@@ -39,19 +39,19 @@ sudo chmod +x ./bin/*
 
 ```
 
-nohup python run_ails2_parallel_etacycle_continue.py --start_idx 0 --end_idx 48 > output.log 2>&1 &
+nohup python run.py AILS2_EoH_Acc_large_continue.jar --start-idx 50 --end-idx 100 --time-limit 86400 > output.log 2>&1 &
 
 ```
 
 ```
 
-nohup python run_ails2_parallel_etacycle_continue.py --start_idx 48 --end_idx 96 > output.log 2>&1 &
+nohup python run.py AILS2_EoH_Omega2_continue.jar --start-idx 50 --end-idx 100 --time-limit 86400 > output.log 2>&1 &
 
 ```
 
 ```
 
-nohup python run.py AILSII_continue.jar --start-idx 50 --end-idx 100 --time-limit 86400 > output.log 2>&1 &
+nohup python run.py AILS2_EoH_Ruin_continue.jar --start-idx 50 --end-idx 100 --time-limit 86400 > output.log 2>&1 &
 
 ```
 
