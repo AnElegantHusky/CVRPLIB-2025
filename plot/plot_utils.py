@@ -422,6 +422,204 @@ def get_fitness_table(instance_names, algorithm_names, base_dir='.', output_csv=
 
     return df
 
+
+def plot_gap_scatter_with_time_limit(instance_names, algorithm_names, base_dir='.', output_dir='.',
+                                     show_plot=False, point_size=60, point_alpha=0.7,
+                                     star_method=None, time_limit=None):
+    """
+    绘制 Gap 散点图，支持时间限制截断。
+
+    读取逻辑:
+    1. 如果 time_limit is None: 直接读取 .sol 文件中的最终 Cost。
+    2. 如果 time_limit is not None:
+       - 优先查找 .csv 文件。
+       - 如果 .csv 存在且非空: 读取并找到 time <= time_limit 的对应 Fitness。
+       - 如果 .csv 不存在或为空: 回退到读取 .sol 文件。
+
+    参数:
+    instance_names (list): 实例名称列表
+    algorithm_names (list): 算法名称列表
+    base_dir (str): 数据根目录
+    output_dir (str): 图片保存目录
+    show_plot (bool): 是否显示图片
+    point_size (int): 散点大小
+    point_alpha (float): 透明度
+    star_method (str): 特殊标记的算法名称
+    time_limit (float, optional): 时间限制 (秒)。如果提供，将尝试从 CSV 读取该时间点的解。
+    """
+
+    results = []
+
+    limit_str = f" (Time Limit: {time_limit}s)" if time_limit is not None else ""
+    print(f"--- 开始绘制 Gap 分析{limit_str} ---")
+
+    # 1. 遍历所有实例
+    for instance in instance_names:
+        # 提取客户数量 (假设格式 -n数字-)
+        match = re.search(r'-n(\d+)-', instance)
+        if match:
+            customer_num = int(match.group(1))
+        else:
+            print(f"警告: 无法从实例名 {instance} 中提取客户数量，跳过。")
+            continue
+
+        instance_best_values = {}
+
+        # 2. 遍历该实例下的所有算法
+        for method in algorithm_names:
+            method_dir = os.path.join(base_dir, method)
+            if not os.path.isdir(method_dir):
+                continue
+
+            fitness_val = None
+            csv_processed = False  # 标记是否成功处理了 CSV 数据
+
+            # -----------------------------------------------------------
+            # 逻辑分支 A: 如果设定了 time_limit，尝试读取 CSV
+            # -----------------------------------------------------------
+            if time_limit is not None:
+                csv_file_path = None
+                # 查找 CSV 文件
+                for file in os.listdir(method_dir):
+                    if file.endswith('.csv') and instance in file:
+                        csv_file_path = os.path.join(method_dir, file)
+                        break
+
+                if csv_file_path:
+                    try:
+                        # 读取 CSV
+                        data = pd.read_csv(
+                            csv_file_path,
+                            sep='[;,]',
+                            header=None,
+                            names=['time', 'fitness'],
+                            engine='python',
+                            on_bad_lines='skip'
+                        )
+
+                        if not data.empty:
+                            # 转换类型
+                            data['time'] = pd.to_numeric(data['time'], errors='coerce')
+                            data['fitness'] = pd.to_numeric(data['fitness'], errors='coerce')
+                            data.dropna(inplace=True)
+                            data = data.sort_values(by='time')
+
+                            # 筛选 time <= time_limit 的行
+                            valid_rows = data[data['time'] <= time_limit]
+
+                            if not valid_rows.empty:
+                                # 取最后一行 (最接近 time_limit 的解)
+                                fitness_val = valid_rows.iloc[-1]['fitness']
+                                csv_processed = True
+                            else:
+                                # CSV 非空，但在 time_limit 之前没有任何记录
+                                # 这种情况通常意味着在该时间限制内未找到可行解
+                                # 此时我们标记 csv_processed = True，但 fitness_val 仍为 None
+                                # 避免回退去读 .sol (因为 .sol 是最终解，肯定超出了时间限制)
+                                csv_processed = True
+                                # print(f"信息: {method} 在 {instance} 的 CSV 中未找到 {time_limit}s 内的解。")
+
+                    except Exception as e:
+                        print(f"警告: 读取 CSV {csv_file_path} 出错: {e}")
+
+            # -----------------------------------------------------------
+            # 逻辑分支 B: 读取 .sol 文件 (Fallback)
+            # 触发条件:
+            # 1. time_limit 为 None (用户没设限制)
+            # 2. time_limit 设了，但 CSV 没找到或为空 (csv_processed = False)
+            # -----------------------------------------------------------
+            if fitness_val is None and not csv_processed:
+                sol_file_path = None
+                for file in os.listdir(method_dir):
+                    if file.endswith('.sol') and instance in file:
+                        sol_file_path = os.path.join(method_dir, file)
+                        break
+
+                if sol_file_path:
+                    try:
+                        with open(sol_file_path, 'r', encoding='utf-8') as f:
+                            lines = f.readlines()
+                            for line in reversed(lines):
+                                if line.strip().startswith("Cost"):
+                                    parts = line.strip().split()
+                                    if len(parts) >= 2:
+                                        fitness_val = float(parts[1])
+                                        break
+                    except Exception as e:
+                        print(f"错误: 读取 SOL {sol_file_path} 时发生异常: {e}")
+
+            # 如果找到了有效的 fitness 值，存入字典
+            if fitness_val is not None:
+                instance_best_values[method] = fitness_val
+
+        # 3. 计算 Gap
+        if instance_best_values:
+            # 当前实例在所有符合条件的算法中的最小值
+            min_fitness_in_instance = min(instance_best_values.values())
+
+            for method, val in instance_best_values.items():
+                if min_fitness_in_instance == 0:
+                    gap = 0.0
+                else:
+                    gap = ((val - min_fitness_in_instance) / min_fitness_in_instance) * 100
+
+                results.append({
+                    'customer_num': customer_num,
+                    'method': method,
+                    'gap': gap,
+                    'instance': instance
+                })
+
+    # 4. 绘图
+    if not results:
+        print("未找到有效数据，无法绘制 Gap 图。")
+        return
+
+    df = pd.DataFrame(results)
+    df = df.sort_values(by='customer_num')
+
+    plt.figure(figsize=(12, 7))
+
+    for method in algorithm_names:
+        method_df = df[df['method'] == method]
+        if not method_df.empty:
+            if star_method is not None and method == star_method:
+                marker = 's'  # 方块
+            else:
+                marker = 'o'  # 圆点
+
+            plt.scatter(
+                method_df['customer_num'],
+                method_df['gap'],
+                label=method,
+                s=point_size,
+                alpha=point_alpha,
+                edgecolors='w',
+                linewidths=0.8,
+                marker=marker
+            )
+
+    plt.xlabel('Number of Customers')
+    plt.ylabel('Gap (%)')
+
+    title_suffix = f" (Time Limit: {time_limit}s)" if time_limit else " (.sol Files / Full Run)"
+    plt.title(f'Algorithm Gap Analysis{title_suffix}')
+
+    plt.legend(title='Method')
+    plt.grid(True, linestyle='--', alpha=0.5)
+    plt.ylim(bottom=-0.5)
+
+    # 5. 保存
+    os.makedirs(output_dir, exist_ok=True)
+    filename_suffix = f"_limit_{time_limit}" if time_limit else "_sol"
+    output_path = os.path.join(output_dir, f'gap_analysis_scatter{filename_suffix}.png')
+
+    plt.savefig(output_path, dpi=300)
+    print(f"--- Gap 分析完成. 图像已保存至 {output_path} ---")
+
+    if show_plot:
+        plt.show()
+
 def plot_gap_scatter_from_sol(instance_names, algorithm_names, base_dir='.', output_dir='.', show_plot=False,
                               point_size=60, point_alpha=0.7, star_method=None):
     """

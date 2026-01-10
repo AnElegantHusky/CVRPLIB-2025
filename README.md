@@ -55,6 +55,9 @@ nohup python run.py AILS2_EoH_Ruin_continue.jar --start-idx 50 --end-idx 100 --t
 
 ```
 
+python run.py AILS2_EoH_Ruin_continue.jar --start-idx 90 --end-idx 93 --time-limit 14400
+
+
 [//]: # (```)
 
 [//]: # ()
