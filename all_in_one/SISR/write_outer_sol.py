@@ -3,7 +3,6 @@ import sqlite3
 import json
 from pathlib import Path
 
-instance_name = 'XLTEST-n1048-k139' # TODO
 
 def save_best(db_path, running_time, score, solution, algo_name):
     try:
@@ -41,13 +40,12 @@ def save_best(db_path, running_time, score, solution, algo_name):
 
 SISR_PATH = Path(__file__).resolve().parent
 
-OUTER_PATH = SISR_PATH / 'outer_sol' / instance_name
-DB_PATH = SISR_PATH / 'log_buffer' / instance_name / 'shared.db'
+OUTER_PATH = SISR_PATH / 'outer_sol'
+DB_PATH = SISR_PATH / 'log_buffer'
 
-Sol_path = [item for item in OUTER_PATH.iterdir() if item.is_file()]
-
-sol = vrplib.read_solution(Sol_path[0])
-
-
-save_best(DB_PATH, -1e5, sol['cost'], sol['routes'], 'outer')
-# save_best(DB_PATH, -1e5, 100, sol['routes'], 'outer')
+if __name__ == '__main__':
+    for sol_path in OUTER_PATH.rglob('*.sol'):
+        instance_name = sol_path.parent.name
+        sol = vrplib.read_solution(sol_path)
+        db_path = DB_PATH / instance_name / 'shared.db'
+        save_best(db_path, -1e5, sol['cost'], sol['routes'], 'outer')
