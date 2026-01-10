@@ -65,7 +65,7 @@ lines = [
 ]
 
 for instance_path in target_files:
-    instance_name = instance_path.name
+    instance_name = instance_path.stem
     cmd = f"nohup python main_for_all_final.py {instance_folder} {instance_name} > {instance_name}.log 2>&1 &"
     lines.append(cmd)
 
