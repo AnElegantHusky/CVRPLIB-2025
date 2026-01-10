@@ -864,20 +864,31 @@ if __name__ == '__main__':
                         need_restart = True
                         break
 
-                # 如果发现新最优解，或者有 survivor 进程死亡，都调用 manage_workers
-                if (global_best_info and crt_best_info['score'] > global_best_info['score']) or need_restart:
+                # 检查是否有新的最优解
+                has_new_best = (global_best_info and
+                                crt_best_info['score'] > global_best_info['score'])
 
-                if global_best_info and crt_best_info['score'] > global_best_info['score']:
+                # 如果有新最优解，记录日志并更新
+                if has_new_best:
                     print(global_best_info['algo_name'], global_best_info['score'])
-
                     db_handler.log_survivor(global_best_info['algo_name'])
                     if crt_best_info['algo_name'] is not None:
-                        db_handler.log_improvement(crt_best_info['algo_name'], crt_best_info['score'],
-                                                   global_best_info['algo_name'], global_best_info['score'],
-                                                   time.time() - start_time)
-
+                        db_handler.log_improvement(
+                            crt_best_info['algo_name'], crt_best_info['score'],
+                            global_best_info['algo_name'], global_best_info['score'],
+                            time.time() - start_time
+                        )
                     crt_best_info['score'] = global_best_info['score']
                     crt_best_info['algo_name'] = global_best_info['algo_name']
+
+                # 如果有新最优解或需要重启，都调用 manage_workers
+                # 但确保传入的是最新的 global_best_info
+                if has_new_best or need_restart:
+                    # 即使没有新最优解，也确保 crt_best_info 与 global_best_info 同步
+                    if global_best_info and not has_new_best:
+                        # 同步但不记录日志（因为不是新发现）
+                        crt_best_info['score'] = global_best_info['score']
+                        crt_best_info['algo_name'] = global_best_info['algo_name']
 
 
                     manage_workers(process_dict,
