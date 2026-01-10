@@ -541,9 +541,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('instances_path', default='cvrplib_1019', help='The folder of all instances.')
     parser.add_argument('instance_name', help='Instance name.')
-    parser.add_argument('running_time_min', default=24*60*30, type=int, help='Max running time in minutes.')
-    parser.add_argument('warmup_sec', default=3600, type=int, help='Warmup time in seconds.')
-    parser.add_argument('update_interval_sec', default=3600, type=int, help='Update interval in seconds.')
+    parser.add_argument('--running_time_min', default=24*60*30, type=int, help='Max running time in minutes.')
+    parser.add_argument('--warmup_sec', default=3600, type=int, help='Warmup time in seconds.')
+    parser.add_argument('--update_interval_sec', default=3600, type=int, help='Update interval in seconds.')
     args = parser.parse_args()
 
     # 1. 强制 Spawn
