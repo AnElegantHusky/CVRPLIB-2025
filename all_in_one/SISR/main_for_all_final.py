@@ -391,6 +391,9 @@ def manage_workers(process_dict,
         'AILS2_5day',
         'AILS2_10day',
         'AILS2_20day',
+        'ails2_eoh_acc_large',
+        'AILS2_etaMax001_limit5d',
+        'ails2_eoh_omega2'
     ]
 
     # 1. 终止非幸存者进程
@@ -449,16 +452,16 @@ def manage_workers(process_dict,
         p.start()
         process_dict['ails2_eoh_acc'] = p
 
-    # if ails_eoh_acc_large_template:
-    #     if not process_dict.get('ails2_eoh_acc_large') or not process_dict['ails2_eoh_acc_large'].is_alive():       # :
-    #         # 构建该特定配置的命令
-    #         p = multiprocessing.Process(
-    #             target=run_external_process,
-    #             args=(ails_eoh_acc_large_template,),
-    #             name='ails2_eoh_acc_large'
-    #         )
-    #         p.start()
-    #         process_dict['ails2_eoh_acc_large'] = p
+    if ails_eoh_acc_large_template:
+        if not process_dict.get('ails2_eoh_acc_large') or not process_dict['ails2_eoh_acc_large'].is_alive():       # :
+            # 构建该特定配置的命令
+            p = multiprocessing.Process(
+                target=run_external_process,
+                args=(ails_eoh_acc_large_template,),
+                name='ails2_eoh_acc_large'
+            )
+            p.start()
+            process_dict['ails2_eoh_acc_large'] = p
 
     # if ails_eoh_ruin_template:
     #     if not process_dict.get('ails2_eoh_ruin') or not process_dict['ails2_eoh_ruin'].is_alive():       # :
@@ -481,15 +484,15 @@ def manage_workers(process_dict,
     #     p.start()
     #     process_dict['ails2_eoh_omega'] = p
 
-    # if not process_dict.get('ails2_eoh_omega2') or not process_dict['ails2_eoh_omega2'].is_alive():       #add omega2
-    #     # 构建该特定配置的命令
-    #     p = multiprocessing.Process(
-    #         target=run_external_process,
-    #         args=(ails_eoh_omega2_template,),
-    #         name='ails2_eoh_omega2'
-    #     )
-    #     p.start()
-    #     process_dict['ails2_eoh_omega2'] = p
+    if not process_dict.get('ails2_eoh_omega2') or not process_dict['ails2_eoh_omega2'].is_alive():       #add omega2
+        # 构建该特定配置的命令
+        p = multiprocessing.Process(
+            target=run_external_process,
+            args=(ails_eoh_omega2_template,),
+            name='ails2_eoh_omega2'
+        )
+        p.start()
+        process_dict['ails2_eoh_omega2'] = p
 
     # if not process_dict.get('ails2_eoh_omega_acc') or not process_dict['ails2_eoh_omega_acc'].is_alive():       #add omega and acc
     #     # 构建该特定配置的命令
@@ -611,8 +614,10 @@ if __name__ == '__main__':
         {'name': f'AILS2_20day', 'etaMax': 1, 'limit': 24 * 60 * 60 * 20},
 
         {'name': f'AILS2_etaMax0005_limit24h', 'etaMax': 0.005, 'limit': 24*60*60},
-        # {'name': f'AILS2_etaMax001_limit24h',   'etaMax': 0.01, 'limit': 24*60*60},
         {'name': f'AILS2_etaMax002_limit24h', 'etaMax': 0.02, 'limit': 24*60*60},
+
+        {'name': f'AILS2_etaMax001_limit5d', 'etaMax': 0.01, 'limit': 24 * 60 * 60 * 5},
+
         # {'name': 'AILS2_etaMax005_limit24h',   'etaMax': 0.05, 'limit': 24*60*60},
         # {'name': 'AILS2_etaMax01_limit24h',   'etaMax': 0.1, 'limit': 24*60*60},
         # {'name': 'AILS2_etaMax1_limit10min',   'etaMax': 1, 'limit': 10*60},
@@ -689,7 +694,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(4 * 60 * 60),  # second
+        "-limit", str(5 * 24 * 60 * 60),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -752,7 +757,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(24*60*60),  # second
+        "-limit", str(5 * 24 * 60 * 60),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -851,6 +856,17 @@ if __name__ == '__main__':
                 break
             try:
                 global_best_info = db_handler.get_status()
+
+                # 检查是否需要重启已死亡的 survivor 进程
+                need_restart = False
+                for name in ['ails2_eoh_acc_large', 'AILS2_etaMax001_limit5d', 'ails2_eoh_omega2']:
+                    if name in process_dict and not process_dict[name].is_alive():
+                        need_restart = True
+                        break
+
+                # 如果发现新最优解，或者有 survivor 进程死亡，都调用 manage_workers
+                if (global_best_info and crt_best_info['score'] > global_best_info['score']) or need_restart:
+
                 if global_best_info and crt_best_info['score'] > global_best_info['score']:
                     print(global_best_info['algo_name'], global_best_info['score'])
 
