@@ -541,6 +541,10 @@ def manage_workers(process_dict,
 
 if __name__ == '__main__':
     # python main_for_all3.py XLTEST-n1048-k139 20
+
+    # one_day_time_sec = 24 * 60 * 60       # warning
+    one_day_time_sec = 30 * 60
+
     parser = argparse.ArgumentParser()
     parser.add_argument('instances_path', default='cvrplib_1019', help='The folder of all instances.')
     parser.add_argument('instance_name', help='Instance name.')
@@ -608,15 +612,15 @@ if __name__ == '__main__':
 
     # 1. 定义多种 AILS2 配置
     ails_configs = [
-        {'name': f'AILS2_1day', 'etaMax': 1, 'limit': 24 * 60 * 60},
-        {'name': f'AILS2_5day', 'etaMax': 1, 'limit': 24 * 60 * 60 * 5},
-        {'name': f'AILS2_10day', 'etaMax': 1, 'limit': 24 * 60 * 60 * 10},
-        {'name': f'AILS2_20day', 'etaMax': 1, 'limit': 24 * 60 * 60 * 20},
+        {'name': f'AILS2_1day', 'etaMax': 1, 'limit': one_day_time_sec},
+        {'name': f'AILS2_5day', 'etaMax': 1, 'limit': one_day_time_sec * 5},
+        {'name': f'AILS2_10day', 'etaMax': 1, 'limit': one_day_time_sec * 10},
+        {'name': f'AILS2_20day', 'etaMax': 1, 'limit': one_day_time_sec * 20},
 
-        {'name': f'AILS2_etaMax0005_limit24h', 'etaMax': 0.005, 'limit': 24*60*60},
-        {'name': f'AILS2_etaMax002_limit24h', 'etaMax': 0.02, 'limit': 24*60*60},
+        {'name': f'AILS2_etaMax0005_limit24h', 'etaMax': 0.005, 'limit': one_day_time_sec},
+        {'name': f'AILS2_etaMax002_limit24h', 'etaMax': 0.02, 'limit': one_day_time_sec},
 
-        {'name': f'AILS2_etaMax001_limit5d', 'etaMax': 0.01, 'limit': 24 * 60 * 60 * 5},
+        {'name': f'AILS2_etaMax001_limit5d', 'etaMax': 0.01, 'limit': one_day_time_sec * 5},
 
         # {'name': 'AILS2_etaMax005_limit24h',   'etaMax': 0.05, 'limit': 24*60*60},
         # {'name': 'AILS2_etaMax01_limit24h',   'etaMax': 0.1, 'limit': 24*60*60},
@@ -674,7 +678,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(24*60*60),  # second
+        "-limit", str(one_day_time_sec),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -694,7 +698,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(5 * 24 * 60 * 60),  # second
+        "-limit", str(5 * one_day_time_sec),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -736,7 +740,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(24*60*60),  # second
+        "-limit", str(one_day_time_sec),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -757,7 +761,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(5 * 24 * 60 * 60),  # second
+        "-limit", str(5 * one_day_time_sec),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -780,7 +784,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(24*60*60),  # second
+        "-limit", str(one_day_time_sec),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
