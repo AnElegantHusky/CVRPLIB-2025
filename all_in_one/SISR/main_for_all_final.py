@@ -389,6 +389,8 @@ def manage_workers(process_dict,
         best_info.get('algo_name'),
         'AILS2_1day',
         'AILS2_5day',
+        'AILS2_10day',
+        'AILS2_20day',
     ]
 
     # 1. 终止非幸存者进程
@@ -605,6 +607,8 @@ if __name__ == '__main__':
     ails_configs = [
         {'name': f'AILS2_1day', 'etaMax': 1, 'limit': 24 * 60 * 60},
         {'name': f'AILS2_5day', 'etaMax': 1, 'limit': 24 * 60 * 60 * 5},
+        {'name': f'AILS2_10day', 'etaMax': 1, 'limit': 24 * 60 * 60 * 10},
+        {'name': f'AILS2_20day', 'etaMax': 1, 'limit': 24 * 60 * 60 * 20},
 
         {'name': f'AILS2_etaMax0005_limit24h', 'etaMax': 0.005, 'limit': 24*60*60},
         # {'name': f'AILS2_etaMax001_limit24h',   'etaMax': 0.01, 'limit': 24*60*60},

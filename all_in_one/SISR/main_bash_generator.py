@@ -15,7 +15,7 @@ lines = [
 ]
 for instance_path in instance_root_path.rglob('*.vrp'):
     instance_name = instance_path.name
-    cmd = f"nohup python ./write_outer_sol {instance_folder} {instance_name} > {instance_name}.log 2>&1 &"
+    cmd = f"nohup python main_for_all_final.py {instance_folder} {instance_name} > {instance_name}.log 2>&1 &"
     lines.append(cmd)
 
 with open(sh_name, 'w', encoding='utf-8') as f:
