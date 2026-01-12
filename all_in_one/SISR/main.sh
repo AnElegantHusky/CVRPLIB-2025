@@ -40,8 +40,16 @@ elif docker exec cvrplib test -d /app/SISR; then
     docker exec -w /app cvrplib bash -c "cd SISR && $CMD"
     exit $?
 
+# 【尝试路径 C】: /app/Competition_Deploy_Hybird/all_in_one/SISR
+elif docker exec cvrplib test -d /app/Competition_Deploy_Hybird/all_in_one/SISR; then
+    echo "✅ 检测到路径 C: /app/Competition_Deploy_Hybird/all_in_one/SISR"
+    echo "🚀 开始执行任务..."
+
+    docker exec -w /app cvrplib bash -c "cd Competition_Deploy_Hybird/all_in_one/SISR && $CMD"
+    exit $?
+
 # 【所有路径都失败】
 else
-    echo "❌ 错误: 在容器 cvrplib 中未找到 /app/all_in_one/SISR 或 /app/SISR 路径。"
+    echo "❌ 错误: 在容器 cvrplib 中未找到 /app/Competition_Deploy_Hybird/all_in_one/SISR 或 /app/all_in_one/SISR 或 /app/SISR 路径。"
     exit 1
 fi
