@@ -35,3 +35,12 @@ docker exec -it cvrplib bash
 
 ```
 
+关闭容器中任务，但不杀死容器
+```bash
+# 杀死容器 cvrplib 内所有名为 python3 的进程
+docker exec cvrplib pkill -f python3
+
+# 如果上面那个没停干净，可以杀掉 shell 脚本
+docker exec cvrplib pkill -f run_all.sh
+```
+

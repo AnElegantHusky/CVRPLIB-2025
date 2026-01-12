@@ -373,8 +373,8 @@ def manage_workers(process_dict,
                    filo_template,
                    hgs_template,
                    ails_eoh_acc_template,
-                   ails_eoh_omega2_template,
                    ails_eoh_omega_template,
+                   ails_eoh_omega2_template,
                    ails_eoh_omega_acc_template,
                    best_info,
                    start_time,
@@ -769,7 +769,7 @@ if __name__ == '__main__':
     ails_eoh_omega2_cmd = [                            # : AILSII不同版本新增cmd
         "java",
         # "--enable-native-access=ALL-UNNAMED", # handle the warning
-        "-jar", java_cp_eoh_omega,
+        "-jar", java_cp_eoh_omega2,
         "-file", instance_path.as_posix(),
         "-sharedDB", shared_db_path.as_posix(),
         "-rounded", "true",
@@ -787,12 +787,10 @@ if __name__ == '__main__':
         "-etaMax", "0.01",
     ]
 
-
-
     ails_eoh_omega_acc_cmd = [                            # : AILSII不同版本新增cmd
         "java",
         # "--enable-native-access=ALL-UNNAMED", # handle the warning
-        "-jar", java_cp_eoh_omega,
+        "-jar", java_cp_eoh_omega2,
         "-file", instance_path.as_posix(),
         "-sharedDB", shared_db_path.as_posix(),
         "-rounded", "true",
@@ -860,7 +858,6 @@ if __name__ == '__main__':
                    ails_eoh_omega_cmd,
                    ails_eoh_omega2_cmd,
                    ails_eoh_omega_acc_cmd,
-
                    {},
                    start_time,
                    ails_eoh_acc_large_template=ails_eoh_acc_large_cmd,
