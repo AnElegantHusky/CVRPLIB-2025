@@ -364,6 +364,7 @@ def update_cmd_arg(base_cmd, flag, value):
     return cmd
 
 # ================= 核心管理逻辑 =================
+finished_external = []
 
 def manage_workers(process_dict,
                    sisr_args,
@@ -391,7 +392,7 @@ def manage_workers(process_dict,
         'AILS2_5day',
         'AILS2_10day',
         'AILS2_20day',
-        'ails2_eoh_acc_large',
+        # 'ails2_eoh_acc_large',
         'AILS2_etaMax001_limit5d',
         'ails2_eoh_omega2'
     ]
@@ -404,6 +405,18 @@ def manage_workers(process_dict,
             kill_process_tree(p.pid)
             p.join(timeout=1)
             del process_dict[name]
+
+    # 1.5 如果 AILS2_1day/5day/10day/20day已经跑完，则终止对应进程
+    for name in ['AILS2_1day', 'AILS2_5day', 'AILS2_10day', 'AILS2_20day']:
+        if name not in process_dict:
+            continue
+        p = process_dict[name]
+        if not p.is_alive():
+            kill_process_tree(p.pid)
+            p.join(timeout=1)
+            del process_dict[name]
+            finished_external.append(name)
+
 
     # 2. 垃圾回收 (关键：防止内存泄漏)
     gc.collect()
@@ -421,8 +434,12 @@ def manage_workers(process_dict,
     #     process_dict['ails2'] = p
 
     # 2. 重启/启动 AILS2 多实例
-    for config in ails_configs:
+
+    for config in ails_configs:     # ails_configs: AILS2_1day, AILS2_5day, AILS2_10day, AILS2_20day,
+                                    # AILS2_etaMax0005_limit24h, AILS2_etaMax002_limit24h, AILS2_etaMax001_limit5d
         unique_name = config['name']
+        if unique_name in finished_external:
+            continue
 
         # 只有当该进程不存在或已死时才启动
         if not process_dict.get(unique_name) or not process_dict[unique_name].is_alive():
@@ -540,10 +557,7 @@ def manage_workers(process_dict,
 # ================= 主程序入口 =================
 
 if __name__ == '__main__':
-    # python main_for_all3.py XLTEST-n1048-k139 20
-
-    # one_day_time_sec = 24 * 60 * 60       # warning
-    one_day_time_sec = 30 * 60
+    one_day_time_sec = 24 * 60 * 60
 
     parser = argparse.ArgumentParser()
     parser.add_argument('instances_path', default='cvrplib_1019', help='The folder of all instances.')
@@ -698,7 +712,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(5 * one_day_time_sec),  # second
+        "-limit", str(one_day_time_sec),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -863,7 +877,8 @@ if __name__ == '__main__':
 
                 # 检查是否需要重启已死亡的 survivor 进程
                 need_restart = False
-                for name in ['ails2_eoh_acc_large', 'AILS2_etaMax001_limit5d', 'ails2_eoh_omega2']:
+                # for name in ['ails2_eoh_acc_large', 'AILS2_etaMax001_limit5d', 'ails2_eoh_omega2']:
+                for name in ['AILS2_etaMax001_limit5d', 'ails2_eoh_omega2']:
                     if name in process_dict and not process_dict[name].is_alive():
                         need_restart = True
                         break

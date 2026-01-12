@@ -30,7 +30,7 @@ from pathlib import Path
 SISR_PATH = Path(__file__).resolve().parent
 ROOT_PATH = SISR_PATH.parent
 
-instance_folder = 'cvrplib_1019' # TODO: check path
+instance_folder = 'instances' # TODO: check path
 instance_root_path = SISR_PATH / 'data' / instance_folder
 
 # 2. 获取所有文件并【排序】
