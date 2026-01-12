@@ -132,7 +132,10 @@ for srv in servers:
 
             # 4. 【兜底】杀掉容器内所有 python3 进程 (最彻底)
             # 如果前面的步骤有漏网之鱼（比如子进程改了名），这一步能保证干净
-            "docker exec cvrplib pkill -9 -f python3"
+            "docker exec cvrplib pkill -9 -f python3",
+
+            # -f java 会匹配 'java -jar ...' 等所有 java 相关命令
+            "docker exec cvrplib pkill -9 -f java",
         ]
 
         print(f"   🔪 正在执行深度清理...")
