@@ -92,7 +92,7 @@ servers = [
 # ===========================================
 # 本地要分发的文件
 file_name_list = [
-    # 'main.sh',
+    'main.sh',
     # 'main_for_all_final.py',
     # 'sqlite2csv.py',
     # 'db2sol.py',
