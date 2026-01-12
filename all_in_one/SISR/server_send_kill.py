@@ -97,7 +97,7 @@ to_run_servers = [
 
 # ===========================================
 
-print(f"🛑 开始批量停止任务...")
+print(f"🛑 开始执行【深度清理】任务...")
 
 for srv in servers:
     host_ip = srv['host']
@@ -116,16 +116,32 @@ for srv in servers:
             connect_timeout=10
         )
 
-        # 定义清理命令
-        # warn=True: 如果没有找到进程(pkill返回1)，不要抛出异常，继续执行下一条
+        # === 定义清理命令序列 (执行顺序很重要) ===
+        kill_cmds = [
+            # 1. 【关键】先杀 Shell 脚本
+            # 防止杀掉 Python 后，脚本里的循环又立刻启动新的 Python
+            "docker exec cvrplib pkill -f run_all.sh",
 
-        print(f"   🔪 正在清理 python3 进程...")
-        conn.run("docker exec cvrplib pkill -f python3", warn=True, hide=True)
+            # 2. 【核心】强杀主 Python 程序
+            # 使用 -9 强制杀死，防止进程卡死无法响应
+            "docker exec cvrplib pkill -9 -f main_for_all_final.py",
 
-        print(f"   🔪 正在清理 run_all.sh 进程...")
-        conn.run("docker exec cvrplib pkill -f run_all.sh", warn=True, hide=True)
+            # 3. 【关联】通过路径关键字杀子进程
+            # 凡是命令行参数里包含 'all_in_one' 的进程全部干掉
+            "docker exec cvrplib pkill -9 -f all_in_one",
 
-        print(f"✅ {host_ip}: 清理命令已执行完毕")
+            # 4. 【兜底】杀掉容器内所有 python3 进程 (最彻底)
+            # 如果前面的步骤有漏网之鱼（比如子进程改了名），这一步能保证干净
+            "docker exec cvrplib pkill -9 -f python3"
+        ]
+
+        print(f"   🔪 正在执行深度清理...")
+
+        for cmd in kill_cmds:
+            # warn=True: 即使没找到进程报错，也不中断脚本，继续执行下一条
+            conn.run(cmd, warn=True, hide=True)
+
+        print(f"✅ {host_ip}: 清理完毕")
         conn.close()
 
     except Exception as e:
