@@ -23,7 +23,7 @@ servers = [
         "user": "ei",
         "password": "ei@noah2012",  # 如果用 SSH Key，这项可以留空或删除
         "port": 22,
-        "base_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/"
+        "base_path": "/home/ei/workspace/cvrp_com_hyb/CVRPLIB-2025-all-in-one/all_in_one/SISR/"
     },
     {
         "host": "10.90.91.125",
@@ -92,11 +92,11 @@ servers = [
 # ===========================================
 # 本地要分发的文件
 file_name_list = [
-    'main.sh',
-    'main_for_all_final.py',
-    'sqlite2csv.py',
-    'db2sol.py',
-    # 'instances.zip'
+    # 'main.sh',
+    # 'main_for_all_final.py',
+    # 'sqlite2csv.py',
+    # 'db2sol.py',
+    'instances.zip'
 ]
 
 # 获取当前脚本所在的目录 (兼容 Windows/Linux)
@@ -120,7 +120,7 @@ to_run_servers = [
 ]
 
 for srv in servers:
-    if srv not in to_run_servers:
+    if srv['host'] not in to_run_servers:
         continue
     try:
         print(f"\n🔗 正在连接: {srv['host']} (User: {srv['user']})...")
