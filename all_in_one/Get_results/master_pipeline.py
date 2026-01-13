@@ -11,9 +11,9 @@ from fabric import Connection
 
 # ================= 配置区域 =================
 # 1. 功能开关
-SAVE_ALL_HISTORY = False  # [关键开关] True: 保存所有历史数据; False: DB和CSV只保留最新
+SAVE_ALL_HISTORY = False  # True: 保存所有历史数据; False: DB和CSV只保留最新
 
-# 2. 服务器清单
+# 2. 服务器清单 (共12台)
 SERVERS = [
     {"host": "10.90.91.100", "user": "ei", "password": "ei@noah2012", "port": 22,
      "base_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/"},
@@ -41,7 +41,7 @@ SERVERS = [
      "base_path": "/home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/"},
 ]
 
-FETCH_INTERVAL = 24 * 3600
+FETCH_INTERVAL = 24 * 3600  # 巡检间隔：24小时
 LOCAL_ROOT = Path(__file__).resolve().parent
 HISTORY_FILE = LOCAL_ROOT / "best_scores_history.json"
 
@@ -65,9 +65,13 @@ def save_history(history):
 
 
 def clean_old_data(dir_path):
-    """清理目录下的旧文件"""
+    """清理目录逻辑：增加异常捕获以解决 Windows 文件占用锁定问题"""
     if dir_path.exists():
-        shutil.rmtree(dir_path)
+        try:
+            shutil.rmtree(dir_path, ignore_errors=False)
+            log_with_time(f"🧹 已清理旧目录: {dir_path.name}")
+        except Exception as e:
+            log_with_time(f"⚠️ 清理目录 {dir_path.name} 失败 (可能文件被占用): {e}")
     dir_path.mkdir(parents=True, exist_ok=True)
 
 
@@ -78,22 +82,21 @@ def run_cycle():
     ts_folder = now.strftime("%Y%m%d_%H%M%S")
     ts_human = now.strftime("%Y-%m-%d %H:%M:%S")
 
-    # 1. 路径确定
-    # 如果不保存历史，DB存储在固定目录 log_buffer，否则存储在带时间戳目录
+    # 1. 路径初始化
     if SAVE_ALL_HISTORY:
         current_db_buffer = LOCAL_ROOT / "all_history_dbs" / ts_folder
         csv_save_path = LOCAL_ROOT / "all_history_csvs"
     else:
         current_db_buffer = LOCAL_ROOT / "log_buffer"
         csv_save_path = LOCAL_ROOT / "latest_csvs"
-        # 清理旧数据
+        # 仅在关闭历史记录模式下清理，防止空间溢出
         clean_old_data(current_db_buffer)
         clean_old_data(csv_save_path)
 
     current_db_buffer.mkdir(parents=True, exist_ok=True)
     csv_save_path.mkdir(parents=True, exist_ok=True)
 
-    # SOL 和 Report 永远保留历史
+    # 无论模式如何，SOL 和 Report 永远保留时间戳历史
     sol_history_dir = LOCAL_ROOT / "all_history_sols" / f"sol_{ts_folder}"
     report_history_dir = LOCAL_ROOT / "all_history_reports"
     sol_history_dir.mkdir(parents=True, exist_ok=True)
@@ -101,12 +104,13 @@ def run_cycle():
 
     log_with_time(f"🚀 周期开始: {ts_human} (历史记录模式: {'开启' if SAVE_ALL_HISTORY else '关闭'})")
 
-    # 2. 抓取 (Fetch)
+    # 2. 抓取 (Fetch) 阶段
     for srv in SERVERS:
         try:
             with Connection(host=srv['host'], user=srv['user'], port=srv['port'],
                             connect_kwargs={"password": srv['password']}, connect_timeout=10) as conn:
                 remote_log_root = f"{srv['base_path'].rstrip('/')}/log_buffer"
+                # 远程查找所有 shared.db
                 result = conn.run(f"find {remote_log_root} -name 'shared.db'", hide=True, warn=True)
                 if result.ok and result.stdout.strip():
                     for remote_file in result.stdout.strip().split('\n'):
@@ -118,77 +122,101 @@ def run_cycle():
         except Exception as e:
             log_with_time(f"  [Fetch Error] {srv['host']}: {e}")
 
-    # 3. 处理数据 (CSV & SOL & Report)
+    # --- 阶段转换提示 ---
+    print("-" * 60)
+    log_with_time("✅ 所有服务器采集完毕。开始整理本地 CSV 并对比历史分数...")
+    print("-" * 60)
+
+    # 3. 处理数据 (CSV & SOL & Report) 阶段
     history = load_history()
     improvements = []
-
-    # 临时存放本次生成的 CSV
     temp_csv_root = csv_save_path / f"csv_{ts_folder}"
     temp_csv_root.mkdir(parents=True, exist_ok=True)
 
+    # 遍历下载好的所有 shared.db
     for db_path in current_db_buffer.rglob("shared.db"):
         instance_name = db_path.parent.name
         try:
+            # 使用 with 显式管理连接，确保处理完即刻关闭连接，避免 Windows 文件占用
             with sqlite3.connect(db_path) as conn:
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
 
-                # A. 转 CSV
+                # A. 转换所有表为 CSV
                 inst_csv_dir = temp_csv_root / instance_name
                 inst_csv_dir.mkdir(parents=True, exist_ok=True)
                 cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-                for table in [t[0] for t in cursor.fetchall()]:
+                tables = [t[0] for t in cursor.fetchall()]
+
+                for table in tables:
                     cursor.execute(f"SELECT * FROM {table}")
                     rows = cursor.fetchall()
                     if rows:
-                        with open(inst_csv_dir / f"{table}.csv", 'w', newline='', encoding='utf-8') as f:
+                        csv_file = inst_csv_dir / f"{table}.csv"
+                        with open(csv_file, 'w', newline='', encoding='utf-8') as f:
                             writer = csv.writer(f)
                             writer.writerow(rows[0].keys())
                             writer.writerows(rows)
 
-                # B. 提取 SOL 并比分
+                # B. 提取最佳解并对比分数
                 cursor.execute("SELECT solution, score FROM global_best WHERE id = 1;")
                 row = cursor.fetchone()
                 if row and row['solution']:
                     score = float(row['score'])
                     old_best = history.get(instance_name)
 
+                    # 发现更好的成绩
                     if old_best is None or score < old_best:
                         status = "🆕 [New]" if old_best is None else "🔥 [Improved]"
                         diff = 0 if old_best is None else old_best - score
                         history[instance_name] = score
                         improvements.append(f"{status} {instance_name}: {score:.4f} (Diff: -{diff:.4f})")
 
-                    # 生成 SOL (始终保存到历史目录)
+                    # 解析并保存标准的 .sol 文件
                     routes = ast.literal_eval(row['solution'])
-                    with open(sol_history_dir / f"{instance_name}.sol", 'w', encoding='utf-8') as f:
+                    sol_file = sol_history_dir / f"{instance_name}.sol"
+                    with open(sol_file, 'w', encoding='utf-8') as f:
                         for i, r in enumerate(routes):
                             f.write(f"Route #{i + 1}: {' '.join(map(str, r))}\n")
                         f.write(f"Cost {score:.6f}\n")
         except Exception as e:
             log_with_time(f"  [Process Error] {instance_name}: {e}")
 
-    # 4. 打包 CSV
+    # 4. 打包并清理临时 CSV 文件夹
     if any(temp_csv_root.iterdir()):
         shutil.make_archive(str(temp_csv_root), 'zip', temp_csv_root)
-        shutil.rmtree(temp_csv_root)
+        try:
+            shutil.rmtree(temp_csv_root)
+        except:
+            pass
 
-    # 5. 保存历史及战报
+    # 5. 保存历史记录及生成战报
     save_history(history)
     report_file = report_history_dir / f"report_{ts_folder}.txt"
     with open(report_file, 'w', encoding='utf-8') as f:
-        f.write(f"SISR 自动周期总结 ({ts_human})\n" + "=" * 40 + "\n")
-        f.write("\n".join(improvements) if improvements else "本次运行无分数更新。")
+        header = f"SISR 自动化分析报告 ({ts_human})\n"
+        f.write(header + "=" * 40 + "\n")
+        f.write("\n".join(improvements) if improvements else "本次巡检无分数更新。")
 
-    log_with_time(f"✨ 周期结束。成绩单已存至 history_reports。")
+    log_with_time(f"✨ 周期任务完成。报告已生成: {report_file.name}")
 
+
+# ================= 主入口 =================
 
 def main():
-    log_with_time("🚀 系统启动。")
+    log_with_time("🚀 系统启动。正在进入 24 小时巡检模式...")
     while True:
-        run_cycle()
-        log_with_time(f"💤 进入休眠，{FETCH_INTERVAL / 3600}小时后运行下一次...")
-        time.sleep(FETCH_INTERVAL)
+        try:
+            run_cycle()
+            log_with_time(f"💤 任务休眠中。下次运行时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} 之后约 24 小时。")
+            time.sleep(FETCH_INTERVAL)
+        except KeyboardInterrupt:
+            log_with_time("👋 用户停止脚本运行。")
+            break
+        except Exception as e:
+            log_with_time(f"❌ 主程序捕获严重异常: {e}")
+            log_with_time("将在 60 秒后重试...")
+            time.sleep(60)
 
 
 if __name__ == "__main__":
