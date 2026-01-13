@@ -44,7 +44,7 @@ SERVERS = [
      "base_path": "/home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/"},
 ]
 
-FETCH_INTERVAL = 24 * 3600
+FETCH_INTERVAL = 2 * 3600
 LOCAL_ROOT = Path(__file__).resolve().parent
 HISTORY_FILE = LOCAL_ROOT / "best_scores_history.json"
 
@@ -84,7 +84,7 @@ def get_cvrplib_instances_float():
     headers = {"User-Agent": "Mozilla/5.0"}
     log_with_time("🌍 正在连接 CVRPLIB 获取最新纪录(BKS)...")
     try:
-        response = requests.get(target_url, headers=headers, timeout=20)
+        response = requests.get(target_url, headers=headers, timeout=20, verify=False)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.select_one('main section table') or soup.find('table')
@@ -248,7 +248,7 @@ def main():
     while True:
         try:
             run_cycle()
-            log_with_time(f"💤 休眠中。下次运行约在 24 小时后。")
+            log_with_time(f"💤 休眠中。下次运行约在 {FETCH_INTERVAL//3600} 小时后。")
             time.sleep(FETCH_INTERVAL)
         except KeyboardInterrupt:
             break
