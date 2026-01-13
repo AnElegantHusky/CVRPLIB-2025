@@ -204,7 +204,7 @@ def run_cycle():
 # ================= 主入口 =================
 
 def main():
-    log_with_time("🚀 系统启动。正在进入 24 小时巡检模式...")
+    log_with_time(f"🚀 系统启动。正在进入 {FETCH_INTERVAL//3600} 小时一次的巡检模式...")
     while True:
         try:
             run_cycle()
