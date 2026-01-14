@@ -11,36 +11,59 @@ import matplotlib.patches as patches
 import re
 
 def plot_csv(file_path, instance_name, setting, save_path):
+    # color_dict = {
+    #     'HGS-TV': 'green',
+    #     # 'ails2_etaMax1.000_stoppingTime600.00': 'black',
+    #     # 'ails2_etaMax1.000_stoppingTime3600.00': 'darkred',
+    #     # 'ails2_etaMax1.000_stoppingTime7200.00': 'tomato',
+    #     # 'ails2_etaMax1.000_stoppingTime28800.00': 'orange',
+    #     # 'ails2_etaMax1.000_stoppingTime14400.00': 'red',
+    #     'sisr': 'gold',
+    #     'ails2_etaMax0.005_stoppingTime86400.00': 'black',
+    #     # 'ails2_etaMax0.050_stoppingTime86400.00': 'cyan',
+    #     # 'ails2_etaMax0.010_stoppingTime86400.00': 'blue',
+    #     # 'ails2_etaMax0.020_stoppingTime86400.00': 'orange',
+    #     # 'ails2_etaMax0.100_stoppingTime86400.00': 'navy',
+    #     'ails2_etaMax1.000_stoppingTime86400.00': 'navy',
+    #     'filo2': 'darkviolet',
+    #
+    #     'ails2_eoh_omega': 'pink',
+    #     'ails2_eoh_acc': 'purple',
+    #     'ails2_eoh_acc_large': 'darkred',
+    #
+    #     'ails2_etaMax1.000_stoppingTime1500.00': 'blue',
+    #     'ails2_etaMax1.000_stoppingTime300.00': 'tomato',
+    #     'ails2_etaMax1.000_stoppingTime6000.00': 'yellow',
+    #     'ails2_etaMax1.000_stoppingTime3000.00': 'red',
+    #
+    #     'ails2_etaMax0.010_stoppingTime1500.00': 'cyan',
+    #     'ails2_etaMax0.005_stoppingTime300.00': 'navy',
+    #     'ails2_etaMax0.020_stoppingTime300.00': 'orange',
+    # }
+
     color_dict = {
-        'HGS-TV': 'green',
-        # 'ails2_etaMax1.000_stoppingTime600.00': 'black',
-        # 'ails2_etaMax1.000_stoppingTime3600.00': 'darkred',
-        # 'ails2_etaMax1.000_stoppingTime7200.00': 'tomato',
-        # 'ails2_etaMax1.000_stoppingTime28800.00': 'orange',
-        # 'ails2_etaMax1.000_stoppingTime14400.00': 'red',
-        'sisr': 'gold',
-        'ails2_etaMax0.005_stoppingTime86400.00': 'black',
-        # 'ails2_etaMax0.050_stoppingTime86400.00': 'cyan',
-        # 'ails2_etaMax0.010_stoppingTime86400.00': 'blue',
-        # 'ails2_etaMax0.020_stoppingTime86400.00': 'orange',
-        # 'ails2_etaMax0.100_stoppingTime86400.00': 'navy',
-        'ails2_etaMax1.000_stoppingTime86400.00': 'navy',
-        'filo2': 'darkviolet',
+        # Group 1: 基准/独立算法 (高对比度)
+        'HGS-TV': '#333333',  # 深灰色/黑色 (主要基准)
+        'filo2': '#FFD700',  # 金色 (Gold) - 与深色背景对比强烈
 
-        'ails2_eoh_omega': 'pink',
-        'ails2_eoh_acc': 'purple',
-        'ails2_eoh_acc_large': 'darkred',
+        # Group 2: EOH 系列 (暖色/紫红系 - 变体梯度)
+        'ails2_eoh_omega2': '#FF69B4',  # 热粉色 (HotPink)
+        'ails2_eoh_acc': '#C71585',  # 中紫罗兰红 (MediumVioletRed)
+        'ails2_eoh_acc_large': '#800080',  # 紫色 (Purple) - 最深
 
-        'ails2_etaMax1.000_stoppingTime1500.00': 'blue',
-        'ails2_etaMax1.000_stoppingTime300.00': 'tomato',
-        'ails2_etaMax1.000_stoppingTime6000.00': 'yellow',
-        'ails2_etaMax1.000_stoppingTime3000.00': 'red',
+        # Group 3: etaMax=1.0 系列 (蓝色系 - 按时间由短到长渐变)
+        # 时间短 -> 颜色浅; 时间长 -> 颜色深
+        'ails2_etaMax1.000_stoppingTime86400.00': '#87CEEB',  # 天蓝色 (SkyBlue)
+        'ails2_etaMax1.000_stoppingTime432000.00': '#4169E1',  # 皇家蓝 (RoyalBlue)
+        'ails2_etaMax1.000_stoppingTime864000.00': '#0000CD',  # 中蓝色 (MediumBlue)
+        'ails2_etaMax1.000_stoppingTime1728000.00': '#000080',  # 海军蓝 (Navy)
 
-        'ails2_etaMax0.010_stoppingTime1500.00': 'cyan',
-        'ails2_etaMax0.005_stoppingTime300.00': 'navy',
-        'ails2_etaMax0.020_stoppingTime300.00': 'orange',
+        # Group 4: 低 etaMax 系列 (绿色系 - 按 etaMax 值由小到大渐变)
+        # 参数小 -> 颜色浅; 参数大 -> 颜色深
+        'ails2_etaMax0.005_stoppingTime86400.00': '#90EE90',  # 淡绿色 (LightGreen)
+        'ails2_etaMax0.010_stoppingTime432000.00': '#228B22',  # 森林绿 (ForestGreen)
+        'ails2_etaMax0.020_stoppingTime86400.00': '#006400',  # 深绿色 (DarkGreen)
     }
-
 
     df = pd.read_csv(file_path)
     # --- 1. 读取 CSV 文件 ---
@@ -60,16 +83,18 @@ def plot_csv(file_path, instance_name, setting, save_path):
     all_best_running_time = None
     counter_dict = dict()
 
+
     for algo in algorithms:
         subset = df[df['algo_name'] == algo]
         subset = subset.sort_values(by='runningtime')
 
-        if algo == 'ails2_etaMax1.000_stoppingTime86400.00':
-            plt.plot(subset['runningtime'], subset['score'], marker='o', linestyle='-', linewidth=2,
-                     label='ails2_external',
-                     c=color_dict[algo])
-            running_time_np = np.array(subset['runningtime'])
+        if 'ails2_etaMax1.000' in algo:
+            sec = float(re.findall(r"\d+(?:\.\d+)?", algo)[2])
+            day = int(sec // 86400)
 
+            plt.plot(subset['runningtime'], subset['score'], marker='o', linestyle='-', linewidth=2,
+                     label=f'ails2_external_{day}day',
+                     c=color_dict[algo])
             # print(save_path, (running_time_np[1:]-running_time_np[:-1])/60)
         else:
             plt.plot(subset['runningtime'], subset['score'], marker='o', linestyle='-', linewidth=2,
@@ -87,8 +112,14 @@ def plot_csv(file_path, instance_name, setting, save_path):
     plt.title(setting+'  '+instance_name, fontsize=14, fontweight='bold')  # 设置标题
     plt.xlabel('Running Time (seconds)', fontsize=12)  # 设置X轴标签
     plt.ylabel('Score', fontsize=12)  # 设置Y轴标签
-    plt.xticks(np.arange(300, 1800, 120))
-    plt.legend(title="Algorithm Name")  # 显示图例，自动识别不同颜色的线代表什么算法
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    order = sorted(zip(labels, handles))
+    labels_sorted, handles_sorted = zip(*order)
+    plt.legend(handles_sorted, labels_sorted, title="Algorithm Name", loc='upper right')
+
+    # # plt.xticks(np.arange(300, 1800, 120))
+    # plt.legend(title="Algorithm Name")  # 显示图例，自动识别不同颜色的线代表什么算法
     plt.grid(True, linestyle='--', alpha=0.6)  # 添加网格背景，方便看数
 
     # 自动调整布局，防止标签显示不全
@@ -143,35 +174,28 @@ def plot_improvement(file_path, instance_name, setting, save_path):
     # }
 
     color_dict = {
-        'HGS-TV': 'green',
-        # 'ails2_etaMax1.000_stoppingTime600.00': 'black',
-        # 'ails2_etaMax1.000_stoppingTime3600.00': 'darkred',
-        # 'ails2_etaMax1.000_stoppingTime7200.00': 'tomato',
-        # 'ails2_etaMax1.000_stoppingTime28800.00': 'orange',
-        # 'ails2_etaMax1.000_stoppingTime14400.00': 'red',
-        'sisr': 'gold',
-        'ails2_etaMax0.005_stoppingTime86400.00': 'black',
-        # 'ails2_etaMax0.050_stoppingTime86400.00': 'cyan',
-        # 'ails2_etaMax0.010_stoppingTime86400.00': 'blue',
-        # 'ails2_etaMax0.020_stoppingTime86400.00': 'orange',
-        # 'ails2_etaMax0.100_stoppingTime86400.00': 'navy',
-        'ails2_etaMax1.000_stoppingTime86400.00': 'navy',
-        'filo2': 'darkviolet',
+        # Group 1: 基准/独立算法 (高对比度)
+        'HGS-TV': '#333333',  # 深灰色/黑色 (主要基准)
+        'filo2': '#FFD700',  # 金色 (Gold) - 与深色背景对比强烈
 
-        'ails2_eoh_omega': 'pink',
-        'ails2_eoh_acc': 'purple',
-        'ails2_eoh_acc_large': 'darkred',
+        # Group 2: EOH 系列 (暖色/紫红系 - 变体梯度)
+        'ails2_eoh_omega2': '#FF69B4',  # 热粉色 (HotPink)
+        'ails2_eoh_acc': '#C71585',  # 中紫罗兰红 (MediumVioletRed)
+        'ails2_eoh_acc_large': '#800080',  # 紫色 (Purple) - 最深
 
-        'ails2_etaMax1.000_stoppingTime1500.00': 'blue',
-        'ails2_etaMax1.000_stoppingTime300.00': 'tomato',
-        'ails2_etaMax1.000_stoppingTime6000.00': 'yellow',
-        'ails2_etaMax1.000_stoppingTime3000.00': 'red',
+        # Group 3: etaMax=1.0 系列 (蓝色系 - 按时间由短到长渐变)
+        # 时间短 -> 颜色浅; 时间长 -> 颜色深
+        'ails2_etaMax1.000_stoppingTime86400.00': '#87CEEB',  # 天蓝色 (SkyBlue)
+        'ails2_etaMax1.000_stoppingTime432000.00': '#4169E1',  # 皇家蓝 (RoyalBlue)
+        'ails2_etaMax1.000_stoppingTime864000.00': '#0000CD',  # 中蓝色 (MediumBlue)
+        'ails2_etaMax1.000_stoppingTime1728000.00': '#000080',  # 海军蓝 (Navy)
 
-        'ails2_etaMax0.010_stoppingTime1500.00': 'cyan',
-        'ails2_etaMax0.005_stoppingTime300.00': 'navy',
-        'ails2_etaMax0.020_stoppingTime300.00': 'orange',
+        # Group 4: 低 etaMax 系列 (绿色系 - 按 etaMax 值由小到大渐变)
+        # 参数小 -> 颜色浅; 参数大 -> 颜色深
+        'ails2_etaMax0.005_stoppingTime86400.00': '#90EE90',  # 淡绿色 (LightGreen)
+        'ails2_etaMax0.010_stoppingTime432000.00': '#228B22',  # 森林绿 (ForestGreen)
+        'ails2_etaMax0.020_stoppingTime86400.00': '#006400',  # 深绿色 (DarkGreen)
     }
-
 
     df = pd.read_csv(file_path)
 
@@ -266,8 +290,10 @@ def plot_improvement(file_path, instance_name, setting, save_path):
 
         # --- 处理显示名称 (你的字符串处理逻辑) ---
         name = algo_name_raw
-        if 'ails2_etaMax1.000_stoppingTime86400.00' == name:
-            name = 'ails2_external'
+        if 'ails2_etaMax1.000' in name:
+            sec = float(re.findall(r"\d+(?:\.\d+)?", name)[2])
+            day = int(sec // 86400)
+            name = f'ails2_external_{day}day'
 
         if 'ails2_eta' in name:
             name = extract_and_format(name)
@@ -307,9 +333,14 @@ def plot_improvement(file_path, instance_name, setting, save_path):
     plt.xlabel('Running Time (seconds)', fontsize=12)
     plt.ylabel('Score', fontsize=12)
 
+    handles, labels = plt.gca().get_legend_handles_labels()
+    order = sorted(zip(labels, handles))
+    labels_sorted, handles_sorted = zip(*order)
+    plt.legend(handles_sorted, labels_sorted, title="Algorithm Name", loc='upper right')
+
     # 自动生成的图例 (基于 rect 的 label 参数)
-    plt.legend(title="Algorithm Name", loc='upper right')
-    plt.xticks(np.arange(300, 1800, 120))
+    # plt.legend(title="Algorithm Name", loc='upper right')
+    # plt.xticks(np.arange(300, 1800, 120))
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.tight_layout()
 
@@ -334,7 +365,8 @@ if __name__ == '__main__':
     # root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/results1223/results03')
     # root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/CVRPLIB2025-251229')
     # root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/CVRPLIB2025-260104')
-    root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/log_csv_202601120805')
+    # root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/log_csv_202601120805')
+    root_path = Path('E:/onedrive/cityU/CVRPLIB/all_in_one/20260114_172818')
 
     final_best_list = []
     final_stats_list = []
@@ -343,7 +375,8 @@ if __name__ == '__main__':
     counter_dict = dict()
     setting = None
     for root, dirs, files in os.walk(root_path):
-        if 'XLTEST' in root:
+        # if 'XLTEST' in root:
+        if 'XL' in root:
             instance_name = Path(root).name
             log = Path(root).parent.name
             server = Path(root).parent.parent.name
@@ -379,8 +412,13 @@ if __name__ == '__main__':
             # else:
             #     continue
 
-            if '125' in server:
-                setting = 'V final test 30min 2min'
+            # if '125' in server:
+            #     setting = 'V final test 30min 2min'
+            # else:
+            #     continue
+
+            if '126' in server:
+                setting = 'Final '
             else:
                 continue
 
