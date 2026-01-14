@@ -19,7 +19,7 @@ EXPORT_CSV = False
 
 # 2. CSV 导出自定义：在此列表填入你【不想】在 CSV 中看到的列名
 # 例如：["solution"] 会把巨大的路径字符串删掉，让 CSV 变清爽
-CSV_EXCLUDE_COLUMNS = ["solution"]      # TODO 看看csv里solution列的表头是什么，然后将要删除的表头放进来
+CSV_EXCLUDE_COLUMNS = [""]      # TODO 看看csv里solution列的表头是什么，然后将要删除的表头放进来
 
 # 3. 进程监测配置
 PROCESS_KEYWORD = "main_for_all_final.py"       # TODO
@@ -53,7 +53,6 @@ SERVERS = [
     {"host": "10.90.91.232", "user": "cvrp", "password": "123456", "port": 22,
      "base_path": "/home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/"},
 ]
-
 FETCH_INTERVAL = 1 * 3600
 LOCAL_ROOT = Path(__file__).resolve().parent
 HISTORY_FILE = LOCAL_ROOT / "best_scores_history.json"
@@ -124,6 +123,12 @@ def run_cycle():
     leaderboard_data = get_cvrplib_instances_float()
     server_status_report = []
 
+    # 统计指标初始化
+    active_servers = 0
+    down_servers = 0
+    error_servers = 0
+    total_processes = 0
+
     current_db_buffer = LOCAL_ROOT / "log_buffer"
     csv_save_path = LOCAL_ROOT / "latest_csvs"
     if not SAVE_ALL_HISTORY:
@@ -143,10 +148,19 @@ def run_cycle():
         try:
             with Connection(host=srv['host'], user=srv['user'], port=srv['port'],
                             connect_kwargs={"password": srv['password']}, connect_timeout=10) as conn:
+                # 检查进程
                 cp = conn.run(f"ps -ef | grep '{PROCESS_KEYWORD}' | grep -v grep | wc -l", hide=True)
                 n = int(cp.stdout.strip())
-                status_str += f"✅ Running ({n})" if n > 0 else "❌ DOWN"
 
+                if n > 0:
+                    status_str += f"✅ Running ({n})"
+                    active_servers += 1
+                    total_processes += n
+                else:
+                    status_str += "❌ DOWN"
+                    down_servers += 1
+
+                # 寻找并获取数据库
                 remote_root = f"{srv['base_path'].rstrip('/')}/log_buffer"
                 res = conn.run(f"find {remote_root} -name 'shared.db'", hide=True, warn=True)
                 if res.ok and res.stdout.strip():
@@ -157,6 +171,7 @@ def run_cycle():
                         conn.get(remote_f, local=str(local_f))
         except Exception as e:
             status_str += f"⚠️ Error: {e}"
+            error_servers += 1
         server_status_report.append(status_str)
 
     # 2. 数据分析
@@ -172,7 +187,6 @@ def run_cycle():
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
 
-                # --- 导出 CSV (含列过滤逻辑) ---
                 if EXPORT_CSV:
                     csv_dir = csv_save_path / inst_name
                     csv_dir.mkdir(parents=True, exist_ok=True)
@@ -181,18 +195,14 @@ def run_cycle():
                         cursor.execute(f"SELECT * FROM {tbl}")
                         rs = cursor.fetchall()
                         if rs:
-                            # 过滤表头和数据
                             all_cols = list(rs[0].keys())
                             filtered_cols = [c for c in all_cols if c not in CSV_EXCLUDE_COLUMNS]
-
                             with open(csv_dir / f"{tbl}.csv", 'w', newline='', encoding='utf-8') as f:
                                 w = csv.writer(f)
-                                w.writerow(filtered_cols)  # 写入过滤后的表头
+                                w.writerow(filtered_cols)
                                 for row in rs:
-                                    # 仅写入不在排除列表中的列数据
                                     w.writerow([row[c] for c in filtered_cols])
 
-                # --- 结果对比 ---
                 cursor.execute("SELECT solution, score FROM global_best WHERE id = 1;")
                 row = cursor.fetchone()
                 if row and row['solution']:
@@ -217,7 +227,6 @@ def run_cycle():
                             local_improvements.append(
                                 {"name": inst_name, "msg": f"📈 [Self Improved] {inst_name} | Now: {score:.4f}"})
 
-                    # 导出 .sol (这个始终导出完整路径用于提交)
                     with open(sol_history_dir / f"{inst_name}.sol", 'w') as f:
                         for i, r in enumerate(ast.literal_eval(row['solution'])):
                             f.write(f"Route #{i + 1}: {' '.join(map(str, r))}\n")
@@ -225,16 +234,26 @@ def run_cycle():
         except:
             pass
 
-    # 排序与写报告 (保持不变)
+    # 排序
     bks_breakers.sort(key=lambda x: extract_n_value(x['name']))
     local_improvements.sort(key=lambda x: extract_n_value(x['name']))
     not_broken_gaps.sort(key=lambda x: x['gap_v'])
 
+    # 3. 写报告
     save_history(local_history)
     rep_p = report_history_dir / f"report_{ts_folder}.txt"
     with open(rep_p, 'w', encoding='utf-8') as f:
         f.write(f"SISR 自动巡检报告 ({ts_human})\n" + "=" * 60 + "\n\n")
-        f.write("📡 【Part 1】服务器状态:\n" + "-" * 60 + "\n" + "\n".join(server_status_report) + "\n\n")
+
+        # --- 汇总概要 ---
+        f.write(f"📊 【汇总概要】\n")
+        f.write(f"* 服务器在线率: {active_servers} / {len(SERVERS)}\n")
+        f.write(f"* 总活跃进程数: {total_processes}\n")
+        if down_servers > 0: f.write(f"* 🛑 离线警告: 有 {down_servers} 台服务器进程已停止\n")
+        if error_servers > 0: f.write(f"* ⚠️ 异常警告: 有 {error_servers} 台服务器连接失败\n")
+        f.write("-" * 60 + "\n\n")
+
+        f.write("📡 【Part 1】服务器状态详情:\n" + "-" * 60 + "\n" + "\n".join(server_status_report) + "\n\n")
         f.write(f"🌟 【Part 2】New Records (按n排序) ({len(bks_breakers)}):\n" + "-" * 60 + "\n" + "\n".join(
             [x['msg'] for x in bks_breakers]) + "\n\n")
         f.write(f"🚀 【Part 3】Self Improved (按n排序) ({len(local_improvements)}):\n" + "-" * 60 + "\n" + "\n".join(
