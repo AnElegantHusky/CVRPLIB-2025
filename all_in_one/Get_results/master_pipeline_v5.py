@@ -24,6 +24,8 @@ CSV_EXCLUDE_COLUMNS = ["solution"]      # TODO 看看csv里solution列的表头�
 # 3. 进程监测配置
 PROCESS_KEYWORD = "main_for_all_final.py"       # TODO
 
+# 查看时，登录一个服务器，然后尝试 ps -ef | grep python 或 ps -ef | grep python3，看看文件名，然后填写在 PROCESS_KEYWORD
+
 # 4. 服务器清单 (保持不变)
 SERVERS = [
     {"host": "10.90.91.100", "user": "ei", "password": "ei@noah2012", "port": 22,
