@@ -7,7 +7,7 @@ from pathlib import Path
 def save_best(db_path, running_time, score, solution, algo_name):
     try:
         sol_json = json.dumps(solution)
-        print(sol_json)
+        # print(sol_json)
     except TypeError as e:
         print(f"[Data Error] Solution serialization failed: {e}")
         return False
@@ -45,7 +45,9 @@ DB_PATH = SISR_PATH / 'log_buffer'
 
 if __name__ == '__main__':
     for sol_path in OUTER_PATH.rglob('*.sol'):
-        instance_name = sol_path.parent.name
+        instance_name = sol_path.name.split('.')[0]
+
         sol = vrplib.read_solution(sol_path)
         db_path = DB_PATH / instance_name / 'shared.db'
+        print(instance_name, sol['cost'])
         save_best(db_path, -1e5, sol['cost'], sol['routes'], 'outer')
