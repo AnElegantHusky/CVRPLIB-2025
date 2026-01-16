@@ -13,19 +13,14 @@ from fabric import Connection
 from bs4 import BeautifulSoup
 
 # ================= 配置区域 =================
-# 1. 功能开关
-SAVE_ALL_HISTORY = False  # True: 保留所有历史下载的DB; False: 仅保留最新一轮
-EXPORT_CSV = True  # 是否导出 CSV 文件
-
-# 2. CSV 导出自定义：删除冗余列
+SAVE_ALL_HISTORY = False
+EXPORT_CSV = True
 CSV_EXCLUDE_COLUMNS = ["solution"]
-
-# 3. 进程监测配置
 PROCESS_KEYWORD = "main_for_all_final.py"
 
+# 团队名称定义
 Our_team = 'OptVerse-CityU'
 
-# 4. 服务器清单
 SERVERS = [
     {"host": "10.90.91.100", "user": "ei", "password": "ei@noah2012", "port": 22,
      "base_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/"},
@@ -94,7 +89,7 @@ def clean_old_data(dir_path):
 def get_cvrplib_instances_float():
     target_url = "https://galgos.inf.puc-rio.br/cvrplib/index.php/en/bks_challenge/score/instances"
     headers = {"User-Agent": "Mozilla/5.0"}
-    log_with_time("🌍 正在从 CVRPLIB 获取最新 BKS 榜单...")
+    log_with_time("🌍 正在从 CVRPLIB 获取最新 BKS 榜单及 Leader 信息...")
     try:
         response = requests.get(target_url, headers=headers, timeout=20, verify=False)
         response.raise_for_status()
@@ -105,14 +100,15 @@ def get_cvrplib_instances_float():
             cols = row.find_all('td')
             if len(cols) >= 3:
                 key = cols[0].get_text(strip=True)
-                raw_val = cols[2].get_text(strip=True)
                 leader_team = cols[1].get_text(strip=True)
+                raw_val = cols[2].get_text(strip=True)
                 try:
                     clean_val = raw_val.replace('$', '').replace(',', '').replace('{', '').replace('}', '')
-                    data_dict[key] = float(clean_val)
+                    # 存储 score 和 leader
+                    data_dict[key] = {"score": float(clean_val), "leader": leader_team}
                 except:
                     continue
-        log_with_time(f"✅ 获取成功，共加载 {len(data_dict)} 个算例 BKS。")
+        log_with_time(f"✅ 获取成功，共加载 {len(data_dict)} 个算例。")
         return data_dict
     except Exception as e:
         log_with_time(f"⚠️ 获取榜单失败: {e}")
@@ -143,7 +139,7 @@ def run_cycle():
 
     log_with_time(f"🚀 周期开始: {ts_human} (CSV导出: {'开启' if EXPORT_CSV else '关闭'})")
 
-    # 1. 抓取与监控
+    # 1. 抓取与监控 (保持不变)
     for srv in SERVERS:
         try:
             with Connection(host=srv['host'], user=srv['user'], port=srv['port'],
@@ -158,7 +154,6 @@ def run_cycle():
                     status_msg = "❌ DOWN"
                     down_servers += 1
                 server_status_report.append(f"🖥️ {srv['host']}: {status_msg}")
-
                 remote_root = f"{srv['base_path'].rstrip('/')}/log_buffer"
                 res = conn.run(f"find {remote_root} -name 'shared.db'", hide=True, warn=True)
                 if res.ok and res.stdout.strip():
@@ -178,10 +173,7 @@ def run_cycle():
 
     # 2. 数据分析
     local_history = load_history()
-    bks_breakers = []
-    local_improvements = []
-    exact_matches = []
-    not_broken_gaps = []
+    bks_breakers, local_improvements, exact_matches, not_broken_gaps = [], [], [], []
 
     for db_p in current_db_buffer.rglob("shared.db"):
         inst_name = db_p.parent.name
@@ -190,6 +182,7 @@ def run_cycle():
                 conn.row_factory = sqlite3.Row
                 cursor = conn.cursor()
 
+                # CSV 导出逻辑 (略，保持不变)
                 if EXPORT_CSV:
                     csv_dir = csv_save_path / inst_name
                     csv_dir.mkdir(parents=True, exist_ok=True)
@@ -209,8 +202,13 @@ def run_cycle():
                 row = cursor.fetchone()
                 if row and row['solution']:
                     score = float(row['score'])
-                    bks_v = leaderboard_data.get(inst_name)
+                    bks_info = leaderboard_data.get(inst_name, {})
+                    bks_v = bks_info.get("score")
+                    leader = bks_info.get("leader", "Unknown")
                     old_v = local_history.get(inst_name)
+
+                    # 格式化 Leader 名称，如果是自己则加个星号或显示为 Our
+                    leader_str = f"[{leader}]" if leader != Our_team else f"[*Ours*]"
 
                     is_breaking = (bks_v is not None and score < bks_v)
                     is_exact = (bks_v is not None and abs(score - bks_v) < 1e-6)
@@ -218,12 +216,12 @@ def run_cycle():
 
                     if is_breaking:
                         gap = bks_v - score
-                        msg = f"🏆 [NEW RECORD] {inst_name} | Our: {score:.4f} < BKS: {bks_v:.4f} (Gap: -{gap:.4f})"
+                        msg = f"🏆 [NEW RECORD] {inst_name} | Our: {score:.4f} < BKS: {bks_v:.4f} (Gap: -{gap:.4f}) | Leader: {leader_str}"
                         bks_breakers.append({"name": inst_name, "msg": msg})
                         log_with_time(msg)
                         if is_improving: local_history[inst_name] = score
                     elif is_exact:
-                        msg = f"🎯 [Exact Match] {inst_name} | Our: {score:.4f} / BKS: {bks_v:.4f} | Gap: 0.000 (0.000%)"
+                        msg = f"🎯 [Exact Match] {inst_name} | Our: {score:.4f} / BKS: {bks_v:.4f} | Gap: 0.000 (0.000%) | Leader: {leader_str}"
                         exact_matches.append({"name": inst_name, "msg": msg})
                         log_with_time(msg)
                         if is_improving: local_history[inst_name] = score
@@ -231,8 +229,8 @@ def run_cycle():
                         if bks_v is not None:
                             gap = score - bks_v
                             gap_p = (gap / bks_v)
-                            not_broken_gaps.append({"name": inst_name, "gap_v": gap_p,
-                                                    "msg": f"⏳ {inst_name} | Our: {score:.4f} / BKS: {bks_v:.4f} | Gap: +{gap:.4f} (+{gap_p * 100:.3f}%)"})
+                            msg = f"⏳ {inst_name} | Our: {score:.4f} / BKS: {bks_v:.4f} | Gap: +{gap:.4f} (+{gap_p * 100:.3f}%) | Leader: {leader_str}"
+                            not_broken_gaps.append({"name": inst_name, "gap_v": gap_p, "msg": msg})
 
                         if is_improving:
                             local_history[inst_name] = score
@@ -248,13 +246,12 @@ def run_cycle():
         except Exception as e:
             log_with_time(f"  [Process Error] {inst_name}: {e}")
 
-    # 排序
+    # 排序及保存报告 (保持原有 Part 1-5 结构)
     bks_breakers.sort(key=lambda x: extract_n_value(x['name']))
     local_improvements.sort(key=lambda x: extract_n_value(x['name']))
     exact_matches.sort(key=lambda x: extract_n_value(x['name']))
     not_broken_gaps.sort(key=lambda x: x['gap_v'])
 
-    # 3. 生成报告
     save_history(local_history)
     rep_p = report_history_dir / f"report_{ts_folder}.txt"
     with open(rep_p, 'w', encoding='utf-8') as f:
@@ -262,16 +259,15 @@ def run_cycle():
         f.write(f"📊 【汇总概要】\n* 服务器在线率: {active_servers} / {len(SERVERS)}\n* 总活跃进程数: {total_processes}\n")
         if down_servers > 0: f.write(f"* 🛑 离线警告: 有 {down_servers} 台停止运行！\n")
         f.write("-" * 60 + "\n\n")
-
         f.write("📡 【Part 1】服务器状态详情:\n" + "-" * 60 + "\n" + "\n".join(server_status_report) + "\n\n")
-        f.write(f"🌟 【Part 2】New Records (按规模n排序) ({len(bks_breakers)}):\n" + "-" * 60 + "\n" + "\n".join(
+        f.write(f"🌟 【Part 2】New Records ({len(bks_breakers)}):\n" + "-" * 60 + "\n" + "\n".join(
             [x['msg'] for x in bks_breakers]) + "\n\n")
-        f.write(f"🚀 【Part 3】Self Improved (按规模n排序) ({len(local_improvements)}):\n" + "-" * 60 + "\n" + "\n".join(
+        f.write(f"🚀 【Part 3】Self Improved ({len(local_improvements)}):\n" + "-" * 60 + "\n" + "\n".join(
             [x['msg'] for x in local_improvements]) + "\n\n")
-        f.write(f"🎯 【Part 4】Exact BKS Match (已追平 BKS) ({len(exact_matches)}):\n" + "-" * 60 + "\n" + "\n".join(
+        f.write(f"🎯 【Part 4】Exact BKS Match ({len(exact_matches)}):\n" + "-" * 60 + "\n" + "\n".join(
             [x['msg'] for x in exact_matches]) + "\n\n")
-        f.write(f"📊 【Part 5】未突破 BKS 的差距排行 (按Gap%排序):\n" + "-" * 60 + "\n" + "\n".join(
-            [x['msg'] for x in not_broken_gaps]))
+        f.write(
+            f"📊 【Part 5】未突破 BKS 的差距排行:\n" + "-" * 60 + "\n" + "\n".join([x['msg'] for x in not_broken_gaps]))
 
     log_with_time(f"✨ 周期结束。报告已保存: {rep_p.name}")
 
@@ -284,10 +280,9 @@ def main():
             log_with_time(f"💤 任务休眠，下次巡检在 {FETCH_INTERVAL / 3600} 小时后。")
             time.sleep(FETCH_INTERVAL)
         except KeyboardInterrupt:
-            log_with_time("👋 用户手动停止运行。")
             break
         except Exception as e:
-            log_with_time(f"❌ 主程序异常: {e}\n将在 60 秒后重试...")
+            log_with_time(f"❌ 异常: {e}");
             time.sleep(60)
 
 
