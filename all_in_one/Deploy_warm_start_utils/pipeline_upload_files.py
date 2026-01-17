@@ -1,23 +1,30 @@
-# pipeline_upload_tools.py
 import os
+import argparse
 from fabric import Connection
 from rich.console import Console
 from config import servers as SERVER_MANIFEST
 
 console = Console()
 
-# ================= 配置区域 =================
+# ================= 核心配置区域 =================
 
 # 1. 待上传文件列表
-# 格式: (本地文件名, 目标标记)
-# 目标标记可选: 'main' (CVRPLIB), 'warm_start', 'both'
+# 格式: (本地文件路径, 目标标记)
+#   - 本地路径: 支持相对路径 (e.g., "src/guardian.py") 或绝对路径。
+#   - 目标标记: "main" (CVRPLIB目录), "warm_start" (算法目录), "both" (两者都传)
 FILES_TO_UPLOAD = [
-    ("./files_to_upload/write_outer_sol.py", "main"),  # 基础库
-    ("./files_to_upload/service_ingest_sol.py", "main"),  # 服务进程
-    # ("your_warm_start_script.py", "warm_start"), # 如果有warm_start代码要更
+    # --- 示例 ---
+    # ("write_outer_sol.py",    "main"),         # 只更新 CVRPLIB 的基础库
+    # ("service_ingest_sol.py", "main"),         # 更新吸入服务
+    # ("guardian.py",           "warm_start"),   # 更新 Warm Start 的守护进程
+    # ("utils/config_loader.py", "both"),        # 更新两边都用的工具
+
+    # 在这里填写你当前要传的文件:
+    ("write_outer_sol.py", "both"),
+    ("service_ingest_sol.py", "main"),
 ]
 
-# 2. 筛选服务器 (本次操作的机器)
+# 2. 目标服务器筛选
 to_run_servers = [
     "10.90.91.100",
     "10.90.91.101",
@@ -37,17 +44,23 @@ to_run_servers = [
 # ===========================================
 
 def main():
-    console.rule("[bold blue]工具上传与环境配置 Pipeline[/bold blue]")
+    console.rule("[bold blue]通用文件上传 Pipeline[/bold blue]")
+
+    # 检查本地文件是否存在，避免连上服务器才报错
+    for local_path, _ in FILES_TO_UPLOAD:
+        if not os.path.exists(local_path):
+            console.print(f"[bold red]❌ 错误: 本地文件未找到 -> {local_path}[/bold red]")
+            return
 
     active_nodes = [s for s in SERVER_MANIFEST if s['host'] in to_run_servers]
 
     if not active_nodes:
-        console.print("[yellow]没有选中任何服务器。[/yellow]")
+        console.print("[yellow]⚠️  没有选中任何服务器，请检查 to_run_servers[/yellow]")
         return
 
     for conf in active_nodes:
         host = conf['host']
-        console.print(f"\n[bold green]>>> 处理节点: {host}[/bold green]")
+        console.print(f"\n[bold green]>>> 正在同步节点: {host}[/bold green]")
 
         try:
             conn = Connection(
@@ -58,49 +71,54 @@ def main():
                 connect_timeout=5
             )
 
-            # 获取路径配置
-            main_path = conf.get('main_work_path')  # CVRPLIB 路径
-            ws_path = conf.get('warm_start_work_path')  # Warm Start 路径
+            # 获取远程基础路径
+            path_map = {
+                "main": conf.get('main_work_path'),
+                "warm_start": conf.get('warm_start_work_path')
+            }
 
-            if not main_path or not ws_path:
-                console.print("[red]Config 缺少 main_work_path 或 warm_start_work_path[/red]")
-                continue
+            # 检查路径配置
+            if not path_map["main"]:
+                console.print("[yellow]   ⚠️  Config 缺失 main_work_path[/yellow]")
+            if not path_map["warm_start"]:
+                console.print("[yellow]   ⚠️  Config 缺失 warm_start_work_path[/yellow]")
 
-            # --- Step 1: 创建共享文件夹 & 设置权限 ---
-            # 在 main_work_path 下创建 outer_sol (SISR/outer_sol)
-            # 也可以在 ws_path 下建软链，但最重要的是物理路径存在且权限为 777
+            # 开始上传循环
+            for local_path, target_tag in FILES_TO_UPLOAD:
+                # 1. 确定文件名 (自动去除本地目录前缀)
+                file_name = os.path.basename(local_path)
 
-            outer_sol_path = os.path.join(main_path, "outer_sol")
-            console.print(f"   🛠️  配置共享目录: {outer_sol_path}")
+                # 2. 确定目标路径列表
+                dest_dirs = []
 
-            # -p 确保目录存在, chmod 777 确保两个容器都能写
-            conn.run(f"mkdir -p {outer_sol_path}", hide=True)
-            conn.run(f"chmod -R 777 {outer_sol_path}", hide=True)
-
-            # --- Step 2: 上传文件 ---
-            for local_file, target_type in FILES_TO_UPLOAD:
-                if not os.path.exists(local_file):
-                    console.print(f"[red]   [跳过] 本地文件不存在: {local_file}[/red]")
+                if target_tag == "both":
+                    if path_map["main"]: dest_dirs.append(path_map["main"])
+                    if path_map["warm_start"]: dest_dirs.append(path_map["warm_start"])
+                elif target_tag in path_map:
+                    if path_map[target_tag]:
+                        dest_dirs.append(path_map[target_tag])
+                    else:
+                        console.print(f"[red]   跳过 {file_name}: 目标 {target_tag} 路径未配置[/red]")
+                else:
+                    console.print(f"[red]   跳过 {file_name}: 未知的标记 '{target_tag}'[/red]")
                     continue
 
-                targets = []
-                if target_type in ['main', 'both']:
-                    targets.append(main_path)
-                if target_type in ['warm_start', 'both']:
-                    targets.append(ws_path)
+                # 3. 执行上传
+                for remote_dir in dest_dirs:
+                    remote_full_path = os.path.join(remote_dir, file_name)
+                    console.print(f"   ⬆️  {local_path} -> [cyan]{remote_dir}[/cyan]")
 
-                for dest_dir in targets:
-                    remote_path = os.path.join(dest_dir, local_file)
-                    console.print(f"   ⬆️  上传 {local_file} -> {target_type} ({dest_dir})")
-                    conn.put(local_file, remote=remote_path)
+                    try:
+                        conn.put(local_path, remote=remote_full_path)
+                    except Exception as e:
+                        console.print(f"[red]      上传失败: {e}[/red]")
 
-            console.print("   ✅ 节点完成")
             conn.close()
 
         except Exception as e:
-            console.print(f"[red]   连接或执行出错: {e}[/red]")
+            console.print(f"[red]   连接错误: {e}[/red]")
 
-    console.rule("[bold blue]全部完成[/bold blue]")
+    console.rule("[bold blue]上传任务结束[/bold blue]")
 
 
 if __name__ == "__main__":
