@@ -1,4 +1,4 @@
-import os
+import posixpath
 from fabric import Connection
 from invoke.exceptions import UnexpectedExit
 from rich.console import Console
@@ -14,6 +14,8 @@ except ImportError:
     MAIN_ROOT_PATH = "Competition_Deploy_Hybird/all_in_one/SISR/"
     WARM_START_ROOT_PATH = "Warm_Start_Deploy_Hybrid/all_in_one/SISR/"
 
+top_A_name = "Competition_Deploy_Hybird"
+top_B_name = "Warm_Start_Deploy_Hybrid"
 
 class ServerNode:
     def __init__(self, config):
@@ -26,18 +28,21 @@ class ServerNode:
         self.base_dir = config['base_path'].rstrip('/')
         self.instance_range = config.get('instance_range', (0, 0))
 
-        # 2. 计算 A (Master) 的路径
-        # path_A_work: .../all_in_one/SISR (代码运行位置)
-        # path_A_root: .../all_in_one (挂载到容器 /app 的位置，包含 AILS2, FILO2)
-        self.path_A_work = os.path.join(self.base_dir, MAIN_ROOT_PATH.rstrip('/'))
-        self.path_A_root = os.path.dirname(self.path_A_work)
+        # [源路径 A]
+        # 结果示例: /home/ei/.../Competition_Deploy_Hybird/all_in_one/SISR
+        self.path_A_work = posixpath.join(self.base_dir, MAIN_ROOT_PATH.rstrip('/'))
+        # 结果示例: /home/ei/.../Competition_Deploy_Hybird/all_in_one
+        self.path_A_root = posixpath.dirname(self.path_A_work)
 
-        # 3. 计算 B (Explorer) 的路径
-        self.path_B_work = os.path.join(self.base_dir, WARM_START_ROOT_PATH.rstrip('/'))
-        self.path_B_root = os.path.dirname(self.path_B_work)
+        # [目标路径 B]
+        self.path_B_work = posixpath.join(self.base_dir, WARM_START_ROOT_PATH.rstrip('/'))
+        self.path_B_root = posixpath.dirname(self.path_B_work)
 
-        # B 的父级目录，用于 mkdir
-        self.path_B_parent = os.path.dirname(self.path_B_root)
+        # path_A_top: .../Competition_Deploy_Hybird
+        self.path_A_top = posixpath.join(self.base_dir, top_A_name)
+
+        # path_B_top: .../Warm_Start_Deploy_Hybrid
+        self.path_B_top = posixpath.join(self.base_dir, top_B_name)
 
         self.conn = None
 
@@ -92,43 +97,29 @@ class ServerNode:
 
     def sync_artifacts(self):
         """
-        [核心功能] 宿主机内部全量克隆：
-        将 A 的 all_in_one 整个复制到 B，排除 log_buffer
+        全量克隆：将 Competition_Deploy_Hybird 整个目录 -> 复制到 Warm_Start_Deploy_Hybrid
         """
-        console.print(f"[cyan]📦 {self.host}: 正在同步 all_in_one (Source -> Target)...[/cyan]")
+        console.print(f"[cyan]📦 {self.host}: 同步整个项目目录 (A -> B)...[/cyan]")
 
-        # 1. 确保目标父目录存在 (例如 .../Warm_Start_Deploy_Hybrid/)
-        self.run_cmd(f"mkdir -p {self.path_B_parent}", work_dir="/tmp")
+        # 1. 确保 B 的顶层目录存在
+        self.run_cmd(f"mkdir -p {self.path_B_top}", work_dir="/tmp")
 
-        # 2. 使用 rsync 进行全量同步
-        # --delete: 确保 B 和 A 一致 (可选，暂不加防止误删)
-        # --exclude: 排除数据文件夹和缓存
-        # {self.path_A_root}/ 注意末尾斜杠，表示复制目录下的内容
-        cmd_sync = (
-            f"rsync -av "
-            f"--exclude 'SISR/log_buffer' "  # 排除数据
+        # 2. rsync 同步
+        # 源: path_A_top/ (Competition_Deploy_Hybird 下的所有内容)
+        # 目标: path_B_top/ (Warm_Start_Deploy_Hybrid)
+        # 排除路径需要调整，因为现在根目录变了
+        # log_buffer 现在相对于根目录的路径是 all_in_one/SISR/log_buffer
+        cmd = (
+            f"rsync -az "
+            f"--exclude 'all_in_one/SISR/log_buffer' "
             f"--exclude '__pycache__' "
             f"--exclude '*.git' "
-            f"{self.path_A_root}/ {self.path_B_root}/"
+            f"{self.path_A_top}/ {self.path_B_top}/"
         )
 
-        ok, err = self.run_cmd(cmd_sync, work_dir="/tmp")
-
+        ok, err = self.run_cmd(cmd, work_dir="/tmp")
         if ok:
-            console.print(f"   ✅ {self.host}: 同步完成")
-            return True
+            console.print(f"   ✅ 同步完成")
         else:
-            # 如果 rsync 失败 (极少见)，尝试用 cp 回退方案
-            console.print(f"   ⚠️ {self.host}: rsync 失败，尝试 cp...")
-            cmd_cp = (
-                f"rm -rf {self.path_B_root} && "
-                f"cp -r {self.path_A_root} {self.path_B_root} && "
-                f"rm -rf {self.path_B_work}/log_buffer"  # 删掉复制过去的数据
-            )
-            ok_cp, err_cp = self.run_cmd(cmd_cp, work_dir="/tmp")
-            if ok_cp:
-                console.print(f"   ✅ {self.host}: cp 同步完成")
-                return True
-            else:
-                console.print(f"   ❌ {self.host}: 同步彻底失败 - {err_cp}")
-                return False
+            console.print(f"   ❌ 同步失败: {err}")
+        return ok
