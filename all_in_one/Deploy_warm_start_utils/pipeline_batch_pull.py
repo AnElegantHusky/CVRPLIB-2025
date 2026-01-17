@@ -55,7 +55,8 @@ candidates = [
     "/app/all_in_one/SISR/log_buffer",       # Case 3: 挂载的是 Competition_Root
     "log_buffer",                            # 相对路径备用
     "SISR/log_buffer",
-    "all_in_one/SISR/log_buffer"
+    "all_in_one/SISR/log_buffer",
+    "Competition_Deploy_Hybird/all_in_one/SISR/log_buffer",
 ]
 
 target_dir = None
