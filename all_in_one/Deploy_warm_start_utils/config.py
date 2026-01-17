@@ -11,11 +11,6 @@
 #            - SISR
 
 
-
-
-MAIN_ROOT_PATH = "Competition_Deploy_Hybird/all_in_one/SISR/"
-WARM_START_ROOT_PATH = "Warm_Start_Deploy_Hybrid/all_in_one/SISR/"
-
 LOG_BUFFER_DIR = "log_buffer/"
 
 servers = [
@@ -26,6 +21,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (0, 3),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.101",
@@ -34,6 +31,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (3, 9),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.124",
@@ -42,6 +41,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (9, 15),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/CVRPLIB-2025-all-in-one/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.125",
@@ -50,6 +51,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (15, 21),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.126",
@@ -58,6 +61,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (21, 27),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.127",
@@ -66,6 +71,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (27, 32),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.163",
@@ -74,6 +81,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (32, 37),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.167",
@@ -82,6 +91,8 @@ servers = [
         "port": 22,
         "base_path": "/home/ei/workspace/cvrp_com_hyb/",
         "instance_range": (37, 42),
+        "main_work_path": "/home/ei/workspace/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/ei/workspace/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.49",
@@ -90,6 +101,8 @@ servers = [
         "port": 22,
         "base_path": "/home/cvrp/cvrp_com_hyb/",
         "instance_range": (42, 49),
+        "main_work_path": "/home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/cvrp/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.51",
@@ -98,6 +111,8 @@ servers = [
         "port": 22,
         "base_path": "/home/cvrp/cvrp_com_hyb/",
         "instance_range": (49, 56),
+        "main_work_path": "/home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/cvrp/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.231",
@@ -106,6 +121,8 @@ servers = [
         "port": 22,
         "base_path": "/home/cvrp/cvrp_com_hyb/",
         "instance_range": (56, 78),
+        "main_work_path": "/home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/cvrp/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
     {
         "host": "10.90.91.232",
@@ -114,5 +131,7 @@ servers = [
         "port": 22,
         "base_path": "/home/cvrp/cvrp_com_hyb/",
         "instance_range": (78, 100),
+        "main_work_path": "/home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/",
+        "warm_start_work_path": "/home/cvrp/cvrp_com_hyb/Warm_Start_Deploy_Hybrid/all_in_one/SISR/",
     },
 ]

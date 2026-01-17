@@ -5,17 +5,6 @@ from rich.console import Console
 
 console = Console()
 
-# 引入 Config 中的路径常量
-# 确保 config.py 与此文件在同一目录下，或者在 PYTHONPATH 中
-try:
-    from config import MAIN_ROOT_PATH, WARM_START_ROOT_PATH
-except ImportError:
-    # 默认回退值，防止报错
-    MAIN_ROOT_PATH = "Competition_Deploy_Hybird/all_in_one/SISR/"
-    WARM_START_ROOT_PATH = "Warm_Start_Deploy_Hybrid/all_in_one/SISR/"
-
-top_A_name = "Competition_Deploy_Hybird"
-top_B_name = "Warm_Start_Deploy_Hybrid"
 
 class ServerNode:
     def __init__(self, config):
@@ -24,30 +13,33 @@ class ServerNode:
         self.port = config.get('port', 22)
         self.password = config['password']
 
-        # 1. 基础路径 (宿主机项目总根目录)
+        # 基础路径 (仅作备用，主要逻辑使用 work_path)
         self.base_dir = config['base_path'].rstrip('/')
         self.instance_range = config.get('instance_range', (0, 0))
 
-        # [源路径 A]
-        # 结果示例: /home/ei/.../Competition_Deploy_Hybird/all_in_one/SISR
-        self.path_A_work = posixpath.join(self.base_dir, MAIN_ROOT_PATH.rstrip('/'))
-        # 结果示例: /home/ei/.../Competition_Deploy_Hybird/all_in_one
+        # ==========================================================
+        # 路径逻辑重构：基于 Config 中的全路径反向解析
+        # ==========================================================
+
+        # [源路径 A] (Master)
+        # Config: .../Competition_Deploy_Hybird/all_in_one/SISR/
+        self.path_A_work = config['main_work_path'].rstrip('/')
+
+        # 倒推上一级: .../Competition_Deploy_Hybird/all_in_one
         self.path_A_root = posixpath.dirname(self.path_A_work)
 
-        # [目标路径 B]
-        self.path_B_work = posixpath.join(self.base_dir, WARM_START_ROOT_PATH.rstrip('/'))
+        # 倒推顶层: .../Competition_Deploy_Hybird (这是我们要复制的根目录)
+        self.path_A_top = posixpath.dirname(self.path_A_root)
+
+        # [目标路径 B] (Warm Start)
+        # Config: .../Warm_Start_Deploy_Hybrid/all_in_one/SISR/
+        self.path_B_work = config['warm_start_work_path'].rstrip('/')
         self.path_B_root = posixpath.dirname(self.path_B_work)
-
-        # path_A_top: .../Competition_Deploy_Hybird
-        self.path_A_top = posixpath.join(self.base_dir, top_A_name)
-
-        # path_B_top: .../Warm_Start_Deploy_Hybrid
-        self.path_B_top = posixpath.join(self.base_dir, top_B_name)
+        self.path_B_top = posixpath.dirname(self.path_B_root)
 
         self.conn = None
 
     def connect(self):
-        """建立 SSH 连接"""
         try:
             self.conn = Connection(
                 host=self.host,
@@ -61,54 +53,43 @@ class ServerNode:
             console.print(f"[bold red]❌ {self.host} 连接失败: {e}[/bold red]")
             return False
 
-    def run_cmd(self, cmd, work_dir=None, background=False, warn=True):
-        """
-        通用命令执行
-        :param work_dir: 执行命令的目录，默认为 base_dir
-        :param background: 是否后台运行 (nohup)
-        """
+    def run_cmd(self, cmd, work_dir=None, background=False):
+        # 默认在 base_dir 执行，但强烈建议传入 work_dir
         target_dir = work_dir if work_dir else self.base_dir
 
-        # 构造组合命令
         full_cmd = f"cd {target_dir} && {cmd}"
-
         if background:
             full_cmd = f"nohup {full_cmd} > /dev/null 2>&1 &"
 
         try:
-            # hide=True 隐藏默认输出，我们手动打印
-            result = self.conn.run(full_cmd, hide=True, warn=warn)
-
+            result = self.conn.run(full_cmd, hide=True, warn=True)
             if result.failed:
-                console.print(
-                    f"[bold red]⚠️  CMD Error on {self.host}:[/bold red]\nCommand: {full_cmd}\nError: {result.stderr}")
+                console.print(f"[red]⚠️ {self.host} Error:[/red] {result.stderr.strip()}")
                 return False, result.stderr.strip()
-
             return True, result.stdout.strip()
-
         except UnexpectedExit as e:
-            console.print(f"[bold red]❌ Critical Error on {self.host}:[/bold red] {e}")
             return False, str(e)
-
-    def check_docker_status(self):
-        """检查 Docker 是否存活"""
-        ok, _ = self.run_cmd("docker info", work_dir="/tmp", warn=True)
-        return ok
 
     def sync_artifacts(self):
         """
-        全量克隆：将 Competition_Deploy_Hybird 整个目录 -> 复制到 Warm_Start_Deploy_Hybrid
+        全量克隆：将 Path_A_Top 整个目录 -> 复制到 Path_B_Top
+        例如: Competition_Deploy_Hybird -> Warm_Start_Deploy_Hybrid
         """
-        console.print(f"[cyan]📦 {self.host}: 同步整个项目目录 (A -> B)...[/cyan]")
+        console.print(f"[cyan]📦 {self.host}: 同步项目目录 (A -> B)...[/cyan]")
+        console.print(f"   Source: {self.path_A_top}")
+        console.print(f"   Target: {self.path_B_top}")
 
-        # 1. 确保 B 的顶层目录存在
-        self.run_cmd(f"mkdir -p {self.path_B_top}", work_dir="/tmp")
+        # 1. 确保 B 的父级目录存在
+        # 我们取 path_B_top 的父级目录作为 mkdir 的目标
+        path_B_parent = posixpath.dirname(self.path_B_top)
+        self.run_cmd(f"mkdir -p {path_B_parent}", work_dir="/tmp")
 
         # 2. rsync 同步
-        # 源: path_A_top/ (Competition_Deploy_Hybird 下的所有内容)
-        # 目标: path_B_top/ (Warm_Start_Deploy_Hybrid)
-        # 排除路径需要调整，因为现在根目录变了
-        # log_buffer 现在相对于根目录的路径是 all_in_one/SISR/log_buffer
+        # 源: path_A_top/ (注意末尾斜杠，代表复制内容)
+        # 目标: path_B_top/ (会自动创建同名目录或放入其中，这里我们希望内容对拷)
+        # 我们先 mkdir 目标目录
+        self.run_cmd(f"mkdir -p {self.path_B_top}", work_dir="/tmp")
+
         cmd = (
             f"rsync -az "
             f"--exclude 'all_in_one/SISR/log_buffer' "
