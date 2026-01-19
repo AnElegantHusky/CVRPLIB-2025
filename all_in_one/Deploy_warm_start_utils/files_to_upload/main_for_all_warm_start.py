@@ -634,7 +634,6 @@ if __name__ == "__main__":
     # 1. 参数解析优化
     parser = argparse.ArgumentParser(description="Warm Start Worker Script")
     parser.add_argument("--instance_name", type=str, required=True, help="Instance Name (e.g., XL-London_1)")
-    parser.add_argument("--seed", type=int, default=1, help="Random Seed")
     # 新增 warm_start_time 参数，由 Guardian 决定跑多久
     parser.add_argument("--warm_start_day", type=int, default=2, help="Running duration in seconds")
 

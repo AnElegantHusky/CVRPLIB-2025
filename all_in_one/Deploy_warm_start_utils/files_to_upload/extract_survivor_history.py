@@ -77,7 +77,7 @@ def extract_solutions(db_root_path: Path, output_root_path: Path, target_algos: 
 
     # 遍历所有实例目录 (XL-*)
     for inst_dir in sorted(db_root_path.iterdir()):
-        if not inst_dir.is_dir() or not inst_dir.name.startswith("XL"):
+        if not inst_dir.is_dir() or not inst_dir.name.startswith("XL-"):
             continue
 
         db_path = inst_dir / "shared.db"

@@ -28,7 +28,7 @@ CVRPLIB_DB_DIR = CVRPLIB_ROOT / "log_buffer"
 CVRPLIB_EXT_POOL = CVRPLIB_ROOT / "ails2_ext_sols"
 CVRPLIB_RECEIVE_DIR = CVRPLIB_ROOT.parent.parent / "warm_start_outer_sol"
 
-WARM_START_TIME = 300
+WARM_START_DAY = 1
 WORKER_SCRIPT = "main_for_all_warm_start.py"
 
 # 指定要从 CVRPLIB DB 提取哪些算法
@@ -98,28 +98,34 @@ def task_1_extract():
 
 def task_2_init_workspace():
     print(f"Step 2: Filtering & Initializing Workspace...")
+
+    # 清理并重建 init_sols 目录
     if WS_INIT_SOLS.exists(): shutil.rmtree(WS_INIT_SOLS)
     WS_INIT_SOLS.mkdir(parents=True, exist_ok=True)
 
+    # 遍历解池 (CVRPLIB_EXT_POOL 下是按实例名分文件夹的)
     for inst_dir in CVRPLIB_EXT_POOL.iterdir():
         if not inst_dir.is_dir(): continue
 
+        # 筛选最佳解
         best_sol = SolutionFilter.select_best_for_instance(inst_dir.name, CVRPLIB_EXT_POOL)
 
         if best_sol:
-            target_dir = WS_INIT_SOLS / inst_dir.name
-            target_dir.mkdir(parents=True, exist_ok=True)
-            # 命名带上来源方法，方便调试: global_best_init.sol
-            target_file = target_dir / f"{best_sol.parent.name}_init.sol"
+            # 【修正】：直接保存为 init_sols/InstanceName.sol
+            target_file = WS_INIT_SOLS / f"{inst_dir.name}.sol"
+
+            # 复制并重命名
             shutil.copy(best_sol, target_file)
+            # print(f"   -> Prepared: {target_file.name} (from {best_sol.parent.name})")
+
+    print(f"   Initialized {len(list(WS_INIT_SOLS.glob('*.sol')))} instances.")
 
 
 def run_worker_process(instance_name):
     cmd = [
         "python3", WORKER_SCRIPT,
         "--instance_name", instance_name,
-        "--warm_start_time", str(WARM_START_TIME),
-        "--seed", "1"
+        "--warm_start_day", str(WARM_START_DAY),
     ]
     try:
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -130,11 +136,22 @@ def run_worker_process(instance_name):
 
 def task_3_run_parallel():
     if not WS_INIT_SOLS.exists(): return
-    instances = [d.name for d in WS_INIT_SOLS.iterdir() if d.is_dir()]
+
+    # 【修正】：从 .sol 文件名中获取实例名 (e.g. "XL-London.sol" -> "XL-London")
+    instances = [f.stem for f in WS_INIT_SOLS.glob("*.sol")]
+
     print(f"Step 3: Running {len(instances)} instances parallel...")
 
+    if not instances:
+        print("   [Warn] No .sol files found in init_sols!")
+        return
+
     with Pool() as p:
-        p.map(run_worker_process, instances)
+        # 并发运行
+        results = p.map(run_worker_process, instances)
+
+    success_cnt = sum(1 for r in results if r[1])
+    print(f"   Finished. Success: {success_cnt}/{len(instances)}")
 
 
 def task_4_collect_and_push():
