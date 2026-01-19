@@ -678,14 +678,12 @@ def inject_initial_solution(instance_name, db_path):
 if __name__ == '__main__':
     one_day_time_sec = 24 * 60 * 60
 
-    warm_start_day = 2
+    # warm_start_day = 2
 
     parser = argparse.ArgumentParser()
     parser.add_argument('instances_path', default='cvrplib_1019', help='The folder of all instances.')
     parser.add_argument('instance_name', help='Instance name.')
-    parser.add_argument('--running_time_min', default=24*60*30, type=int, help='Max running time in minutes.')
-    parser.add_argument('--warmup_sec', default=3600, type=int, help='Warmup time in seconds.')
-    parser.add_argument('--update_interval_sec', default=3600, type=int, help='Update interval in seconds.')
+    parser.add_argument("--warm_start_time", type=int, default=2 * one_day_time_sec, help="Running duration in seconds")
     args = parser.parse_args()
 
     # 1. 强制 Spawn
@@ -1087,37 +1085,51 @@ if __name__ == '__main__':
 if __name__ == "__main__":
     multiprocessing.freeze_support()
 
+    one_day_time_sec = 24 * 60 * 60
+    dMax = 30
+    dMin = 15
+    gamma = 30
+    varphi = 40
+    crtRunningTime = 0.
+
+    writing_interval_sec = 60
+
     # 1. 参数解析优化
     parser = argparse.ArgumentParser(description="Warm Start Worker Script")
     parser.add_argument("--instance_name", type=str, required=True, help="Instance Name (e.g., XL-London_1)")
     parser.add_argument("--seed", type=int, default=1, help="Random Seed")
     # 新增 warm_start_time 参数，由 Guardian 决定跑多久
-    parser.add_argument("--warm_start_time", type=int, default=60, help="Running duration in seconds")
+    parser.add_argument("--warm_start_day", type=int, default=2, help="Running duration in seconds")
 
     args, unknown = parser.parse_known_args()
 
-    inst_name = args.instance_name
+    instance_name = args.instance_name
+    instance_path = ROOT_PATH / 'SISR' / 'data' / args.instances_path / f'{instance_name}.vrp' # TODO: check path
+
     seed = args.seed
-    overall_time_limit = args.warm_start_time  # 设定运行总时长
+    warm_start_day = args.warm_start_day  # 设定运行总时长
 
     # 路径定义
-    db_dir = SISR_PATH / "log_buffer" / inst_name
-    db_path = db_dir / "shared.db"
+    db_dir = SISR_PATH / "log_buffer" / instance_name
+    shared_db_path = db_dir / "shared.db"
 
     # --- Step 1: 环境清理 (Guardian可能做过，但这里再做一次保险) ---
-    print(f"🚀 [WarmStart] Starting task for {inst_name} | Limit: {overall_time_limit}s")
-    if db_dir.exists():
+    if shared_db_path.exists() and shared_db_path.is_file():
         try:
-            shutil.rmtree(db_dir)
-        except Exception as e:
-            print(f"   ⚠️ Failed to clean dir: {e}")
+            shared_db_path.unlink()
+            print(f"文件 {shared_db_path} 已删除。")
+        except OSError as e:
+            print(f"删除失败: {e}")
+    else:
+        print("文件不存在。")
     db_dir.mkdir(parents=True, exist_ok=True)
 
     # --- Step 2: 初始化 DB ---
-    init_db(db_path)
+    db_handler = SharedDB(shared_db_path)
+    db_handler.init_db()
 
     # --- Step 3: 注入初解 (从外部目录) ---
-    inject_initial_solution(inst_name, db_path)
+    inject_initial_solution(instance_name, shared_db_path)
 
     # --- Step 4: 定义只运行的两个特定算法 ---
     # 基础命令模板 (根据你的实际 jar 包位置和参数调整)
@@ -1126,27 +1138,52 @@ if __name__ == "__main__":
 
     # 4.1 构造 ails2_etaMax_0.01 命令
     # 这里的参数根据你的原始代码逻辑提取
-    cmd_eta_001 = (
-        f"{base_java_cmd} "
-        f"-instName {inst_name} "
-        f"-termination 0 -timeLimit {overall_time_limit} "  # 让 Java 内部也感知时间限制
-        f"-seed {seed} "
-        f"-etaMax 0.01 "  # 核心差异参数
-        f"-dbPath {db_path} "
-        f"-initialSolPath \"\""  # 设为空，强迫它读 DB
-    )
+
+    start_time = time.time()
+
+    ails_cmd = [
+        "java",
+        # "--enable-native-access=ALL-UNNAMED", # handle the warning
+        "-jar", java_cp,
+        "-file", instance_path.as_posix(),
+        "-sharedDB", shared_db_path.as_posix(),
+        "-rounded", "true",
+        "-best", "0",
+        "-initSolution", "None",
+        "-limit", str(warm_start_day * one_day_time_sec),  # second
+        "-crtRunningTime", str(crtRunningTime),  # second
+        "-stoppingCriterion", "Time",
+        "-dMax", str(dMax),
+        "-dMin", str(dMin),
+        "-gamma", str(gamma),
+        "-varphi", str(varphi),
+        "-startTime", str(start_time),
+        "-updateInterval", str(writing_interval_sec),
+        # "-etaMax", str(etaMax),
+    ]
 
     # 4.2 构造 eoh_omega2 命令 (假设这是 AILS 的另一种参数配置，或者是独立的 EOH jar)
     # 如果是同一个 jar 只是参数不同：
-    cmd_eoh_omega2 = (
-        f"{base_java_cmd} "
-        f"-instName {inst_name} "
-        f"-termination 0 -timeLimit {overall_time_limit} "
-        f"-seed {seed} "
-        f"-omega 2 "  # 核心差异参数
-        f"-dbPath {db_path} "
-        f"-initialSolPath \"\""
-    )
+    ails_eoh_omega2_cmd = [  # : AILSII不同版本新增cmd
+        "java",
+        # "--enable-native-access=ALL-UNNAMED", # handle the warning
+        "-jar", java_cp_eoh_omega2,
+        "-file", instance_path.as_posix(),
+        "-sharedDB", shared_db_path.as_posix(),
+        "-rounded", "true",
+        "-best", "0",
+        "-initSolution", "None",
+        "-limit", str(warm_start_day * one_day_time_sec),  # second
+        "-crtRunningTime", str(crtRunningTime),  # second
+        "-stoppingCriterion", "Time",
+        "-dMax", str(dMax),
+        "-dMin", str(dMin),
+        "-gamma", str(gamma),
+        "-varphi", str(varphi),
+        "-startTime", str(start_time),
+        "-updateInterval", str(writing_interval_sec),
+        "-etaMax", "0.01",
+    ]
 
     # 如果 EOH 是完全不同的程序，请替换上面的 cmd_eoh_omega2 字符串
 
@@ -1155,7 +1192,7 @@ if __name__ == "__main__":
     # --- Step 5: 启动子进程 ---
     try:
         print(f"🔥 [WarmStart] Launching: ails2_etaMax_0.01")
-        p1 = subprocess.Popen(cmd_eta_001, shell=True, start_new_session=True)
+        p1 = subprocess.Popen(ails_cmd, shell=True, start_new_session=True)
         workers.append(p1)
 
         print(f"🔥 [WarmStart] Launching: eoh_omega2")
