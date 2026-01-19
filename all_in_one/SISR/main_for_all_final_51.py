@@ -451,11 +451,11 @@ def manage_workers(process_dict,
     """
 
     survivor_name_list = [
-        # best_info.get('algo_name'),
-        # 'AILS2_1day',
-        # 'AILS2_5day',
-        # 'AILS2_10day',
-        # 'AILS2_15day',
+        best_info.get('algo_name'),
+        'AILS2_1day',
+        'AILS2_5day',
+        'AILS2_10day',
+        'AILS2_15day',
         # 'ails2_eoh_acc_large',
         'AILS2_etaMax001_limit5d',
         'ails2_eoh_omega2'
@@ -471,15 +471,15 @@ def manage_workers(process_dict,
             del process_dict[name]
 
     # 1.5 如果 AILS2_1day/5day/10day/20day已经跑完，则终止对应进程
-    # for name in ['AILS2_1day', 'AILS2_5day', 'AILS2_10day', 'AILS2_15day']:
-    #     if name not in process_dict:
-    #         continue
-    #     p = process_dict[name]
-    #     if not p.is_alive():
-    #         kill_process_tree(p.pid)
-    #         p.join(timeout=1)
-    #         del process_dict[name]
-    #         finished_external.append(name)
+    for name in ['AILS2_1day', 'AILS2_5day', 'AILS2_10day', 'AILS2_15day']:
+        if name not in process_dict:
+            continue
+        p = process_dict[name]
+        if not p.is_alive():
+            kill_process_tree(p.pid)
+            p.join(timeout=1)
+            del process_dict[name]
+            finished_external.append(name)
 
 
     # 2. 垃圾回收 (关键：防止内存泄漏)
@@ -523,26 +523,26 @@ def manage_workers(process_dict,
             p.start()
             process_dict[unique_name] = p
 
-    # if not process_dict.get('ails2_eoh_acc') or not process_dict['ails2_eoh_acc'].is_alive():       # :
-    #     # 构建该特定配置的命令
-    #     p = multiprocessing.Process(
-    #         target=run_external_process,
-    #         args=(ails_eoh_acc_template,),
-    #         name='ails2_eoh_acc'
-    #     )
-    #     p.start()
-    #     process_dict['ails2_eoh_acc'] = p
-    #
-    # if ails_eoh_acc_large_template:
-    #     if not process_dict.get('ails2_eoh_acc_large') or not process_dict['ails2_eoh_acc_large'].is_alive():       # :
-    #         # 构建该特定配置的命令
-    #         p = multiprocessing.Process(
-    #             target=run_external_process,
-    #             args=(ails_eoh_acc_large_template,),
-    #             name='ails2_eoh_acc_large'
-    #         )
-    #         p.start()
-    #         process_dict['ails2_eoh_acc_large'] = p
+    if not process_dict.get('ails2_eoh_acc') or not process_dict['ails2_eoh_acc'].is_alive():       # :
+        # 构建该特定配置的命令
+        p = multiprocessing.Process(
+            target=run_external_process,
+            args=(ails_eoh_acc_template,),
+            name='ails2_eoh_acc'
+        )
+        p.start()
+        process_dict['ails2_eoh_acc'] = p
+
+    if ails_eoh_acc_large_template:
+        if not process_dict.get('ails2_eoh_acc_large') or not process_dict['ails2_eoh_acc_large'].is_alive():       # :
+            # 构建该特定配置的命令
+            p = multiprocessing.Process(
+                target=run_external_process,
+                args=(ails_eoh_acc_large_template,),
+                name='ails2_eoh_acc_large'
+            )
+            p.start()
+            process_dict['ails2_eoh_acc_large'] = p
 
     # if ails_eoh_ruin_template:
     #     if not process_dict.get('ails2_eoh_ruin') or not process_dict['ails2_eoh_ruin'].is_alive():       # :
@@ -586,25 +586,25 @@ def manage_workers(process_dict,
     #     process_dict['ails2_eoh_omega_acc'] = p
 
     # --- FILO2 (C++) ---
-    # if not process_dict.get('filo2') or not process_dict['filo2'].is_alive():
-    #     p = multiprocessing.Process(
-    #         target=run_external_process,
-    #         args=(filo_template,),
-    #         name="filo2"
-    #     )
-    #     p.start()
-    #     process_dict['filo2'] = p
-    #
-    # # --- HGS-TV (C++) ---
-    # if hgs_template is not None:
-    #     if not process_dict.get('HGS-TV') or not process_dict['HGS-TV'].is_alive():
-    #         p = multiprocessing.Process(
-    #             target=run_external_process,
-    #             args=(hgs_template,),
-    #             name="HGS-TV"
-    #         )
-    #         p.start()
-    #         process_dict['HGS-TV'] = p
+    if not process_dict.get('filo2') or not process_dict['filo2'].is_alive():
+        p = multiprocessing.Process(
+            target=run_external_process,
+            args=(filo_template,),
+            name="filo2"
+        )
+        p.start()
+        process_dict['filo2'] = p
+
+    # --- HGS-TV (C++) ---
+    if hgs_template is not None:
+        if not process_dict.get('HGS-TV') or not process_dict['HGS-TV'].is_alive():
+            p = multiprocessing.Process(
+                target=run_external_process,
+                args=(hgs_template,),
+                name="HGS-TV"
+            )
+            p.start()
+            process_dict['HGS-TV'] = p
 
     # --- SISR ---
     # if not process_dict.get('sisr') or not process_dict['sisr'].is_alive():
@@ -677,8 +677,6 @@ def inject_initial_solution(instance_name, db_path):
 
 if __name__ == '__main__':
     one_day_time_sec = 24 * 60 * 60
-
-    warm_start_day = 2
 
     parser = argparse.ArgumentParser()
     parser.add_argument('instances_path', default='cvrplib_1019', help='The folder of all instances.')
@@ -767,7 +765,7 @@ if __name__ == '__main__':
         {'name': f'AILS2_etaMax0005_limit24h', 'etaMax': 0.005, 'limit': one_day_time_sec},
         {'name': f'AILS2_etaMax002_limit24h', 'etaMax': 0.02, 'limit': one_day_time_sec},
 
-        {'name': f'AILS2_etaMax001_limit5d', 'etaMax': 0.01, 'limit': one_day_time_sec * warm_start_day},
+        {'name': f'AILS2_etaMax001_limit5d', 'etaMax': 0.01, 'limit': one_day_time_sec * 2},
 
         # {'name': 'AILS2_etaMax005_limit24h',   'etaMax': 0.05, 'limit': 24*60*60},
         # {'name': 'AILS2_etaMax01_limit24h',   'etaMax': 0.1, 'limit': 24*60*60},
@@ -908,7 +906,7 @@ if __name__ == '__main__':
         "-rounded", "true",
         "-best", "0",
         "-initSolution", "None",
-        "-limit", str(warm_start_day * one_day_time_sec),  # second
+        "-limit", str(2 * one_day_time_sec),  # second
         "-crtRunningTime", str(crtRunningTime),  # second
         "-stoppingCriterion", "Time",
         "-dMax", str(dMax),
@@ -1082,120 +1080,3 @@ if __name__ == '__main__':
                 p.join()
         gc.collect()
         print("Done.")
-
-# =================== 主程序流程修改 ===================
-if __name__ == "__main__":
-    multiprocessing.freeze_support()
-
-    # 1. 参数解析优化
-    parser = argparse.ArgumentParser(description="Warm Start Worker Script")
-    parser.add_argument("--instance_name", type=str, required=True, help="Instance Name (e.g., XL-London_1)")
-    parser.add_argument("--seed", type=int, default=1, help="Random Seed")
-    # 新增 warm_start_time 参数，由 Guardian 决定跑多久
-    parser.add_argument("--warm_start_time", type=int, default=60, help="Running duration in seconds")
-
-    args, unknown = parser.parse_known_args()
-
-    inst_name = args.instance_name
-    seed = args.seed
-    overall_time_limit = args.warm_start_time  # 设定运行总时长
-
-    # 路径定义
-    db_dir = SISR_PATH / "log_buffer" / inst_name
-    db_path = db_dir / "shared.db"
-
-    # --- Step 1: 环境清理 (Guardian可能做过，但这里再做一次保险) ---
-    print(f"🚀 [WarmStart] Starting task for {inst_name} | Limit: {overall_time_limit}s")
-    if db_dir.exists():
-        try:
-            shutil.rmtree(db_dir)
-        except Exception as e:
-            print(f"   ⚠️ Failed to clean dir: {e}")
-    db_dir.mkdir(parents=True, exist_ok=True)
-
-    # --- Step 2: 初始化 DB ---
-    init_db(db_path)
-
-    # --- Step 3: 注入初解 (从外部目录) ---
-    inject_initial_solution(inst_name, db_path)
-
-    # --- Step 4: 定义只运行的两个特定算法 ---
-    # 基础命令模板 (根据你的实际 jar 包位置和参数调整)
-    # 注意：这里假设 jar 包和 classpath 都在 ../AILS2 下，请根据实际 Docker 路径确认
-    base_java_cmd = "java -cp \"../AILS2/libs/*:../AILS2/target/classes\" SearchMethod.AILSII"
-
-    # 4.1 构造 ails2_etaMax_0.01 命令
-    # 这里的参数根据你的原始代码逻辑提取
-    cmd_eta_001 = (
-        f"{base_java_cmd} "
-        f"-instName {inst_name} "
-        f"-termination 0 -timeLimit {overall_time_limit} "  # 让 Java 内部也感知时间限制
-        f"-seed {seed} "
-        f"-etaMax 0.01 "  # 核心差异参数
-        f"-dbPath {db_path} "
-        f"-initialSolPath \"\""  # 设为空，强迫它读 DB
-    )
-
-    # 4.2 构造 eoh_omega2 命令 (假设这是 AILS 的另一种参数配置，或者是独立的 EOH jar)
-    # 如果是同一个 jar 只是参数不同：
-    cmd_eoh_omega2 = (
-        f"{base_java_cmd} "
-        f"-instName {inst_name} "
-        f"-termination 0 -timeLimit {overall_time_limit} "
-        f"-seed {seed} "
-        f"-omega 2 "  # 核心差异参数
-        f"-dbPath {db_path} "
-        f"-initialSolPath \"\""
-    )
-
-    # 如果 EOH 是完全不同的程序，请替换上面的 cmd_eoh_omega2 字符串
-
-    workers = []
-
-    # --- Step 5: 启动子进程 ---
-    try:
-        print(f"🔥 [WarmStart] Launching: ails2_etaMax_0.01")
-        p1 = subprocess.Popen(cmd_eta_001, shell=True, start_new_session=True)
-        workers.append(p1)
-
-        print(f"🔥 [WarmStart] Launching: eoh_omega2")
-        p2 = subprocess.Popen(cmd_eoh_omega2, shell=True, start_new_session=True)
-        workers.append(p2)
-
-        # --- Step 6: 进入监控循环 (倒计时) ---
-        # 复用 manage_workers 函数，或者直接写一个简单的等待循环
-        # 这里建议直接调用 manage_workers，因为它包含了读 DB 更新 crt_best 的逻辑
-
-        # 为了适配 manage_workers 的接口，我们需要传递那些 template 参数
-        # 但既然我们只有两个固定进程，其实只需要监控时间即可
-
-        start_time = time.time()
-        while True:
-            elapsed = time.time() - start_time
-            remaining = overall_time_limit - elapsed
-
-            if remaining <= 0:
-                print("⏰ [WarmStart] Time limit reached. Stopping...")
-                break
-
-            # 简单的活跃性检查
-            alive_count = sum(1 for p in workers if p.poll() is None)
-            if alive_count == 0:
-                print("⚠️ [WarmStart] All workers finished early.")
-                break
-
-            # (可选) 在这里添加读取 shared.db 并打印当前最优解的逻辑
-            # ...
-
-            time.sleep(5)
-
-    except KeyboardInterrupt:
-        print("\n🛑 [WarmStart] Interrupted by user.")
-    finally:
-        # --- Step 7: 清理退出 ---
-        print("🧹 [WarmStart] Terminating workers...")
-        for p in workers:
-            kill_process(p)
-
-        print("✅ [WarmStart] Done.")
-        sys.exit(0)

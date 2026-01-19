@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     execute_batch_command(
         command_str=MY_COMMAND,
-        target_scope="main"
+        target_scope="warm_start"
     )
 
     # 场景 2: 比如你想查看某个文件是否存在
