@@ -122,36 +122,95 @@ def task_2_init_workspace():
 
 
 def run_worker_process(instance_name):
+    """
+    运行单个实例的任务，并捕获输出以便调试
+    """
     cmd = [
         "python3", WORKER_SCRIPT,
         "--instance_name", instance_name,
         "--warm_start_day", str(WARM_START_DAY),
+        "--seed", "1"
     ]
+
+    # 设置硬超时时间，比内部逻辑多给 30 秒缓冲，防止僵死
+    HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
+    # HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
+
+
     try:
-        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return (instance_name, True)
-    except:
-        return (instance_name, False)
+        # capture_output=True 会同时捕获 stdout 和 stderr
+        # text=True 让输出变为字符串
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=True,
+            # timeout=HARD_TIMEOUT
+        )
+        # 如果成功，返回 True
+        return (instance_name, True, None)
+
+    except subprocess.CalledProcessError as e:
+        # 脚本运行出错 (Return Code != 0)
+        error_msg = (
+            f"\n❌ [Error] Instance: {instance_name}\n"
+            f"   Exit Code: {e.returncode}\n"
+            f"   Command: {' '.join(cmd)}\n"
+            f"   Error Output (Last 10 lines):\n"
+            f"{'=' * 40}\n"
+            f"{''.join(e.stderr.splitlines(keepends=True)[-10:])}"  # 只打最后10行，避免刷屏
+            f"{'=' * 40}\n"
+        )
+        # 直接打印出来，或者返回给主进程
+        print(error_msg)
+        return (instance_name, False, error_msg)
+
+    except subprocess.TimeoutExpired as e:
+        # 脚本超时被强杀
+        print(f"⏰ [Timeout] Instance {instance_name} exceeded {HARD_TIMEOUT}s.")
+        return (instance_name, False, "Timeout")
+
+    except Exception as e:
+        # 其他 Python 调用错误
+        print(f"⚠️ [Exception] Instance {instance_name}: {e}")
+        return (instance_name, False, str(e))
 
 
 def task_3_run_parallel():
     if not WS_INIT_SOLS.exists(): return
 
-    # 【修正】：从 .sol 文件名中获取实例名 (e.g. "XL-London.sol" -> "XL-London")
+    # 获取所有任务名 (文件名去掉后缀)
     instances = [f.stem for f in WS_INIT_SOLS.glob("*.sol")]
 
-    print(f"Step 3: Running {len(instances)} instances parallel...")
+    print(f"Step 3: Running {len(instances)} instances in parallel...")
+    print(f"        (Hard Timeout set to {WARM_START_DAY}s)")
 
     if not instances:
-        print("   [Warn] No .sol files found in init_sols!")
+        print("   [Warn] No .sol files found to run!")
         return
 
+    start_t = time.time()
+
+    # 使用 Pool 运行
+    # processes=None 默认使用所有 CPU 核
     with Pool() as p:
-        # 并发运行
+        # map 会阻塞直到所有任务完成
         results = p.map(run_worker_process, instances)
 
+    duration = time.time() - start_t
+
+    # 统计结果
     success_cnt = sum(1 for r in results if r[1])
-    print(f"   Finished. Success: {success_cnt}/{len(instances)}")
+    fail_cnt = len(instances) - success_cnt
+
+    print(f"\nStep 3 Finished in {duration:.1f}s.")
+    print(f"   ✅ Success: {success_cnt}")
+    print(f"   ❌ Failed:  {fail_cnt}")
+
+    # 如果有失败，可以汇总打印一下失败的实例名
+    if fail_cnt > 0:
+        failed_instances = [r[0] for r in results if not r[1]]
+        print(f"   Failed Instances: {failed_instances}")
 
 
 def task_4_collect_and_push():
