@@ -214,41 +214,92 @@ def task_3_run_parallel():
 
 
 def task_4_collect_and_push():
-    print("Step 4: Collecting & Pushing...")
+    print("Step 4: Collecting & Pushing (Atomic Mode)...")
+
+    # 1. 准备目录
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     local_save_dir = WS_RESULT_DIR / timestamp
     local_save_dir.mkdir(parents=True, exist_ok=True)
-    CVRPLIB_RECEIVE_DIR.mkdir(parents=True, exist_ok=True)
 
+    # 确保接收目录存在，并尝试给予目录本身 777 权限
+    if not CVRPLIB_RECEIVE_DIR.exists():
+        CVRPLIB_RECEIVE_DIR.mkdir(parents=True, exist_ok=True)
+    try:
+        os.chmod(CVRPLIB_RECEIVE_DIR, 0o777)
+    except Exception as e:
+        # 只要能写进去就行，修改目录权限失败可以忽略
+        pass
+
+    count = 0
+    # 2. 遍历结果
     for inst_dir in WS_LOG_BUFFER.iterdir():
         if not inst_dir.is_dir(): continue
         db_path = inst_dir / "shared.db"
         if not db_path.exists(): continue
 
         try:
+            # 只读模式读取 DB
             conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+            # 增加 SQL 执行超时防止死锁
             row = conn.execute("SELECT solution, score FROM global_best WHERE id=1").fetchone()
             conn.close()
 
             if row:
-                # 解析
+                sol_raw, score = row
                 try:
-                    routes = json.loads(row[0])
+                    routes = json.loads(sol_raw)
                 except:
-                    routes = ast.literal_eval(row[0])
+                    try:
+                        routes = ast.literal_eval(sol_raw)
+                    except:
+                        print(f"   [Error] Failed to parse solution for {inst_dir.name}")
+                        continue
 
-                score = row[1]
                 file_name = f"{inst_dir.name}.sol"
 
-                # 【复用】使用 extract_survivor_history 里的写文件函数
-                # 这样保证输出格式永远一致
+                # -------------------------------------------------
+                # 动作 A: 先在本地归档 (Local Archive)
+                # -------------------------------------------------
                 local_path = local_save_dir / file_name
                 routes_to_sol_file(routes, score, local_path)
 
-                shutil.copy(local_path, CVRPLIB_RECEIVE_DIR / file_name)
-        except Exception as e:
-            print(f"Error {inst_dir.name}: {e}")
+                # 顺便把本地存档也改成 666，方便以后手动查看（可选）
+                try:
+                    os.chmod(local_path, 0o666)
+                except:
+                    pass
 
+                # -------------------------------------------------
+                # 动作 B: 原子化推送到共享目录 (Atomic Push)
+                # -------------------------------------------------
+                # 这里的逻辑是为了应对“接收方可能随时在读取”的情况
+
+                final_target_path = CVRPLIB_RECEIVE_DIR / file_name
+                temp_target_path = CVRPLIB_RECEIVE_DIR / f"{file_name}.tmp"
+
+                # 1. Copy 到同一个目录下的临时文件 (.tmp)
+                #    注意：必须先 copy 成 .tmp，此时接收方会忽略这个后缀的文件
+                shutil.copy(local_path, temp_target_path)
+
+                # 2. 修改临时文件的权限为 666 (rw-rw-rw-)
+                #    这是最关键的一步，确保接收方容器（可能是非root用户）能删除它
+                try:
+                    os.chmod(temp_target_path, 0o666)
+                except Exception as e:
+                    print(f"   [Warn] Chmod failed on temp file: {e}")
+
+                # 3. 原子重命名 (Atomic Rename)
+                #    Linux 系统下，在同目录内 rename 是瞬间完成的。
+                #    接收方永远不会读到“写了一半”的文件。
+                os.replace(temp_target_path, final_target_path)
+
+                count += 1
+
+        except Exception as e:
+            print(f"Error processing {inst_dir.name}: {e}")
+
+    print(f"   ✅ Collected {count} solutions to {local_save_dir}")
+    print(f"   ✅ Pushed safely to {CVRPLIB_RECEIVE_DIR}")
 
 # ================= 主入口 =================
 

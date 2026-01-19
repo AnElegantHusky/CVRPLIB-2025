@@ -640,9 +640,8 @@ if __name__ == "__main__":
     args, unknown = parser.parse_known_args()
 
     instance_name = args.instance_name
-    instance_path = ROOT_PATH / 'SISR' / 'data' / args.instances_path / f'{instance_name}.vrp' # TODO: check path
+    instance_path = ROOT_PATH / 'SISR' / 'data' / 'instances' / f'{instance_name}.vrp' # TODO: check path
 
-    seed = args.seed
     warm_start_day = args.warm_start_day  # 设定运行总时长
 
     # 路径定义
@@ -668,13 +667,6 @@ if __name__ == "__main__":
     inject_initial_solution(instance_name, shared_db_path)
 
     # --- Step 4: 定义只运行的两个特定算法 ---
-    # 基础命令模板 (根据你的实际 jar 包位置和参数调整)
-    # 注意：这里假设 jar 包和 classpath 都在 ../AILS2 下，请根据实际 Docker 路径确认
-    base_java_cmd = "java -cp \"../AILS2/libs/*:../AILS2/target/classes\" SearchMethod.AILSII"
-
-    # 4.1 构造 ails2_etaMax_0.01 命令
-    # 这里的参数根据你的原始代码逻辑提取
-
     start_time = time.time()
 
     ails_cmd = [
@@ -749,12 +741,15 @@ if __name__ == "__main__":
     # --- Step 5: 启动子进程 ---
     try:
         print(f"🔥 [WarmStart] Launching: ails2_etaMax_0.01")
-        p1 = subprocess.Popen(ails_cmd, shell=False, start_new_session=True)
+        p1 = subprocess.Popen(" ".join(ails_cmd), shell=True, start_new_session=True)
         workers.append(p1)
 
         print(f"🔥 [WarmStart] Launching: eoh_omega2")
-        p2 = subprocess.Popen(ails_eoh_omega2_cmd, shell=False, start_new_session=True)
+        p2 = subprocess.Popen(" ".join(ails_eoh_omega2_cmd), shell=True, start_new_session=True)
         workers.append(p2)
+
+        p3 = subprocess.Popen(" ".join(ails_eoh_ruin_cmd), shell=True, start_new_session=True)
+        workers.append(p3)
 
         # --- Step 6: 进入监控循环 (倒计时) ---
         # 复用 manage_workers 函数，或者直接写一个简单的等待循环
