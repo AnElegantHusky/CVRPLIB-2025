@@ -103,7 +103,7 @@ def ingest_loop():
 
         # 动态调整休眠时间
         # 如果刚才处理了文件，说明可能正忙，休眠短一点；否则休眠长一点
-        time.sleep(10 * 60)
+        time.sleep(60)
 
 
 if __name__ == "__main__":
