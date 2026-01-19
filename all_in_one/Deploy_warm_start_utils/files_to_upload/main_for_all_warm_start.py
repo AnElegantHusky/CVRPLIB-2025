@@ -620,8 +620,8 @@ def inject_initial_solution(instance_name, db_path):
 if __name__ == "__main__":
     multiprocessing.freeze_support()
 
-    # one_day_time_sec = 24 * 60 * 60
-    one_day_time_sec = 120
+    one_day_time_sec = 24 * 60 * 60
+    # one_day_time_sec = 120
 
     dMax = 30
     dMin = 15

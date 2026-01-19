@@ -26,7 +26,7 @@ WS_RESULT_DIR = WS_ROOT / "result_sols"
 CVRPLIB_ROOT = Path("/cvrplib_link/")
 CVRPLIB_DB_DIR = CVRPLIB_ROOT / "log_buffer"
 CVRPLIB_EXT_POOL = CVRPLIB_ROOT / "ails2_ext_sols"
-CVRPLIB_RECEIVE_DIR = CVRPLIB_ROOT.parent.parent / "warm_start_outer_sol"
+CVRPLIB_RECEIVE_DIR = CVRPLIB_ROOT / "warm_start_outer_sol"
 
 WARM_START_DAY = 1
 WORKER_SCRIPT = "main_for_all_warm_start.py"
@@ -304,8 +304,9 @@ def task_4_collect_and_push():
 # ================= 主入口 =================
 
 if __name__ == "__main__":
-    os.chdir(WS_ROOT)
-    task_1_extract()
-    task_2_init_workspace()
-    task_3_run_parallel()
-    task_4_collect_and_push()
+    for i in range(30):
+        os.chdir(WS_ROOT)
+        task_1_extract()
+        task_2_init_workspace()
+        task_3_run_parallel()
+        task_4_collect_and_push()
