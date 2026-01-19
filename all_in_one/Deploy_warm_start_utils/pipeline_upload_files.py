@@ -20,8 +20,12 @@ FILES_TO_UPLOAD = [
     # ("utils/config_loader.py", "both"),        # 更新两边都用的工具
 
     # 在这里填写你当前要传的文件:
-    ("write_outer_sol.py", "both"),
-    ("service_ingest_sol.py", "main"),
+    ("./files_to_upload/extract_survivor_history.py", "both"),
+    ("./files_to_upload/guardian.py", "warm_start"),
+    ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
+    ("./files_to_upload/service_ingest_sol.py", "main"),
+    ("./files_to_upload/write_outer_sol.py", "both"),
+
 ]
 
 # 2. 目标服务器筛选
