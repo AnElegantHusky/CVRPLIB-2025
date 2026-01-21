@@ -26,7 +26,7 @@ pip install fabric
 
 2.1 路径
 ```bash
-cd Deploy_warm_start_utils
+cd all_in_one/Deploy_warm_start_utils
 ```
 
 2.2 运行
