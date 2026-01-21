@@ -2,6 +2,7 @@ import argparse
 from fabric import Connection
 from rich.console import Console
 from config import servers as SERVER_MANIFEST
+from typing import List
 
 console = Console()
 
@@ -23,7 +24,7 @@ to_run_servers = [
 ]
 
 
-def execute_batch_command(command_str: str, target_scope: str = "main"):
+def execute_batch_command(command_str: str, target_scope: str = "main", to_run_servers: List | None = None):
     """
     Args:
         command_str: 要执行的 shell 命令 (例如 "ls -la" 或 "chmod 777 folder")
@@ -34,7 +35,10 @@ def execute_batch_command(command_str: str, target_scope: str = "main"):
     console.print(f"范围: [cyan]{target_scope}[/cyan]")
 
     # 1. 筛选服务器
-    active_nodes = [s for s in SERVER_MANIFEST if s['host'] in to_run_servers]
+    if to_run_servers is None:
+        active_nodes = [s for s in SERVER_MANIFEST]
+    else:
+        active_nodes = [s for s in SERVER_MANIFEST if s['host'] in to_run_servers]
 
     if not active_nodes:
         console.print("[yellow]⚠️  没有选中任何服务器，请检查 to_run_servers 列表[/yellow]")
