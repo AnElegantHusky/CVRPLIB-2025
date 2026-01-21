@@ -114,6 +114,7 @@ if __name__ == "__main__":
         ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
         ("./files_to_upload/service_ingest_sol.py", "main"),
         ("./files_to_upload/write_outer_sol.py", "both"),
+        ("./files_to_upload/main_for_all_restart.py", "main"),
     ]
 
     # 2. 定义目标服务器 (None 表示全部)

@@ -32,8 +32,18 @@ WARM_START_DAY = 1
 WORKER_SCRIPT = "main_for_all_warm_start.py"
 
 # 指定要从 CVRPLIB DB 提取哪些算法
-EXTRACT_ALGOS = ["ails2_1day", "sisr_cvrp", "global_best"]
-FILTER_METHOD_PRIORITY = ["global_best", "ails2_1day", "sisr_cvrp"]
+EXTRACT_ALGOS = [
+            "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
+            "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
+            "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
+            "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
+]
+FILTER_METHOD_PRIORITY = [
+            "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
+            "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
+            "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
+            "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
+]
 FILTER_CRITERIA = "best_score"
 
 

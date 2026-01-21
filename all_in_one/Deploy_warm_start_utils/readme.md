@@ -31,10 +31,13 @@ cd all_in_one/Deploy_warm_start_utils
 
 2.2 运行
 ```bash
+python pipeline_restart.py
 python pipeline_monitor.py
 ```
 
 2.3 传输结果
 ```bash
-cd logs_monitor
+10.90.91.232: 
+ - /home/cvrp/cvrp_com_hyb/Competition_Deploy_Hybird/all_in_one/SISR/ails2_ext_sols
+本地: logs_monitor
 ```

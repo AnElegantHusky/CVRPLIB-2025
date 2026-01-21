@@ -2,6 +2,7 @@ import argparse
 import ast
 import sqlite3
 import json
+import shutil  # [新增] 用于删除文件夹
 from pathlib import Path
 
 
@@ -57,7 +58,7 @@ def fetch_topk(conn, algo_name: str, k: int):
             return []
 
 
-# ================= 核心导出函数 (供外部调用) =================
+# ================= 核心导出函数 (已修改) =================
 
 def extract_solutions(db_root_path: Path, output_root_path: Path, target_algos: list, top_k: int = 5):
     """
@@ -72,7 +73,18 @@ def extract_solutions(db_root_path: Path, output_root_path: Path, target_algos: 
         print(f"[Warn] DB root not found: {db_root_path}")
         return 0
 
+    # [新增/修改] 清理旧的输出目录
+    if output_root_path.exists():
+        print(f"[Info] Cleaning old output directory: {output_root_path}")
+        try:
+            shutil.rmtree(output_root_path)
+        except Exception as e:
+            print(f"[Error] Failed to clean directory {output_root_path}: {e}")
+            return 0
+
+    # 重新创建目录
     output_root_path.mkdir(parents=True, exist_ok=True)
+
     success_count = 0
 
     # 遍历所有实例目录 (XL-*)
@@ -136,3 +148,14 @@ if __name__ == "__main__":
     print(f"Extracting from {log_root} to {out_root}...")
     cnt = extract_solutions(log_root, out_root, args.algos, args.topk)
     print(f"Done. Processed {cnt} instances.")
+
+    # example usage:
+    # EXTRACT_ALGOS = [
+    #     "ails2_etaMax1.000_stoppingTime86400.00",  # 1 天
+    #     "ails2_etaMax1.000_stoppingTime432000.00",  # 5 天
+    #     "ails2_etaMax1.000_stoppingTime864000.00",  # 10 天
+    #     "ails2_etaMax1.000_stoppingTime1728000.00",  # 20 天
+    # ]
+    # extract_solution('SISR/log_buffer', 'SISR/ails2_ext_sols', EXTRACT_ALGOS, top_k=5)
+
+    # results -> SISR/ails2_ext_sols/XL-xxx/ails2_xxx/1.sol, 2.sol, ...

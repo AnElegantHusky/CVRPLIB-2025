@@ -130,6 +130,30 @@ def run_docker_cmd(target_cmd, background=False):
     console.rule("[bold magenta]Done[/bold magenta]")
 
 
+def exec_in_warmstart(conn, cmd, background=False):
+    """
+    [纯逻辑函数]
+    接收一个已建立的 conn，在 WarmStart 容器中执行命令
+    """
+    # 这里为了简便，假设 find_container_workdir 逻辑是一样的，
+    # 实际可以复用 pipeline_docker_cvrplib_cmd 里的函数，或者单独复制一份
+    # ... (查找路径逻辑) ...
+    # 假设找到了 work_dir
+    work_dir = "/app/all_in_one/SISR"  # 简化示例，实际请复制查找逻辑
+
+    bg_flag = "-d" if background else ""
+    full_cmd = f"docker exec {bg_flag} {CONTAINER_NAME} /bin/bash -c \"cd {work_dir} && {cmd}\""
+
+    console.print(f"      🚀 [WarmStart] Exec: [dim]{cmd}[/dim]")
+    result = conn.run(full_cmd, warn=True, hide=True)
+
+    if result.ok:
+        console.print(f"      ✅ Success")
+        return True
+    else:
+        console.print(f"      ❌ Failed: {result.stderr.strip()}")
+        return False
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run command inside WarmStart Docker")
     parser.add_argument("cmd", type=str, help="The command to run")

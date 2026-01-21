@@ -118,6 +118,32 @@ def run_docker_cmd(target_cmd, background=False):
     console.rule("[bold blue]Done[/bold blue]")
 
 
+def exec_in_cvrplib(conn, cmd, background=False):
+    """
+    [纯逻辑函数]
+    接收一个已建立的 conn，在 CVRPLIB 容器中执行命令
+    """
+    # 1. 找路径
+    work_dir = find_container_workdir(conn, CONTAINER_NAME)
+    if not work_dir:
+        console.print(f"      ❌ [CVRPLIB] Workdir not found (Anchor: {ANCHOR_FILE})")
+        return False
+
+    # 2. 构造命令
+    bg_flag = "-d" if background else ""
+    full_cmd = f"docker exec {bg_flag} {CONTAINER_NAME} /bin/bash -c \"cd {work_dir} && {cmd}\""
+
+    # 3. 执行
+    console.print(f"      🚀 [CVRPLIB] Exec: [dim]{cmd}[/dim]")
+    result = conn.run(full_cmd, warn=True, hide=True)
+
+    if result.ok:
+        console.print(f"      ✅ Success")
+        return True
+    else:
+        console.print(f"      ❌ Failed: {result.stderr.strip()}")
+        return False
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run command inside Docker SISR dir")
     parser.add_argument("cmd", type=str, help="The command to run")
