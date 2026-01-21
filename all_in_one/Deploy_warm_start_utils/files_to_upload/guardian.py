@@ -6,7 +6,8 @@ import sqlite3
 import json
 import ast
 from pathlib import Path
-from datetime import datetime
+import random
+from datetime import datetime, timedelta, timezone
 from multiprocessing import Pool
 
 # 【核心修改】引入提取函数
@@ -49,11 +50,67 @@ FILTER_CRITERIA = "best_score"
 
 # ================= 2. 筛选模块 (保持不变) =================
 
+# class SolutionFilter:
+#     @staticmethod
+#     def get_sol_cost(file_path):
+#         try:
+#             with open(file_path, 'r') as f:
+#                 lines = f.readlines()
+#                 for line in reversed(lines):
+#                     if line.strip().startswith("Cost"):
+#                         return float(line.strip().split()[-1])
+#         except:
+#             pass
+#         return float('inf')
+#
+#     @staticmethod
+#     def select_best_for_instance(instance_name, pool_dir):
+#         inst_pool = pool_dir / instance_name
+#         if not inst_pool.exists(): return None
+#
+#         # 1. 按优先级找
+#         for method in FILTER_METHOD_PRIORITY:
+#             method_dir = inst_pool / method
+#             if not method_dir.exists(): continue
+#
+#             sol_files = list(method_dir.glob("*.sol"))
+#             if not sol_files: continue
+#
+#             # 2. 选最好的解
+#             if FILTER_CRITERIA == "best_score":
+#                 sol_files.sort(key=lambda x: SolutionFilter.get_sol_cost(x))
+#                 return sol_files[0]  # Cost 最小
+#             else:
+#                 # latest (按文件名 1.sol, 2.sol 数字越小越新)
+#                 sol_files.sort(key=lambda x: int(x.stem))
+#                 return sol_files[0]
+#
+#         # 3. 兜底
+#         all_sols = list(inst_pool.glob("**/*.sol"))
+#         if all_sols:
+#             return all_sols[0]
+#         return None
+
 class SolutionFilter:
+    # === 配置区域 ===
+    # 算法启动时间：2026-01-12 23:30 (UTC+8 香港时间)
+    START_DT = datetime(2026, 1, 12, 23, 30, tzinfo=timezone(timedelta(hours=8)))
+
+    # 定义 (时长秒数, 文件夹名称) 的对应关系
+    # 注意：这里按时长从大到小排列，方便后续逻辑
+    METHOD_CONFIGS = [
+        (1728000, "ails2_etaMax1.000_stoppingTime1728000.00"),  # 20 天
+        (864000, "ails2_etaMax1.000_stoppingTime864000.00"),  # 10 天
+        (432000, "ails2_etaMax1.000_stoppingTime432000.00"),  # 5 天
+        (86400, "ails2_etaMax1.000_stoppingTime86400.00"),  # 1 天
+    ]
+
     @staticmethod
     def get_sol_cost(file_path):
+        """读取 sol 文件中的 Cost"""
         try:
             with open(file_path, 'r') as f:
+                # 倒序读取，通常 Cost 在最后
                 lines = f.readlines()
                 for line in reversed(lines):
                     if line.strip().startswith("Cost"):
@@ -65,31 +122,73 @@ class SolutionFilter:
     @staticmethod
     def select_best_for_instance(instance_name, pool_dir):
         inst_pool = pool_dir / instance_name
-        if not inst_pool.exists(): return None
+        if not inst_pool.exists():
+            return None
 
-        # 1. 按优先级找
-        for method in FILTER_METHOD_PRIORITY:
-            method_dir = inst_pool / method
-            if not method_dir.exists(): continue
+        # 1. 计算当前耗时 (elapsed seconds)
+        now = datetime.now(timezone(timedelta(hours=8)))  # 当前香港时间
+        elapsed_sec = (now - SolutionFilter.START_DT).total_seconds()
 
-            sol_files = list(method_dir.glob("*.sol"))
-            if not sol_files: continue
+        target_folder_name = None
 
-            # 2. 选最好的解
-            if FILTER_CRITERIA == "best_score":
-                sol_files.sort(key=lambda x: SolutionFilter.get_sol_cost(x))
-                return sol_files[0]  # Cost 最小
-            else:
-                # latest (按文件名 1.sol, 2.sol 数字越小越新)
-                sol_files.sort(key=lambda x: int(x.stem))
-                return sol_files[0]
+        # 2. 动态筛选：找“已结束”且“耗时最长”的方法
+        # METHOD_CONFIGS 已经按时长降序排列
+        for duration, folder_name in SolutionFilter.METHOD_CONFIGS:
+            # 如果当前时间已经超过了该方法的停止时间
+            if elapsed_sec >= duration:
+                # 检查物理文件夹是否存在
+                method_dir = inst_pool / folder_name
+                if method_dir.exists():
+                    # 找到了！这就是理论上完成的最长任务
+                    target_folder_name = folder_name
+                    break
 
-        # 3. 兜底
-        all_sols = list(inst_pool.glob("**/*.sol"))
-        if all_sols:
-            return all_sols[0]
-        return None
+        # 3. 兜底逻辑：如果没有任何一个满足时间条件（比如刚跑了半天），
+        # 或者满足时间的文件夹不存在，则回退到找“存在的时长最短的那个”作为保底
+        if target_folder_name is None:
+            # 反向遍历（从短到长），找一个存在的
+            for _, folder_name in reversed(SolutionFilter.METHOD_CONFIGS):
+                if (inst_pool / folder_name).exists():
+                    target_folder_name = folder_name
+                    break
 
+        if target_folder_name is None:
+            return None
+
+        # 4. 获取解并排序
+        method_dir = inst_pool / target_folder_name
+        sol_files = list(method_dir.glob("*.sol"))
+
+        if not sol_files: return None
+
+        # 按 Cost 排序 (Cost 越小越好)
+        # 注意：这里必须读文件获取真实 Cost，而不是依赖文件名
+        sol_files_with_cost = []
+        for f in sol_files:
+            c = SolutionFilter.get_sol_cost(f)
+            if c != float('inf'):
+                sol_files_with_cost.append((c, f))
+
+        # 再次排序，确保是 Cost 升序
+        sol_files_with_cost.sort(key=lambda x: x[0])
+
+        if not sol_files_with_cost: return None
+
+        # 5. Top-K 随机选择 (Top 10)
+        # 取前 10 个最好的解
+        top_k = sol_files_with_cost[:10]
+
+        # 随机选一个。
+        # 解释：随机性在 Warm Start 中很重要，能避免所有子进程都从完全相同的起点开始搜索，
+        # 从而增加搜索空间的多样性。
+        selected_pair = random.choice(top_k)
+
+        # 打印日志方便调试（可选）
+        # print(f"[{instance_name}] Time elapsed: {elapsed_sec/3600:.1f}h. "
+        #       f"Selected from {target_folder_name} (Top {len(top_k)}). "
+        #       f"Cost: {selected_pair[0]}")
+
+        return selected_pair[1]  # 返回 Path 对象
 
 # ================= 3. 任务流程 =================
 

@@ -7,6 +7,8 @@ import logging  # <--- 引入日志模块
 from pathlib import Path
 from datetime import datetime
 from write_outer_sol import save_best
+import signal
+import sys
 
 # === 配置区域 ===
 BASE_PATH = Path(__file__).resolve().parent
@@ -67,6 +69,17 @@ def log_status(instance, new_score, old_bks, status, algo_label):
     )
     logger.info(log_msg)  # <--- 使用 logger.info 代替 print
 
+IS_RUNNING = True
+
+def handle_exit_signal(signum, frame):
+    """捕获 kill 信号，不再接受新任务，等待当前任务完成"""
+    global IS_RUNNING
+    print(f"\n[Stop] 收到终止信号 ({signum})，正在完成当前操作后退出...")
+    IS_RUNNING = False
+
+# 注册信号 (SIGTERM 是 kill 默认发送的，SIGINT 是 Ctrl+C)
+signal.signal(signal.SIGTERM, handle_exit_signal)
+signal.signal(signal.SIGINT, handle_exit_signal)
 
 def ingest_loop():
     logger.info(f"[*] 启动多源解吸入服务 (Multi-Source Ingest Service)")
@@ -88,7 +101,7 @@ def ingest_loop():
         })
         logger.info(f"    监听中: {folder_path}")
 
-    while True:
+    while IS_RUNNING:
         batch_processed_count = 0
 
         for source in monitor_paths:

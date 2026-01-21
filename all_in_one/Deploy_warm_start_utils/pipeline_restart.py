@@ -64,36 +64,36 @@ def restart_logic(conn, host_ip):
 # === 入口 ===
 if __name__ == "__main__":
 
-    # 传输必要文件
-    MY_FILES = [
-        ("./files_to_upload/extract_survivor_history.py", "both"),
-        ("./files_to_upload/guardian.py", "warm_start"),
-        ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
-        ("./files_to_upload/service_ingest_sol.py", "main"),
-        ("./files_to_upload/write_outer_sol.py", "both"),
-        ("./files_to_upload/main_for_all_restart.py", "main"),
-    ]
-
-    ALL_SERVERS = [
-        "10.90.91.100",
-        "10.90.91.101",
-        "10.90.91.124",
-        "10.90.91.125",
-        "10.90.91.126",
-        "10.90.91.127",
-        "10.90.91.163",
-        "10.90.91.167",
-        "10.90.91.49",
-        "10.90.91.51",
-        "10.90.91.231",
-        "10.90.91.232",
-    ]
+    # # 传输必要文件
+    # MY_FILES = [
+    #     ("./files_to_upload/extract_survivor_history.py", "both"),
+    #     ("./files_to_upload/guardian.py", "warm_start"),
+    #     ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
+    #     ("./files_to_upload/service_ingest_sol.py", "main"),
+    #     ("./files_to_upload/write_outer_sol.py", "both"),
+    #     ("./files_to_upload/main_for_all_restart.py", "main"),
+    # ]
+    #
+    # ALL_SERVERS = [
+    #     "10.90.91.100",
+    #     "10.90.91.101",
+    #     "10.90.91.124",
+    #     "10.90.91.125",
+    #     "10.90.91.126",
+    #     "10.90.91.127",
+    #     "10.90.91.163",
+    #     "10.90.91.167",
+    #     "10.90.91.49",
+    #     "10.90.91.51",
+    #     "10.90.91.231",
+    #     "10.90.91.232",
+    # ]
+    #
+    # run_upload_pipeline(MY_FILES, target_servers=ALL_SERVERS)
 
     TARGET_SERVERS = [
         "10.90.91.232",
     ]
-
-    run_upload_pipeline(MY_FILES, target_servers=ALL_SERVERS)
 
     # 重启
     run_dist_task(restart_logic, target_servers=TARGET_SERVERS)
