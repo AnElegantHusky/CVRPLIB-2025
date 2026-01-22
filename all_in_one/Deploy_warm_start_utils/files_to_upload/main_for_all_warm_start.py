@@ -741,14 +741,14 @@ if __name__ == "__main__":
     # --- Step 5: 启动子进程 ---
     try:
         print(f"🔥 [WarmStart] Launching: ails2_etaMax_0.01")
-        p1 = subprocess.Popen(" ".join(ails_cmd), shell=True, start_new_session=True)
+        p1 = subprocess.Popen(" ".join(ails_cmd), shell=True, start_new_session=True, stdout=subprocess.PIPE)
         workers.append(p1)
 
         print(f"🔥 [WarmStart] Launching: eoh_omega2")
-        p2 = subprocess.Popen(" ".join(ails_eoh_omega2_cmd), shell=True, start_new_session=True)
+        p2 = subprocess.Popen(" ".join(ails_eoh_omega2_cmd), shell=True, start_new_session=True, stdout=subprocess.PIPE)
         workers.append(p2)
 
-        p3 = subprocess.Popen(" ".join(ails_eoh_ruin_cmd), shell=True, start_new_session=True)
+        p3 = subprocess.Popen(" ".join(ails_eoh_ruin_cmd), shell=True, start_new_session=True, stdout=subprocess.PIPE)
         workers.append(p3)
 
         # --- Step 6: 进入监控循环 (倒计时) ---
