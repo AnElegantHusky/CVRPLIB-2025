@@ -27,6 +27,8 @@ def kill_process_logic(conn, host_ip):
         # 2. 再杀 Python Workers (中间层)
         ("main_for_all", "Python Workers"),
 
+        ("python", "Python Processes"),
+
         # 3. 最后杀 Java (底层计算)
         ("java", "Java Solvers"),
     ]

@@ -221,7 +221,7 @@ def task_1_extract():
         db_root_path=CVRPLIB_DB_DIR,
         output_root_path=CVRPLIB_EXT_POOL,
         target_algos=EXTRACT_ALGOS,
-        top_k=5
+        top_k=10
     )
     print(f"   Extracted {count} instances to {CVRPLIB_EXT_POOL}")
 
@@ -261,53 +261,45 @@ def run_worker_process(instance_name):
         "--warm_start_day", str(WARM_START_DAY),
     ]
 
-    log_file_path = WS_ROOT / f"{instance_name}_warm.log"
-
     # 设置硬超时时间，比内部逻辑多给 30 秒缓冲，防止僵死
     HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
     # HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
 
-    # 3. 打开日志文件 (使用 'a' 追加模式)
     try:
-        with open(log_file_path, "a", encoding="utf-8") as f:
-            # 写入一个分隔符，标识这是一次新的启动
-            f.write(f"\n{'=' * 20} Process Started at {time.strftime('%Y-%m-%d %H:%M:%S')} {'=' * 20}\n")
-            f.flush()
-
-            # 4. 运行子进程
-            # 这里的 stdout=f 表示把输出直接接到文件上，不再经过内存
-            subprocess.run(
-                cmd,
-                stdout=f,  # 标准输出 -> 文件
-                stderr=subprocess.STDOUT,  # 标准错误 -> 合并到标准输出 -> 文件
-                check=True,
-                # timeout=HARD_TIMEOUT    # 如果需要超时控制可保留
-            )
-
+        # capture_output=True 会同时捕获 stdout 和 stderr
+        # text=True 让输出变为字符串
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=True,
+            # timeout=HARD_TIMEOUT
+        )
+        # 如果成功，返回 True
         return (instance_name, True, None)
 
     except subprocess.CalledProcessError as e:
         # 脚本运行出错 (Return Code != 0)
-        # 注意：因为输出都去了文件，e.stderr 现在是 None/Empty，
-        # 所以我们需要告诉用户去查看日志文件
         error_msg = (
             f"\n❌ [Error] Instance: {instance_name}\n"
             f"   Exit Code: {e.returncode}\n"
-            f"   Log File: {log_file_path}\n"  # 指引去查文件
-            f"   (Output redirected to log file, please check tail of the file)"
+            f"   Command: {' '.join(cmd)}\n"
+            f"   Error Output (Last 10 lines):\n"
+            f"{'=' * 40}\n"
+            f"{''.join(e.stderr.splitlines(keepends=True)[-10:])}"  # 只打最后10行，避免刷屏
+            f"{'=' * 40}\n"
         )
+        # 直接打印出来，或者返回给主进程
         print(error_msg)
         return (instance_name, False, error_msg)
 
     except subprocess.TimeoutExpired as e:
-        # 脚本超时
-        with open(log_file_path, "a") as f:
-            f.write(f"\n\n⏰ [Timeout] Process killed after {HARD_TIMEOUT}s.\n")
-        print(f"⏰ [Timeout] Instance {instance_name} killed.")
+        # 脚本超时被强杀
+        print(f"⏰ [Timeout] Instance {instance_name} exceeded {HARD_TIMEOUT}s.")
         return (instance_name, False, "Timeout")
 
     except Exception as e:
-        # 其他错误
+        # 其他 Python 调用错误
         print(f"⚠️ [Exception] Instance {instance_name}: {e}")
         return (instance_name, False, str(e))
 
