@@ -29,6 +29,8 @@ CVRPLIB_DB_DIR = CVRPLIB_ROOT / "log_buffer"
 CVRPLIB_EXT_POOL = CVRPLIB_ROOT / "ails2_ext_sols"
 CVRPLIB_RECEIVE_DIR = CVRPLIB_ROOT / "warm_start_outer_sol"
 
+CVRPLIB_RESTART_SIGNAL = CVRPLIB_ROOT / "ails2_restart_sols"
+
 WARM_START_DAY = 1
 WORKER_SCRIPT = "main_for_all_warm_start.py"
 
@@ -37,16 +39,25 @@ EXTRACT_ALGOS = [
             "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
             "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
             "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
-            "ails2_etaMax1.000_stoppingTime1296000.00",      # 15 天
-            "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
+            # "ails2_etaMax1.000_stoppingTime1296000.00",      # 15 天
+            # "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
 ]
 FILTER_METHOD_PRIORITY = [
-            "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
-            "ails2_etaMax1.000_stoppingTime1296000.00",      # 15 天
+            # "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
+            # "ails2_etaMax1.000_stoppingTime1296000.00",      # 15 天
             "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
             "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
             "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
 ]
+
+if not CVRPLIB_RESTART_SIGNAL.exists():
+    EXTRACT_ALGOS.append("ails2_etaMax1.000_stoppingTime1728000.00")  # 20 天
+    FILTER_METHOD_PRIORITY.insert(0, "ails2_etaMax1.000_stoppingTime1728000.00")
+else:
+    EXTRACT_ALGOS.append("ails2_etaMax1.000_stoppingTime1296000.00")  # 20 天
+    FILTER_METHOD_PRIORITY.insert(0, "ails2_etaMax1.000_stoppingTime1296000.00")
+
+
 FILTER_CRITERIA = "best_score"
 
 
