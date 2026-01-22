@@ -12,6 +12,7 @@ from config import servers as SERVER_MANIFEST
 # 3. 引入工具库
 from pipeline_docker_cvrplib_cmd import exec_in_cvrplib, CONTAINER_NAME as CVRP_NAME
 from pipeline_docker_warmstart_cmd import exec_in_warmstart, CONTAINER_NAME as WS_NAME
+from pipeline_upload_files import run_upload_pipeline
 
 console = Console()
 
@@ -54,6 +55,21 @@ def ensure_container_alive(conn, container_name):
         conn.run(f"docker start {container_name}", warn=True, hide=True)
         return True
 
+
+def prepare_server_env(conn, host_ip):
+    """
+    Phase 1: 串行执行环境准备
+    1. 上传最新的 restart_clean.py
+    2. 运行它
+    """
+    console.print(f"   🧹 [Clean] Preparing Environment on {host_ip}...", style="yellow")
+
+    # 同时清理之前的 restart logs
+    run_cmd = f"rm -f *_restart.log && python3 restart_clean.py"
+    exec_in_cvrplib(conn, run_cmd, background=False)
+
+    console.print(f"      ✅ Cleanup & Extraction Finished.")
+    return True
 
 def trigger_explicit_restart(conn, host_ip):
     """
@@ -136,12 +152,46 @@ def my_restart_logic(conn, host_ip):
     if not (ensure_container_alive(conn, CVRP_NAME) and ensure_container_alive(conn, WS_NAME)):
         return
 
-    # Step 2: 显式启动任务
+    # Step 2: 清理重启环境
+    prepare_server_env(conn, host_ip)
+
+    # Step 3: 显式启动任务
     trigger_explicit_restart(conn, host_ip)
 
 
 # === 入口 ===
 if __name__ == "__main__":
+    # 格式: (本地文件路径, 目标标记: "main" | "warm_start" | "both")
+    MY_FILES = [
+        ("./files_to_upload/extract_survivor_history.py", "both"),
+        ("./files_to_upload/guardian.py", "warm_start"),
+        ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
+        ("./files_to_upload/service_ingest_sol.py", "main"),
+        ("./files_to_upload/write_outer_sol.py", "both"),
+        ("./files_to_upload/main_for_all_restart.py", "main"),
+        ("./files_to_upload/restart_clean.py", "main"),
+    ]
+
+    # 2. 定义目标服务器 (None 表示全部)
+    MY_SERVERS = [
+        "10.90.91.100",
+        "10.90.91.101",
+        "10.90.91.124",
+        "10.90.91.125",
+        "10.90.91.126",
+        "10.90.91.127",
+        "10.90.91.163",
+        "10.90.91.167",
+        "10.90.91.49",
+        "10.90.91.51",
+        "10.90.91.231",
+        "10.90.91.232",
+    ]
+
+    # 3. 调用函数
+    # 场景 A: 传给指定服务器
+    run_upload_pipeline(MY_FILES, target_servers=MY_SERVERS)
+
     TARGET_SERVERS = [
         # "10.90.91.100",
         # "10.90.91.101",

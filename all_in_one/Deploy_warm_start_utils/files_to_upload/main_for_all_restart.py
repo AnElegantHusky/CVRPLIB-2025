@@ -709,28 +709,10 @@ if __name__ == '__main__':
     inst_size = data.shape[0]
 
     log_path = ROOT_PATH / 'SISR' / 'log_buffer' / instance_name
+
     log_path.mkdir(parents=True, exist_ok=True)
 
 
-    # step 1: 重启数据库之前，备份、处理之前遗留信息
-    # 尝试获取、保存之前的db信息，再清除
-
-    old_log_root = ROOT_PATH / 'SISR' / 'log_buffer'
-    date_str = datetime.now().strftime("%m-%d-%H")
-    archive_log_root = ROOT_PATH / 'SISR' / f'{date_str}_log_buffer'
-    sol_out_root = ROOT_PATH / 'SISR' / 'ails2_restart_sols'
-
-    extract_algos = [
-        # "ails2_etaMax1.000_stoppingTime86400.00",  # 1 天
-        # "ails2_etaMax1.000_stoppingTime432000.00",  # 5 天
-        # "ails2_etaMax1.000_stoppingTime864000.00",  # 10 天
-        "ails2_etaMax1.000_stoppingTime1296000.00",  # 15 天
-        "ails2_etaMax1.000_stoppingTime1728000.00",  # 20 天
-    ]
-    cnt = extract_solutions(old_log_root, sol_out_root, extract_algos, 1)
-    
-    if os.path.exists(old_log_root):
-        os.rename(old_log_root, archive_log_root)
 
     crt_best_info = {
         "algo_name": None,
@@ -740,6 +722,7 @@ if __name__ == '__main__':
     # Shared CSV
     # shared_csv = log_path / 'shared.csv'
     # shared_csv.write_text('', encoding='utf-8')
+
 
     shared_db_path = log_path / 'shared.db'
 
