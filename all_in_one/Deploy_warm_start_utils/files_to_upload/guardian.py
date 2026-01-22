@@ -9,6 +9,7 @@ from pathlib import Path
 import random
 from datetime import datetime, timedelta, timezone
 from multiprocessing import Pool
+import logging
 
 # 【核心修改】引入提取函数
 try:
@@ -23,6 +24,8 @@ WS_ROOT = Path("/app/all_in_one/SISR")
 WS_INIT_SOLS = WS_ROOT / "init_sols"
 WS_LOG_BUFFER = WS_ROOT / "log_buffer"
 WS_RESULT_DIR = WS_ROOT / "result_sols"
+
+LOG_FILE = WS_ROOT / "guardian_process.log"
 
 CVRPLIB_ROOT = Path("/cvrplib_link/")
 CVRPLIB_DB_DIR = CVRPLIB_ROOT / "log_buffer"
@@ -103,6 +106,27 @@ FILTER_CRITERIA = "best_score"
 #         if all_sols:
 #             return all_sols[0]
 #         return None
+
+# ================= 【新增】日志配置函数 =================
+def setup_logger():
+    # 配置日志格式：时间 - 级别 - 消息
+    logging.basicConfig(
+        filename=LOG_FILE,
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    # 同时也稍微打印一点进度到控制台，防止看起来像死机（只打印 INFO）
+    # 如果想完全静默控制台，可以注释掉下面这几行
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(message)s')
+    console.setFormatter(formatter)
+    logging.getLogger('').addHandler(console)
+
+# 初始化 Logger
+setup_logger()
+logger = logging.getLogger(__name__)
 
 class SolutionFilter:
     # === 配置区域 ===
@@ -216,10 +240,12 @@ class SolutionFilter:
         top_k = sol_files_with_cost[:10]
         selected_pair = random.choice(top_k)
 
-        # 成功日志（可选开启，证明这个Instance是正常的）
-        print(
-            f"✅ [Filter Debug] {instance_name}: Success. Selected {selected_pair[1].name} (Cost: {selected_pair[0]}) from {target_folder_name}")
+        selected_cost = selected_pair[0]
+        selected_file = selected_pair[1]
 
+        # 【修改】记录详细筛选日志
+        logger.info(
+            f"[FILTER] Instance: {instance_name} | Selected: {target_folder_name}/{selected_file.name} | Cost: {selected_cost}")
         return selected_pair[1]
 
 # ================= 3. 任务流程 =================
@@ -234,7 +260,7 @@ def task_1_extract():
         target_algos=EXTRACT_ALGOS,
         top_k=15
     )
-    print(f"   Extracted {count} instances to {CVRPLIB_EXT_POOL}")
+    logger.info(f"[EXTRACT] Extracted {count} instances to {CVRPLIB_EXT_POOL}")
 
 
 def task_2_init_workspace():
@@ -259,8 +285,6 @@ def task_2_init_workspace():
             shutil.copy(best_sol, target_file)
             # print(f"   -> Prepared: {target_file.name} (from {best_sol.parent.name})")
 
-    print(f"   Initialized {len(list(WS_INIT_SOLS.glob('*.sol')))} instances.")
-
 
 def run_worker_process(instance_name):
     """
@@ -272,53 +296,45 @@ def run_worker_process(instance_name):
         "--warm_start_day", str(WARM_START_DAY),
     ]
 
-    log_file_path = WS_ROOT / f"{instance_name}_warm.log"
-
     # 设置硬超时时间，比内部逻辑多给 30 秒缓冲，防止僵死
     HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
     # HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
 
-    # 3. 打开日志文件 (使用 'a' 追加模式)
     try:
-        with open(log_file_path, "a", encoding="utf-8") as f:
-            # 写入一个分隔符，标识这是一次新的启动
-            f.write(f"\n{'=' * 20} Process Started at {time.strftime('%Y-%m-%d %H:%M:%S')} {'=' * 20}\n")
-            f.flush()
-
-            # 4. 运行子进程
-            # 这里的 stdout=f 表示把输出直接接到文件上，不再经过内存
-            subprocess.run(
-                cmd,
-                stdout=f,  # 标准输出 -> 文件
-                stderr=subprocess.STDOUT,  # 标准错误 -> 合并到标准输出 -> 文件
-                check=True,
-                # timeout=HARD_TIMEOUT    # 如果需要超时控制可保留
-            )
-
+        # capture_output=True 会同时捕获 stdout 和 stderr
+        # text=True 让输出变为字符串
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=True,
+            # timeout=HARD_TIMEOUT
+        )
+        # 如果成功，返回 True
         return (instance_name, True, None)
 
     except subprocess.CalledProcessError as e:
         # 脚本运行出错 (Return Code != 0)
-        # 注意：因为输出都去了文件，e.stderr 现在是 None/Empty，
-        # 所以我们需要告诉用户去查看日志文件
         error_msg = (
             f"\n❌ [Error] Instance: {instance_name}\n"
             f"   Exit Code: {e.returncode}\n"
-            f"   Log File: {log_file_path}\n"  # 指引去查文件
-            f"   (Output redirected to log file, please check tail of the file)"
+            f"   Command: {' '.join(cmd)}\n"
+            f"   Error Output (Last 10 lines):\n"
+            f"{'=' * 40}\n"
+            f"{''.join(e.stderr.splitlines(keepends=True)[-10:])}"  # 只打最后10行，避免刷屏
+            f"{'=' * 40}\n"
         )
+        # 直接打印出来，或者返回给主进程
         print(error_msg)
         return (instance_name, False, error_msg)
 
     except subprocess.TimeoutExpired as e:
-        # 脚本超时
-        with open(log_file_path, "a") as f:
-            f.write(f"\n\n⏰ [Timeout] Process killed after {HARD_TIMEOUT}s.\n")
-        print(f"⏰ [Timeout] Instance {instance_name} killed.")
+        # 脚本超时被强杀
+        print(f"⏰ [Timeout] Instance {instance_name} exceeded {HARD_TIMEOUT}s.")
         return (instance_name, False, "Timeout")
 
     except Exception as e:
-        # 其他错误
+        # 其他 Python 调用错误
         print(f"⚠️ [Exception] Instance {instance_name}: {e}")
         return (instance_name, False, str(e))
 
@@ -350,14 +366,13 @@ def task_3_run_parallel():
     success_cnt = sum(1 for r in results if r[1])
     fail_cnt = len(instances) - success_cnt
 
-    print(f"\nStep 3 Finished in {duration:.1f}s.")
-    print(f"   ✅ Success: {success_cnt}")
-    print(f"   ❌ Failed:  {fail_cnt}")
+    logger.info(f"[RUN] Finished in {duration:.1f}s | Success: {success_cnt} | Failed: {fail_cnt}")
 
     # 如果有失败，可以汇总打印一下失败的实例名
-    if fail_cnt > 0:
-        failed_instances = [r[0] for r in results if not r[1]]
-        print(f"   Failed Instances: {failed_instances}")
+    for res in results:
+        inst, is_success, msg = res
+        if not is_success:
+            logger.error(f"[RUN_FAIL] Instance: {inst} | Error: {msg}")
 
 
 def task_4_collect_and_push():
@@ -399,7 +414,7 @@ def task_4_collect_and_push():
                     try:
                         routes = ast.literal_eval(sol_raw)
                     except:
-                        print(f"   [Error] Failed to parse solution for {inst_dir.name}")
+                        logger.warning(f"[COLLECT] Parse failed for {inst_dir.name}")
                         continue
 
                 file_name = f"{inst_dir.name}.sol"
@@ -433,27 +448,30 @@ def task_4_collect_and_push():
                 try:
                     os.chmod(temp_target_path, 0o666)
                 except Exception as e:
-                    print(f"   [Warn] Chmod failed on temp file: {e}")
+                    logger.warning(f"[PUSH_WARN] Chmod failed: {e}")
 
                 # 3. 原子重命名 (Atomic Rename)
                 #    Linux 系统下，在同目录内 rename 是瞬间完成的。
                 #    接收方永远不会读到“写了一半”的文件。
                 os.replace(temp_target_path, final_target_path)
-
+                logger.info(f"[PUSH] Instance: {inst_dir.name} | Cost: {score} | Saved: {local_save_dir.name}")
                 count += 1
 
         except Exception as e:
-            print(f"Error processing {inst_dir.name}: {e}")
+            logger.error(f"[COLLECT_ERR] {inst_dir.name}: {e}")
 
-    print(f"   ✅ Collected {count} solutions to {local_save_dir}")
-    print(f"   ✅ Pushed safely to {CVRPLIB_RECEIVE_DIR}")
+    logger.info(f"[SUMMARY] Batch collected {count} solutions.")
 
 # ================= 主入口 =================
 
 if __name__ == "__main__":
-    for i in range(30):
+    TOTAL_LOOPS = 30
+    for i in range(TOTAL_LOOPS):
         os.chdir(WS_ROOT)
+
+        logger.info(f"{'=' * 20} BATCH {i + 1}/{TOTAL_LOOPS} START {'=' * 20}")
         task_1_extract()
         task_2_init_workspace()
         task_3_run_parallel()
         task_4_collect_and_push()
+        logger.info(f"{'=' * 20} BATCH {i + 1}/{TOTAL_LOOPS} END {'=' * 20}\n")

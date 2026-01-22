@@ -3,6 +3,7 @@ import subprocess
 import sys
 import numpy as np
 import time
+from datetime import datetime
 import ast
 import multiprocessing
 import traceback
@@ -16,7 +17,7 @@ from pathlib import Path
 import argparse
 import glob
 from write_outer_sol import save_best
-
+import logging
 
 from sisr2_db import sisr_cvrp
 
@@ -567,12 +568,39 @@ def inject_initial_solution(instance_name, db_path):
     """
     # 构造寻找路径: ROOT/ails2_ext_sols/InstanceName/**/*.sol
     # 使用 glob 递归查找，因为中间层可能是 {fixed_method_name}
+
+    log_file = SISR_PATH / f"{instance_name}_warm_final.log"
+
+    # 2. 获取 logger (使用 instance_name 作为唯一标识，避免冲突)
+    logger = logging.getLogger(f"warm_logger_{instance_name}")
+    logger.setLevel(logging.INFO)
+
+    # 3. 配置 Handler (防止重复添加)
+    if not logger.handlers:
+        # mode='a' 确保追加写入，不覆盖旧日志
+        fh = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+
+        # 格式：时间 | 级别 | 消息
+        formatter = logging.Formatter(
+            fmt='%(asctime)s | %(levelname)-7s | %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+
+    # 4. 【关键】写入批次分隔符
+    # 每次脚本被调用执行到这里时，先打入几个换行和分割线
+    # 这样在 log 文件里，你能清楚看到上一次跑完在哪里，这一次是从哪里开始的
+    logger.info("\n" + "=" * 60)
+    logger.info(f"🚀 [NEW BATCH START] Instance: {instance_name}")
+    logger.info("=" * 60)
+
     search_pattern = ROOT_PATH / "SISR" / EXTERNAL_SOL_DIR_NAME / f'{instance_name}.sol'
 
     found_files = glob.glob(str(search_pattern), recursive=True)
 
     if not found_files:
-        print(f"[Init Injector] ⚠️ No initial solution found in {search_pattern}")
+        logger.error(f"❌ No initial solution found in path: {search_pattern}")
         return
 
     # 默认取第一个找到的 sol 文件
@@ -586,7 +614,7 @@ def inject_initial_solution(instance_name, db_path):
         # 解析 Routes
         routes = solution_data.get('routes')
         if not routes:
-            print("[Init Injector] ❌ Error: 'routes' not found in solution file.")
+            logger.error("❌ 'routes' key missing in solution file.")
             return
 
         # 获取 Score (Cost)
@@ -599,7 +627,7 @@ def inject_initial_solution(instance_name, db_path):
             # 尝试从 Edge Weight 字段读取，或者如果这里有 distance matrix 可以计算
             # 为简单起见，如果读不到 Cost，暂时设为一个较大的数或报错
             # 或者尝试从文件名读取 (例如: XL-London_12345.sol)
-            print("[Init Injector] ⚠️ Cost not found in .sol file metadata. Using 1e10 (Dangerous!)")
+            logger.warning("⚠️ 'cost' not found, defaulting to 1e10.")
             score = 1e10
 
             # 调用 write_outer_sol 的 save_best
@@ -608,13 +636,13 @@ def inject_initial_solution(instance_name, db_path):
         success = save_best(db_path, 0, float(score), routes, "Inject_Warm_Start")
 
         if success:
-            print(f"[Init Injector] ✅ Successfully injected init sol (Score: {score})")
+            logger.info(f"✅ Injection SUCCESS | Score: {score}")
         else:
-            print("[Init Injector] ❌ Injection failed (DB Locked or Logic Error).")
+            logger.error("❌ Injection FAILED (DB might be locked or score not better)")
 
     except Exception as e:
-        print(f"[Init Injector] 💥 Exception during injection: {e}")
-        traceback.print_exc()
+        error_msg = f"Exception during injection: {str(e)}"
+        logger.error(f"💥 Exception during injection: {e}", exc_info=True)
 
 
 if __name__ == "__main__":
@@ -741,14 +769,14 @@ if __name__ == "__main__":
     # --- Step 5: 启动子进程 ---
     try:
         print(f"🔥 [WarmStart] Launching: ails2_etaMax_0.01")
-        p1 = subprocess.Popen(" ".join(ails_cmd), shell=True, start_new_session=True, stdout=subprocess.PIPE)
+        p1 = subprocess.Popen(" ".join(ails_cmd), shell=True, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         workers.append(p1)
 
         print(f"🔥 [WarmStart] Launching: eoh_omega2")
-        p2 = subprocess.Popen(" ".join(ails_eoh_omega2_cmd), shell=True, start_new_session=True, stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(" ".join(ails_eoh_omega2_cmd), shell=True, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         workers.append(p2)
 
-        p3 = subprocess.Popen(" ".join(ails_eoh_ruin_cmd), shell=True, start_new_session=True, stdout=subprocess.PIPE)
+        p3 = subprocess.Popen(" ".join(ails_eoh_ruin_cmd), shell=True, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         workers.append(p3)
 
         # --- Step 6: 进入监控循环 (倒计时) ---
