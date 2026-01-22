@@ -90,10 +90,13 @@ def extract_solutions(db_root_path: Path, output_root_path: Path, target_algos: 
     # 遍历所有实例目录 (XL-*)
     for inst_dir in sorted(db_root_path.iterdir()):
         if not inst_dir.is_dir() or not inst_dir.name.startswith("XL-"):
+            print(f'failed 1: {inst_dir}')
             continue
 
         db_path = inst_dir / "shared.db"
         if not db_path.exists():
+            print(f'failed 2: {inst_dir}')
+
             continue
 
         try:
@@ -107,11 +110,15 @@ def extract_solutions(db_root_path: Path, output_root_path: Path, target_algos: 
             for algo in algos_to_run:
                 rows = fetch_topk(conn, algo, top_k)
                 if not rows:
+                    print(f'failed 3: {inst_dir}-{algo}')
+
                     continue
 
                 for rank, (algo_name, score, sol_text, runningtime) in enumerate(rows, start=1):
                     routes = parse_solution_text(sol_text)
                     if routes is None:
+                        print(f'failed 4: {inst_dir}')
+
                         continue
 
                     # 路径结构: output / Instance / Algo / rank.sol
