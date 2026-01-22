@@ -17,8 +17,6 @@ OUTPUT_SOL_DIR = BASE_DIR / 'ails2_restart_sols'
 EXTRACT_ALGOS = [
     "ails2_etaMax1.000_stoppingTime1296000.00",  # 15 天
     "ails2_etaMax1.000_stoppingTime1728000.00",  # 20 天
-    "global_best",  # 历史最优
-    "sisr_cvrp"  # SISR 结果
 ]
 
 
@@ -46,9 +44,10 @@ def clean_and_prepare():
 
         # 这里假设 extract_survivor_history 默认生成在 ./output 目录下
         extract_solutions(
-            root_dir=str(BASE_DIR),
-            algos=EXTRACT_ALGOS,
-            topk=10
+            LOG_BUFFER_DIR,
+            OUTPUT_SOL_DIR,
+            EXTRACT_ALGOS,
+            top_k=1
         )
 
         # 将生成的 output 文件夹移动/重命名为 ails2_restart_sols
