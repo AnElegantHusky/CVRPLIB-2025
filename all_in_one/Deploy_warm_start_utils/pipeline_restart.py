@@ -18,7 +18,7 @@ console = Console()
 # === 配置 ===
 # 1. 本地 Instances 路径 (用于获取文件名列表)
 # 假设脚本在 pipeline 目录下，数据在 ../data/instances
-LOCAL_INSTANCES_DIR = Path(__file__).resolve().parent / "SISR" / "data" / "instances"
+LOCAL_INSTANCES_DIR = Path(__file__).resolve().parent.parent / "SISR" / "data" / "instances"
 print(LOCAL_INSTANCES_DIR)
 
 # 2. 远程配置
@@ -88,9 +88,8 @@ def trigger_explicit_restart(conn, host_ip):
 
     cmd_list = []
     for file_path in target_files:
-        instance_name = file_path.stem  # 去掉 .vrp
+        instance_name = file_path.stem
         # 构造单条命令
-        # 注意：日志名必须区分开
         cmd = (
             f"nohup python3 -u {RESTART_SCRIPT} "
             f"{REMOTE_INSTANCE_FOLDER} \"{instance_name}\" "
@@ -99,12 +98,34 @@ def trigger_explicit_restart(conn, host_ip):
         cmd_list.append(cmd)
         print(cmd)
 
-    # 将所有后台命令拼接，最后加个 echo
-    # 形式: cmd1 & cmd2 & echo "Done"
-    full_batch_cmd = " ".join(cmd_list) + " echo 'Batch Triggered'"
+    # === 关键修改 ===
+    # 1. 用括号 ( ) 将所有命令包起来，形成一个 Subshell
+    # 2. 这样 exec_in_cvrplib 自动添加的 cd dir && ( ... ) 就会对括号内所有命令生效
+    full_batch_cmd = "(" + " ".join(cmd_list) + " echo 'Batch Triggered' )"
 
-    # 4. 执行 (background=True 意味着整个串在 docker exec -d 中执行)
+    # 4. 执行
+    # background=True 会让 docker exec -d ... 在后台执行这个括号里的所有内容
     exec_in_cvrplib(conn, full_batch_cmd, background=True)
+
+    # cmd_list = []
+    # for file_path in target_files:
+    #     instance_name = file_path.stem  # 去掉 .vrp
+    #     # 构造单条命令
+    #     # 注意：日志名必须区分开
+    #     cmd = (
+    #         f"nohup python3 -u {RESTART_SCRIPT} "
+    #         f"{REMOTE_INSTANCE_FOLDER} \"{instance_name}\" "
+    #         f"> \"{instance_name}_restart.log\" 2>&1 &"
+    #     )
+    #     cmd_list.append(cmd)
+    #     print(cmd)
+    #
+    # # 将所有后台命令拼接，最后加个 echo
+    # # 形式: cmd1 & cmd2 & echo "Done"
+    # full_batch_cmd = " ".join(cmd_list) + " echo 'Batch Triggered'"
+    #
+    # # 4. 执行 (background=True 意味着整个串在 docker exec -d 中执行)
+    # exec_in_cvrplib(conn, full_batch_cmd, background=True)
 
 
 # === 核心业务逻辑 ===
