@@ -95,6 +95,8 @@ to_run_servers = [
     "10.90.91.232",
 ]
 
+docker_name = 'warm_start'
+
 # ===========================================
 
 print(f"🛑 开始执行【深度清理】任务...")
@@ -120,22 +122,24 @@ for srv in servers:
         kill_cmds = [
             # 1. 【关键】先杀 Shell 脚本
             # 防止杀掉 Python 后，脚本里的循环又立刻启动新的 Python
-            "docker exec cvrplib pkill -f run_all.sh",
+            f"docker exec {docker_name} pkill -f run_all.sh",
+
+            f"docker exec {docker_name} pkill -f guardian.py",
 
             # 2. 【核心】强杀主 Python 程序
             # 使用 -9 强制杀死，防止进程卡死无法响应
-            "docker exec cvrplib pkill -9 -f main_for_all_final.py",
+            f"docker exec {docker_name} pkill -9 -f main_for_all_final.py",
 
             # 3. 【关联】通过路径关键字杀子进程
             # 凡是命令行参数里包含 'all_in_one' 的进程全部干掉
-            "docker exec cvrplib pkill -9 -f all_in_one",
+            f"docker exec {docker_name} pkill -9 -f all_in_one",
 
             # 4. 【兜底】杀掉容器内所有 python3 进程 (最彻底)
             # 如果前面的步骤有漏网之鱼（比如子进程改了名），这一步能保证干净
-            "docker exec cvrplib pkill -9 -f python3",
+            f"docker exec {docker_name} pkill -9 -f python3",
 
             # -f java 会匹配 'java -jar ...' 等所有 java 相关命令
-            "docker exec cvrplib pkill -9 -f java",
+            f"docker exec {docker_name} pkill -9 -f java",
         ]
 
         print(f"   🔪 正在执行深度清理...")

@@ -29,9 +29,6 @@ def kill_process_logic(conn, host_ip):
 
         # 3. 最后杀 Java (底层计算)
         ("java", "Java Solvers"),
-
-        # 4. 顺手清理 Shell 脚本 (如果有)
-        (".sh", "Shell Scripts")
     ]
 
     for target, desc in kill_sequence:
