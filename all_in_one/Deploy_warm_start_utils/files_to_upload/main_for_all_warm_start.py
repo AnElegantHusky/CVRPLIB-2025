@@ -567,7 +567,7 @@ def inject_initial_solution(instance_name, db_path):
     """
     # 构造寻找路径: ROOT/ails2_ext_sols/InstanceName/**/*.sol
     # 使用 glob 递归查找，因为中间层可能是 {fixed_method_name}
-    search_pattern = ROOT_PATH / EXTERNAL_SOL_DIR_NAME / f'{instance_name}.sol'
+    search_pattern = ROOT_PATH / "SISR" / EXTERNAL_SOL_DIR_NAME / f'{instance_name}.sol'
 
     found_files = glob.glob(str(search_pattern), recursive=True)
 

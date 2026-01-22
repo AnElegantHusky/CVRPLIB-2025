@@ -241,62 +241,6 @@ class SharedDB:
 
             conn.commit()
 
-    # =================== 2. 新增 注入函数 ===================
-    def inject_initial_solution(instance_name, db_path):
-        """
-        从 ails2_restart_sols 读取解并注入 DB
-        """
-        # 构造寻找路径: ROOT/ails2_restart_sols/InstanceName/**/*.sol
-        # 使用 glob 递归查找，因为中间层可能是 {fixed_method_name}
-        search_pattern = ROOT_PATH / EXTERNAL_SOL_DIR_NAME / instance_name / "**" / "*.sol"
-
-        found_files = glob.glob(str(search_pattern), recursive=True)
-
-        if not found_files:
-            print(f"[Init Injector] ⚠️ No initial solution found in {search_pattern}")
-            return
-
-        # 默认取第一个找到的 sol 文件
-        sol_file = Path(found_files[0])
-        print(f"[Init Injector] 🎯 Loading initial solution: {sol_file.name}")
-
-        try:
-            # 使用 vrplib 读取
-            solution_data = vrplib.read_solution(str(sol_file))
-
-            # 解析 Routes
-            routes = solution_data.get('routes')
-            if not routes:
-                print("[Init Injector] ❌ Error: 'routes' not found in solution file.")
-                return
-
-            # 获取 Score (Cost)
-            # VRPLIB 格式通常在 Header 里有 Cost，或者 solution_data['cost']
-            # 如果没有，我们需要一个备用计算器，或者信任文件名/目录名？
-            # 这里假设 vrplib.read_solution 能解析出 cost
-            score = solution_data.get('cost')
-
-            if score is None:
-                # 尝试从 Edge Weight 字段读取，或者如果这里有 distance matrix 可以计算
-                # 为简单起见，如果读不到 Cost，暂时设为一个较大的数或报错
-                # 或者尝试从文件名读取 (例如: XL-London_12345.sol)
-                print("[Init Injector] ⚠️ Cost not found in .sol file metadata. Using 1e10 (Dangerous!)")
-                score = 1e10
-
-                # 调用 write_outer_sol 的 save_best
-            # 注意：save_best 内部执行的是 UPDATE ... WHERE score > new_score
-            # 因为我们在 init_db 里插入了 1e20，所以这里一定会更新成功
-            success = save_best(db_path, 0, float(score), routes, "Inject_Warm_Start")
-
-            if success:
-                print(f"[Init Injector] ✅ Successfully injected init sol (Score: {score})")
-            else:
-                print("[Init Injector] ❌ Injection failed (DB Locked or Logic Error).")
-
-        except Exception as e:
-            print(f"[Init Injector] 💥 Exception during injection: {e}")
-            traceback.print_exc()
-
     def get_status(self):
         """获取当前面板状态（用于监控）"""
         global_best_info = None
@@ -624,7 +568,7 @@ def inject_initial_solution(instance_name, db_path):
     """
     # 构造寻找路径: ROOT/ails2_restart_sols/InstanceName/**/*.sol
     # 使用 glob 递归查找，因为中间层可能是 {fixed_method_name}
-    search_pattern = ROOT_PATH / EXTERNAL_SOL_DIR_NAME / instance_name / "**" / "*.sol"
+    search_pattern = ROOT_PATH / "SISR" / EXTERNAL_SOL_DIR_NAME / instance_name / "**" / "*.sol"
 
     found_files = glob.glob(str(search_pattern), recursive=True)
 
