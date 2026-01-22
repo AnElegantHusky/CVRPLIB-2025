@@ -37,10 +37,12 @@ EXTRACT_ALGOS = [
             "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
             "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
             "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
+            "ails2_etaMax1.000_stoppingTime1296000.00",      # 15 天
             "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
 ]
 FILTER_METHOD_PRIORITY = [
             "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
+            "ails2_etaMax1.000_stoppingTime1296000.00",      # 15 天
             "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
             "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
             "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
@@ -100,6 +102,7 @@ class SolutionFilter:
     # 注意：这里按时长从大到小排列，方便后续逻辑
     METHOD_CONFIGS = [
         (1728000, "ails2_etaMax1.000_stoppingTime1728000.00"),  # 20 天
+        (1296000, "ails2_etaMax1.000_stoppingTime1296000.00"),  # 15 天
         (864000, "ails2_etaMax1.000_stoppingTime864000.00"),  # 10 天
         (432000, "ails2_etaMax1.000_stoppingTime432000.00"),  # 5 天
         (86400, "ails2_etaMax1.000_stoppingTime86400.00"),  # 1 天

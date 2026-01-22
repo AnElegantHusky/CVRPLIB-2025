@@ -724,6 +724,7 @@ if __name__ == '__main__':
         # "ails2_etaMax1.000_stoppingTime86400.00",  # 1 天
         # "ails2_etaMax1.000_stoppingTime432000.00",  # 5 天
         # "ails2_etaMax1.000_stoppingTime864000.00",  # 10 天
+        "ails2_etaMax1.000_stoppingTime1296000.00",  # 15 天
         "ails2_etaMax1.000_stoppingTime1728000.00",  # 20 天
     ]
     cnt = extract_solutions(old_log_root, sol_out_root, extract_algos, 1)
