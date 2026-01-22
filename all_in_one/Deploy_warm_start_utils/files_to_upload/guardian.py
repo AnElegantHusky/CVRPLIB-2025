@@ -221,7 +221,7 @@ def task_1_extract():
         db_root_path=CVRPLIB_DB_DIR,
         output_root_path=CVRPLIB_EXT_POOL,
         target_algos=EXTRACT_ALGOS,
-        top_k=10
+        top_k=15
     )
     print(f"   Extracted {count} instances to {CVRPLIB_EXT_POOL}")
 
