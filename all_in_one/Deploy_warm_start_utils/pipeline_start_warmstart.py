@@ -26,7 +26,7 @@ def task_ensure_containers_up(conn, host_ip):
     这一步只负责：检查容器 -> 如果死掉就启动。
     绝对不运行 exec_in_warmstart，只在宿主机 Shell 运行 docker 命令。
     """
-    console.print(f"[bold cyan]🏥 Health Check on {host_ip}...[/bold cyan]")
+    console.print(f"🏥 Health Check on {host_ip}...")
 
     # 我们要检查的容器列表
     target_containers = [CVRP_NAME, WS_NAME]
@@ -39,9 +39,9 @@ def task_ensure_containers_up(conn, host_ip):
         is_running = res.ok and res.stdout.strip().lower() == 'true'
 
         if is_running:
-            console.print(f"   ✅ Container [bold]{container}[/bold] is running.")
+            console.print(f"   ✅ Container {container} is running.")
         else:
-            console.print(f"   ⚠️ Container [bold red]{container}[/bold] is STOPPED. Starting...")
+            console.print(f"   ⚠️ Container {container} is STOPPED. Starting...")
             # 2. 启动容器
             start_res = conn.run(f"docker start {container}", warn=True, hide=True)
 
@@ -49,7 +49,7 @@ def task_ensure_containers_up(conn, host_ip):
                 console.print(f"      ✅ Started successfully. Waiting 5s for OS boot...")
                 time.sleep(5)  # 给容器内 Linux 启动的时间
             else:
-                console.print(f"      ❌ [bold red]Failed to start {container}![/bold red] {start_res.stderr}")
+                console.print(f"      ❌ Failed to start {container}! {start_res.stderr}")
                 raise Exception(f"Container {container} failed to start on {host_ip}")
 
 # === 核心业务逻辑 ===

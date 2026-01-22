@@ -125,73 +125,91 @@ class SolutionFilter:
     @staticmethod
     def select_best_for_instance(instance_name, pool_dir):
         inst_pool = pool_dir / instance_name
+
+        # --- Debug 1: 检查实例目录是否存在 ---
         if not inst_pool.exists():
+            print(f"❌ [Filter Debug] Instance dir NOT FOUND: {inst_pool}")
             return None
 
         # 1. 计算当前耗时 (elapsed seconds)
         now = datetime.now(timezone(timedelta(hours=8)))  # 当前香港时间
         elapsed_sec = (now - SolutionFilter.START_DT).total_seconds()
 
+        # --- Debug 2: 打印时间计算结果 ---
+        # 确认服务器时间是否正确，elapsed_sec 是否为负数
+        print(f"ℹ️ [Filter Debug] {instance_name}: Elapsed {elapsed_sec:.1f}s (Start: {SolutionFilter.START_DT})")
+
         target_folder_name = None
 
         # 2. 动态筛选：找“已结束”且“耗时最长”的方法
-        # METHOD_CONFIGS 已经按时长降序排列
         for duration, folder_name in SolutionFilter.METHOD_CONFIGS:
-            # 如果当前时间已经超过了该方法的停止时间
             if elapsed_sec >= duration:
-                # 检查物理文件夹是否存在
                 method_dir = inst_pool / folder_name
                 if method_dir.exists():
-                    # 找到了！这就是理论上完成的最长任务
                     target_folder_name = folder_name
+                    # print(f"✅ [Filter Debug] {instance_name}: Matched time rule -> {folder_name}")
                     break
+                else:
+                    # 只有当时间满足但文件夹不存在时才打印，可能有助排查命名不对的问题
+                    print(f"⚠️ [Filter Debug] {instance_name}: Time matched but folder missing: {folder_name}")
+                    pass
 
-        # 3. 兜底逻辑：如果没有任何一个满足时间条件（比如刚跑了半天），
-        # 或者满足时间的文件夹不存在，则回退到找“存在的时长最短的那个”作为保底
+        # 3. 兜底逻辑
         if target_folder_name is None:
-            # 反向遍历（从短到长），找一个存在的
+            # print(f"⚠️ [Filter Debug] {instance_name}: No time-matched folder. Trying fallback...")
             for _, folder_name in reversed(SolutionFilter.METHOD_CONFIGS):
-                if (inst_pool / folder_name).exists():
+                check_path = inst_pool / folder_name
+                if check_path.exists():
                     target_folder_name = folder_name
+                    print(f"ℹ️ [Filter Debug] {instance_name}: Fallback used -> {folder_name}")
                     break
 
+        # --- Debug 3: 检查是否选中了文件夹 ---
         if target_folder_name is None:
+            print(f"❌ [Filter Debug] {instance_name}: FAILED. No valid algo folder found in {inst_pool}")
+            # 这里建议打印一下目录下实际有哪些文件夹，方便比对名字
+            try:
+                actual_subdirs = [d.name for d in inst_pool.iterdir() if d.is_dir()]
+                print(f"   -> Existing dirs: {actual_subdirs}")
+            except:
+                pass
             return None
 
         # 4. 获取解并排序
         method_dir = inst_pool / target_folder_name
         sol_files = list(method_dir.glob("*.sol"))
 
-        if not sol_files: return None
+        # --- Debug 4: 检查文件夹是否为空 ---
+        if not sol_files:
+            print(f"❌ [Filter Debug] {instance_name}: Folder exists but NO .sol files -> {method_dir}")
+            return None
 
-        # 按 Cost 排序 (Cost 越小越好)
-        # 注意：这里必须读文件获取真实 Cost，而不是依赖文件名
         sol_files_with_cost = []
         for f in sol_files:
             c = SolutionFilter.get_sol_cost(f)
             if c != float('inf'):
                 sol_files_with_cost.append((c, f))
+            else:
+                # --- Debug 5: 检查是否有解析失败的文件 ---
+                print(f"⚠️ [Filter Debug] Cost parse failed: {f.name}")
+                pass
 
-        # 再次排序，确保是 Cost 升序
         sol_files_with_cost.sort(key=lambda x: x[0])
 
-        if not sol_files_with_cost: return None
+        # --- Debug 6: 检查是否有有效解 ---
+        if not sol_files_with_cost:
+            print(f"❌ [Filter Debug] {instance_name}: Found .sol files but all valid costs are Inf.")
+            return None
 
-        # 5. Top-K 随机选择 (Top 10)
-        # 取前 10 个最好的解
+        # 5. Top-K 随机选择
         top_k = sol_files_with_cost[:10]
-
-        # 随机选一个。
-        # 解释：随机性在 Warm Start 中很重要，能避免所有子进程都从完全相同的起点开始搜索，
-        # 从而增加搜索空间的多样性。
         selected_pair = random.choice(top_k)
 
-        # 打印日志方便调试（可选）
-        # print(f"[{instance_name}] Time elapsed: {elapsed_sec/3600:.1f}h. "
-        #       f"Selected from {target_folder_name} (Top {len(top_k)}). "
-        #       f"Cost: {selected_pair[0]}")
+        # 成功日志（可选开启，证明这个Instance是正常的）
+        print(
+            f"✅ [Filter Debug] {instance_name}: Success. Selected {selected_pair[1].name} (Cost: {selected_pair[0]}) from {target_folder_name}")
 
-        return selected_pair[1]  # 返回 Path 对象
+        return selected_pair[1]
 
 # ================= 3. 任务流程 =================
 
@@ -241,49 +259,55 @@ def run_worker_process(instance_name):
         "python3", WORKER_SCRIPT,
         "--instance_name", instance_name,
         "--warm_start_day", str(WARM_START_DAY),
-        "--seed", "1"
     ]
+
+    log_file_path = WS_ROOT / f"{instance_name}_warm.log"
 
     # 设置硬超时时间，比内部逻辑多给 30 秒缓冲，防止僵死
     HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
     # HARD_TIMEOUT = WARM_START_DAY * 3600 * 24 + 3600
 
-
+    # 3. 打开日志文件 (使用 'a' 追加模式)
     try:
-        # capture_output=True 会同时捕获 stdout 和 stderr
-        # text=True 让输出变为字符串
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=True,
-            # timeout=HARD_TIMEOUT
-        )
-        # 如果成功，返回 True
+        with open(log_file_path, "a", encoding="utf-8") as f:
+            # 写入一个分隔符，标识这是一次新的启动
+            f.write(f"\n{'=' * 20} Process Started at {time.strftime('%Y-%m-%d %H:%M:%S')} {'=' * 20}\n")
+            f.flush()
+
+            # 4. 运行子进程
+            # 这里的 stdout=f 表示把输出直接接到文件上，不再经过内存
+            subprocess.run(
+                cmd,
+                stdout=f,  # 标准输出 -> 文件
+                stderr=subprocess.STDOUT,  # 标准错误 -> 合并到标准输出 -> 文件
+                check=True,
+                # timeout=HARD_TIMEOUT    # 如果需要超时控制可保留
+            )
+
         return (instance_name, True, None)
 
     except subprocess.CalledProcessError as e:
         # 脚本运行出错 (Return Code != 0)
+        # 注意：因为输出都去了文件，e.stderr 现在是 None/Empty，
+        # 所以我们需要告诉用户去查看日志文件
         error_msg = (
             f"\n❌ [Error] Instance: {instance_name}\n"
             f"   Exit Code: {e.returncode}\n"
-            f"   Command: {' '.join(cmd)}\n"
-            f"   Error Output (Last 10 lines):\n"
-            f"{'=' * 40}\n"
-            f"{''.join(e.stderr.splitlines(keepends=True)[-10:])}"  # 只打最后10行，避免刷屏
-            f"{'=' * 40}\n"
+            f"   Log File: {log_file_path}\n"  # 指引去查文件
+            f"   (Output redirected to log file, please check tail of the file)"
         )
-        # 直接打印出来，或者返回给主进程
         print(error_msg)
         return (instance_name, False, error_msg)
 
     except subprocess.TimeoutExpired as e:
-        # 脚本超时被强杀
-        print(f"⏰ [Timeout] Instance {instance_name} exceeded {HARD_TIMEOUT}s.")
+        # 脚本超时
+        with open(log_file_path, "a") as f:
+            f.write(f"\n\n⏰ [Timeout] Process killed after {HARD_TIMEOUT}s.\n")
+        print(f"⏰ [Timeout] Instance {instance_name} killed.")
         return (instance_name, False, "Timeout")
 
     except Exception as e:
-        # 其他 Python 调用错误
+        # 其他错误
         print(f"⚠️ [Exception] Instance {instance_name}: {e}")
         return (instance_name, False, str(e))
 
