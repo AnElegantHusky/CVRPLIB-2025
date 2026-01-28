@@ -24,14 +24,30 @@ pip install fabric
 
 ## 2 运行命令
 
-
-
+### 2.1 重启 warm start
 ```bash
 python pipeline_kill_guardian.py
-python pipeline_monitor.py
-
 python pipeline_start_warmstart.py
 python pipeline_monitor.py
 ```
+
+### 2.2 上传 bks
+```bash
+python pipeline_bath_push.py --sol_dir ./mahdi_bks
+```
+
+### 2.3 获取监控日志
+```bash
+python pipeline_download_files.py service_ingest.log --type main
+python pipeline_monitor.py
+```
+
+### 2.4 传输文件路径
+```bash
+downloaded_files
+logs_monitor
+```
+
+
 
 
