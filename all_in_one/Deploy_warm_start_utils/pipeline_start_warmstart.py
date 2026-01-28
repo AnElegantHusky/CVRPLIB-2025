@@ -29,7 +29,7 @@ def task_ensure_containers_up(conn, host_ip):
     console.print(f"🏥 Health Check on {host_ip}...")
 
     # 我们要检查的容器列表
-    target_containers = [CVRP_NAME, WS_NAME]
+    target_containers = [WS_NAME]
 
     for container in target_containers:
         # 1. 检查状态
@@ -119,7 +119,7 @@ def my_startup_logic(conn, host_ip):
 
     # 1. 启动/重启 Ingest Service (CVRPLIB 容器)
     #    注意：这里自带了“检查-杀进程-启动”的完整逻辑
-    restart_ingest_service(conn, CVRP_NAME)
+    # restart_ingest_service(conn, CVRP_NAME)
 
     # 2. 启动/重启 Guardian (WarmStart 容器)
     restart_guardian_service(conn, WS_NAME)
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         # ("./files_to_upload/service_ingest_sol.py", "main"),
         # ("./files_to_upload/write_outer_sol.py", "both"),
         # ("./files_to_upload/main_for_all_restart.py", "main"),
-        ("./files_to_upload/test_extract.py", "warm_start"),
+        # ("./files_to_upload/test_extract.py", "warm_start"),
     ]
 
     TARGET_SERVERS = [
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         "10.90.91.232",
     ]
 
-    # run_upload_pipeline(MY_FILES, target_servers=TARGET_SERVERS)
+    run_upload_pipeline(MY_FILES, target_servers=TARGET_SERVERS)
 
     run_dist_task(task_ensure_containers_up, target_servers=TARGET_SERVERS)
 

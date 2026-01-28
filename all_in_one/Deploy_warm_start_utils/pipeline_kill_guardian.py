@@ -27,6 +27,8 @@ def kill_process_logic(conn, host_ip):
         # 2. 再杀 Python Workers (中间层)
         ("main_for_all", "Python Workers"),
 
+        ("service_ingest_sol", "Python Processes"),
+
         ("python", "Python Processes"),
 
         # 3. 最后杀 Java (底层计算)
@@ -84,7 +86,7 @@ if __name__ == "__main__":
 
     # 3. 调用函数
     # 场景 A: 传给指定服务器
-    run_upload_pipeline(MY_FILES, target_servers=MY_SERVERS)
+    # run_upload_pipeline(MY_FILES, target_servers=MY_SERVERS)
 
 
     TARGET_SERVERS = [

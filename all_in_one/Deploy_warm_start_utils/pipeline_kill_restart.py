@@ -5,7 +5,7 @@ from rich.panel import Panel
 # 引入你的基础库
 from conn_utils import run_dist_task
 from config import servers as SERVER_MANIFEST
-from pipeline_docker_warmstart_cmd import exec_in_warmstart
+from pipeline_docker_cvrplib_cmd import exec_in_cvrplib
 
 console = Console()
 
@@ -50,7 +50,7 @@ def kill_process_logic(conn, host_ip):
 
         # 使用现有的 exec_in_warmstart 工具发送命令
         # 这会自动处理 cd 到工作目录等逻辑，虽然 pkill 不需要目录，但这保持了 pipeline 的统一性
-        exec_in_warmstart(conn, cmd, background=False)
+        exec_in_cvrplib(conn, cmd, background=False)
 
     # === 验证环节 ===
     console.print(f"   🔍 Verifying cleanup...")
@@ -59,7 +59,7 @@ def kill_process_logic(conn, host_ip):
 
     # 我们直接执行 verify_cmd，exec_in_warmstart 会把输出打印在控制台
     # 如果输出为空，说明杀干净了；如果有输出，你会直接看到残留的进程
-    exec_in_warmstart(conn, verify_cmd, background=False)
+    exec_in_cvrplib(conn, verify_cmd, background=False)
 
     console.print(f"   ✅ Kill sequence finished on {host_ip}.")
 

@@ -112,6 +112,7 @@ def trigger_explicit_restart(conn, host_ip):
             f"> \"{instance_name}_restart.log\" 2>&1 &"
         )
         cmd_list.append(cmd)
+        exec_in_cvrplib(conn, cmd, background=True)
         print(cmd)
 
     # === 关键修改 ===
@@ -121,7 +122,7 @@ def trigger_explicit_restart(conn, host_ip):
 
     # 4. 执行
     # background=True 会让 docker exec -d ... 在后台执行这个括号里的所有内容
-    exec_in_cvrplib(conn, full_batch_cmd, background=True)
+
 
     # cmd_list = []
     # for file_path in target_files:
@@ -163,11 +164,11 @@ def my_restart_logic(conn, host_ip):
 if __name__ == "__main__":
     # 格式: (本地文件路径, 目标标记: "main" | "warm_start" | "both")
     MY_FILES = [
-        ("./files_to_upload/extract_survivor_history.py", "both"),
-        ("./files_to_upload/guardian.py", "warm_start"),
-        ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
-        ("./files_to_upload/service_ingest_sol.py", "main"),
-        ("./files_to_upload/write_outer_sol.py", "both"),
+        # ("./files_to_upload/extract_survivor_history.py", "both"),
+        # ("./files_to_upload/guardian.py", "warm_start"),
+        # ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
+        # ("./files_to_upload/service_ingest_sol.py", "main"),
+        # ("./files_to_upload/write_outer_sol.py", "both"),
         ("./files_to_upload/main_for_all_restart.py", "main"),
         ("./files_to_upload/restart_clean.py", "main"),
     ]

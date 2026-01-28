@@ -39,6 +39,7 @@ WORKER_SCRIPT = "main_for_all_warm_start.py"
 
 # 指定要从 CVRPLIB DB 提取哪些算法
 EXTRACT_ALGOS = [
+            "global_best",
             "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
             "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
             "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
@@ -48,6 +49,7 @@ EXTRACT_ALGOS = [
 FILTER_METHOD_PRIORITY = [
             # "ails2_etaMax1.000_stoppingTime1728000.00",      # 20 天
             # "ails2_etaMax1.000_stoppingTime1296000.00",      # 15 天
+            "global_best",
             "ails2_etaMax1.000_stoppingTime864000.00",       # 10 天
             "ails2_etaMax1.000_stoppingTime432000.00",       # 5 天
             "ails2_etaMax1.000_stoppingTime86400.00",        # 1 天
@@ -129,19 +131,19 @@ setup_logger()
 logger = logging.getLogger(__name__)
 
 class SolutionFilter:
-    # === 配置区域 ===
-    # 算法启动时间：2026-01-12 23:30 (UTC+8 香港时间)
-    START_DT = datetime(2026, 1, 12, 23, 30, tzinfo=timezone(timedelta(hours=8)))
-
-    # 定义 (时长秒数, 文件夹名称) 的对应关系
-    # 注意：这里按时长从大到小排列，方便后续逻辑
-    METHOD_CONFIGS = [
-        (1728000, "ails2_etaMax1.000_stoppingTime1728000.00"),  # 20 天
-        (1296000, "ails2_etaMax1.000_stoppingTime1296000.00"),  # 15 天
-        (864000, "ails2_etaMax1.000_stoppingTime864000.00"),  # 10 天
-        (432000, "ails2_etaMax1.000_stoppingTime432000.00"),  # 5 天
-        (86400, "ails2_etaMax1.000_stoppingTime86400.00"),  # 1 天
-    ]
+    # # === 配置区域 ===
+    # # 算法启动时间：2026-01-12 23:30 (UTC+8 香港时间)
+    # START_DT = datetime(2026, 1, 12, 23, 30, tzinfo=timezone(timedelta(hours=8)))
+    #
+    # # 定义 (时长秒数, 文件夹名称) 的对应关系
+    # # 注意：这里按时长从大到小排列，方便后续逻辑
+    # METHOD_CONFIGS = [
+    #     (1728000, "ails2_etaMax1.000_stoppingTime1728000.00"),  # 20 天
+    #     (1296000, "ails2_etaMax1.000_stoppingTime1296000.00"),  # 15 天
+    #     (864000, "ails2_etaMax1.000_stoppingTime864000.00"),  # 10 天
+    #     (432000, "ails2_etaMax1.000_stoppingTime432000.00"),  # 5 天
+    #     (86400, "ails2_etaMax1.000_stoppingTime86400.00"),  # 1 天
+    # ]
 
     @staticmethod
     def get_sol_cost(file_path):
@@ -159,94 +161,70 @@ class SolutionFilter:
 
     @staticmethod
     def select_best_for_instance(instance_name, pool_dir):
+        """
+        从所有可行解（含 Global Best 和各算法历史解）中，
+        筛选出 Top-K，并按平缓等差权重随机选择一个作为 Warm Start。
+        """
         inst_pool = pool_dir / instance_name
 
-        # --- Debug 1: 检查实例目录是否存在 ---
+        # --- Check 1: 检查实例目录是否存在 ---
         if not inst_pool.exists():
-            print(f"❌ [Filter Debug] Instance dir NOT FOUND: {inst_pool}")
+            # 只有在找不到目录时才报错，通常意味着还没有解被提取
             return None
 
-        # 1. 计算当前耗时 (elapsed seconds)
-        now = datetime.now(timezone(timedelta(hours=8)))  # 当前香港时间
-        elapsed_sec = (now - SolutionFilter.START_DT).total_seconds()
+        candidates = []
 
-        # --- Debug 2: 打印时间计算结果 ---
-        # 确认服务器时间是否正确，elapsed_sec 是否为负数
-        print(f"ℹ️ [Filter Debug] {instance_name}: Elapsed {elapsed_sec:.1f}s (Start: {SolutionFilter.START_DT})")
+        # 1. 遍历所有子文件夹（不再根据时间筛选，而是全量读取）
+        #    假设 task_1_extract 已经把 global_best 和其他方法的解都放到了 inst_pool 下的某个子目录中
+        for subdir in inst_pool.iterdir():
+            if subdir.is_dir():
+                # 获取该目录下所有 sol 文件
+                for sol_file in subdir.glob("*.sol"):
+                    c = SolutionFilter.get_sol_cost(sol_file)
+                    if c != float('inf'):
+                        candidates.append((c, sol_file))
 
-        target_folder_name = None
-
-        # 2. 动态筛选：找“已结束”且“耗时最长”的方法
-        for duration, folder_name in SolutionFilter.METHOD_CONFIGS:
-            if elapsed_sec >= duration:
-                method_dir = inst_pool / folder_name
-                if method_dir.exists():
-                    target_folder_name = folder_name
-                    # print(f"✅ [Filter Debug] {instance_name}: Matched time rule -> {folder_name}")
-                    break
-                else:
-                    # 只有当时间满足但文件夹不存在时才打印，可能有助排查命名不对的问题
-                    print(f"⚠️ [Filter Debug] {instance_name}: Time matched but folder missing: {folder_name}")
-                    pass
-
-        # 3. 兜底逻辑
-        if target_folder_name is None:
-            # print(f"⚠️ [Filter Debug] {instance_name}: No time-matched folder. Trying fallback...")
-            for _, folder_name in reversed(SolutionFilter.METHOD_CONFIGS):
-                check_path = inst_pool / folder_name
-                if check_path.exists():
-                    target_folder_name = folder_name
-                    print(f"ℹ️ [Filter Debug] {instance_name}: Fallback used -> {folder_name}")
-                    break
-
-        # --- Debug 3: 检查是否选中了文件夹 ---
-        if target_folder_name is None:
-            print(f"❌ [Filter Debug] {instance_name}: FAILED. No valid algo folder found in {inst_pool}")
-            # 这里建议打印一下目录下实际有哪些文件夹，方便比对名字
-            try:
-                actual_subdirs = [d.name for d in inst_pool.iterdir() if d.is_dir()]
-                print(f"   -> Existing dirs: {actual_subdirs}")
-            except:
-                pass
+        # --- Check 2: 检查是否有有效解 ---
+        if not candidates:
+            # 可能是目录存在但里面是空的
             return None
 
-        # 4. 获取解并排序
-        method_dir = inst_pool / target_folder_name
-        sol_files = list(method_dir.glob("*.sol"))
+        # 2. 排序 (Cost 从小到大)
+        candidates.sort(key=lambda x: x[0])
 
-        # --- Debug 4: 检查文件夹是否为空 ---
-        if not sol_files:
-            print(f"❌ [Filter Debug] {instance_name}: Folder exists but NO .sol files -> {method_dir}")
-            return None
+        # 3. Top-K 截断
+        #    k 默认为 6，如果解的数量不足 6，则由切片自动处理 (取全部)
+        k = 6
+        top_k = candidates[:k]
 
-        sol_files_with_cost = []
-        for f in sol_files:
-            c = SolutionFilter.get_sol_cost(f)
-            if c != float('inf'):
-                sol_files_with_cost.append((c, f))
-            else:
-                # --- Debug 5: 检查是否有解析失败的文件 ---
-                print(f"⚠️ [Filter Debug] Cost parse failed: {f.name}")
-                pass
+        # 4. 计算权重 (平缓等差数列)
+        #    公式: Weight = 2*n - i (i 为排名，0-indexed)
+        #    例如 n=6: 权重为 [12, 11, 10, 9, 8, 7]
+        #    第一名(12) 是 最后一名(7) 概率的约 1.7 倍，差值较小，符合要求。
+        n = len(top_k)
+        weights = [(2 * n - i) for i in range(n)]
 
-        sol_files_with_cost.sort(key=lambda x: x[0])
-
-        # --- Debug 6: 检查是否有有效解 ---
-        if not sol_files_with_cost:
-            print(f"❌ [Filter Debug] {instance_name}: Found .sol files but all valid costs are Inf.")
-            return None
-
-        # 5. Top-K 随机选择
-        top_k = sol_files_with_cost[:10]
-        selected_pair = random.choice(top_k)
+        # 5. 加权随机选择
+        #    choices 返回的是列表，所以取 [0]
+        selected_pair = random.choices(top_k, weights=weights, k=1)[0]
 
         selected_cost = selected_pair[0]
         selected_file = selected_pair[1]
 
-        # 【修改】记录详细筛选日志
-        logger.info(
-            f"[FILTER] Instance: {instance_name} | Selected: {target_folder_name}/{selected_file.name} | Cost: {selected_cost}")
-        return selected_pair[1]
+        # 为了保持日志格式一致，提取父文件夹名作为 method_name
+        method_name = selected_file.parent.name
+
+        # 【记录筛选日志】
+        # 假设上下文中有 logger 对象，如果报错请确认 logger 是否需改为 print 或从外部引入
+        try:
+            logger.info(
+                f"[FILTER] Instance: {instance_name} | Selected: {method_name}/{selected_file.name} | Cost: {selected_cost} | (Rank: {top_k.index(selected_pair)}/{n})"
+            )
+        except NameError:
+            print(
+                f"[FILTER] Instance: {instance_name} | Selected: {method_name}/{selected_file.name} | Cost: {selected_cost}")
+
+        return selected_file
 
 # ================= 3. 任务流程 =================
 
