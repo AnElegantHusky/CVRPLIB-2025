@@ -28,7 +28,6 @@ pip install fabric
 ```bash
 python pipeline_kill_guardian.py
 python pipeline_start_warmstart.py
-python pipeline_monitor.py
 ```
 
 ### 2.2 上传 bks
