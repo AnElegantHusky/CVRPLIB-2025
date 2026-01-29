@@ -133,7 +133,7 @@ if __name__ == "__main__":
         # ("./files_to_upload/extract_survivor_history.py", "both"),
         ("./files_to_upload/guardian.py", "warm_start"),
         ("./files_to_upload/main_for_all_warm_start.py", "warm_start"),
-        # ("./files_to_upload/service_ingest_sol.py", "main"),
+        ("./files_to_upload/service_ingest_sol.py", "main"),
         # ("./files_to_upload/write_outer_sol.py", "both"),
         # ("./files_to_upload/main_for_all_restart.py", "main"),
         # ("./files_to_upload/test_extract.py", "warm_start"),
