@@ -26,8 +26,7 @@ pip install fabric
 
 ### 2.1 重启 warm start
 ```bash
-python pipeline_start_warmstart.py
-python pipeline_monitor.py
+python pipeline_bath_push.py --sol_dir ./mahdi_bks
 ```
 
 [//]: # (### 2.2 上传 bks)
