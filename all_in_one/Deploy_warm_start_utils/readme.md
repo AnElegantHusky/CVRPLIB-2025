@@ -24,7 +24,7 @@ pip install fabric
 
 ## 2 运行命令
 
-### 2.1 重启 warm start
+### 2.1 
 ```bash
 python pipeline_bath_push.py --sol_dir ./mahdi_bks
 ```
