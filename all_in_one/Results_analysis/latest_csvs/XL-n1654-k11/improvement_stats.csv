@@ -1,0 +1,12 @@
+id,seed_algo,seed_score,winner_algo,winner_score,improvement,recording_time
+1,ails2_eoh_acc,36537.0,ails2_eoh_acc_large,36512.0,25.0,7200.66140294075
+2,ails2_eoh_acc_large,36512.0,ails2_etaMax0.020_stoppingTime86400.00,36500.0,12.0,10801.129433631897
+3,ails2_etaMax0.020_stoppingTime86400.00,36500.0,ails2_eoh_acc_large,36453.0,47.0,14401.603061199188
+4,ails2_eoh_acc_large,36453.0,ails2_etaMax0.020_stoppingTime86400.00,36447.0,6.0,25202.237644195557
+5,ails2_etaMax0.020_stoppingTime86400.00,36447.0,ails2_eoh_acc,36423.0,24.0,28802.726900815964
+6,ails2_eoh_acc,36423.0,ails2_etaMax1.000_stoppingTime86400.00,36404.0,19.0,50403.645733356476
+7,ails2_etaMax1.000_stoppingTime86400.00,36404.0,ails2_eoh_acc_large,36396.0,8.0,54004.20205307007
+8,ails2_eoh_acc_large,36396.0,ails2_etaMax1.000_stoppingTime86400.00,36395.0,1.0,72004.96574997902
+9,ails2_etaMax1.000_stoppingTime86400.00,36395.0,ails2_etaMax0.020_stoppingTime86400.00,36394.0,1.0,108006.15512776375
+10,ails2_etaMax0.020_stoppingTime86400.00,36394.0,HGS-TV,36393.0,1.0,111606.48715639114
+11,HGS-TV,36393.0,warm_start,36378.0,15.0,1029660.2442705631

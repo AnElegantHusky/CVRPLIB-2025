@@ -1,0 +1,12 @@
+id,seed_algo,seed_score,winner_algo,winner_score,improvement,recording_time
+1,ails2_etaMax0.020_stoppingTime86400.00,38506.0,ails2_eoh_acc_large,38490.0,16.0,7200.8502316474915
+2,ails2_eoh_acc_large,38490.0,ails2_etaMax0.020_stoppingTime86400.00,38442.0,48.0,10801.450765371323
+3,ails2_etaMax0.020_stoppingTime86400.00,38442.0,ails2_eoh_acc_large,38411.0,31.0,14402.130799293518
+4,ails2_eoh_acc_large,38411.0,ails2_etaMax1.000_stoppingTime86400.00,38402.0,9.0,25202.77134037018
+5,ails2_etaMax1.000_stoppingTime86400.00,38402.0,ails2_etaMax0.020_stoppingTime86400.00,38276.0,126.0,28803.614627361298
+6,ails2_etaMax0.020_stoppingTime86400.00,38276.0,ails2_etaMax0.020_stoppingTime86400.00,38250.0,26.0,32404.434731960297
+7,ails2_etaMax0.020_stoppingTime86400.00,38250.0,HGS-TV,38246.0,4.0,36005.147137880325
+8,HGS-TV,38246.0,ails2_eoh_acc,38239.0,7.0,54006.62315535545
+9,ails2_eoh_acc,38239.0,HGS-TV,38238.0,1.0,57607.33331990242
+10,HGS-TV,38238.0,HGS-TV,38237.0,1.0,61208.07526254654
+11,HGS-TV,38237.0,ails2_etaMax0.005_stoppingTime86400.00,38235.0,2.0,111609.73424220085

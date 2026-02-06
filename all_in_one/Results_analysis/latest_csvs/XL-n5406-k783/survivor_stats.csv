@@ -1,0 +1,9 @@
+algo_name,seed_count
+ails2_eoh_omega2,2
+ails2_eoh_acc,8
+ails2_eoh_acc_large,11
+ails2_etaMax1.000_stoppingTime86400.00,1
+ails2_etaMax0.020_stoppingTime86400.00,1
+HGS-TV,59
+ails2_etaMax1.000_stoppingTime432000.00,4
+ails2_etaMax1.000_stoppingTime864000.00,3
