@@ -1,9 +1,0 @@
-2026-01-09 15:30:07,299 [INFO] --- 脚本开始运行 ---
-2026-01-09 15:30:07,299 [INFO] 配置：时间限制设置为 14400 秒 (4.00 小时)。
-2026-01-09 15:30:07,299 [INFO] 找到 1 个可执行文件 (AILS2_EoH_Ruin_continue.jar)。
-2026-01-09 15:30:07,299 [INFO] 在 100 个实例中，选择了从索引 90 到 92 (共 3 个文件) 运行。
-2026-01-09 15:30:07,299 [INFO] 总共需要运行 3 个任务组合。
-2026-01-09 15:30:07,313 [INFO] 使用 16 个CPU核心开始并行执行...
-2026-01-09 15:30:07,326 [INFO] [AILS2_EoH_Ruin_continue.jar | XLTEST-n8028-k986.vrp] 开始运行 (14400秒限制)。命令: java -jar -Xms4000m -Xmx4000m bin/AILS2_EoH_Ruin_continue.jar -file /home/chenxin/CVRPLIB-2025/XLTEST/XLTEST-n8028-k986.vrp -stoppingCriterion Time -limit 14400 -output remote_results/AILS2_EoH_Ruin_continue.jar -resume /home/chenxin/CVRPLIB-2025/remote_results/test-5days/AILSII_origin_5d/XLTEST-n8028-k986.sol
-2026-01-09 15:30:07,326 [INFO] [AILS2_EoH_Ruin_continue.jar | XLTEST-n8207-k649.vrp] 开始运行 (14400秒限制)。命令: java -jar -Xms4000m -Xmx4000m bin/AILS2_EoH_Ruin_continue.jar -file /home/chenxin/CVRPLIB-2025/XLTEST/XLTEST-n8207-k649.vrp -stoppingCriterion Time -limit 14400 -output remote_results/AILS2_EoH_Ruin_continue.jar -resume /home/chenxin/CVRPLIB-2025/remote_results/test-5days/AILSII_origin_5d/XLTEST-n8207-k649.sol
-2026-01-09 15:30:07,326 [INFO] [AILS2_EoH_Ruin_continue.jar | XLTEST-n8389-k1106.vrp] 开始运行 (14400秒限制)。命令: java -jar -Xms4000m -Xmx4000m bin/AILS2_EoH_Ruin_continue.jar -file /home/chenxin/CVRPLIB-2025/XLTEST/XLTEST-n8389-k1106.vrp -stoppingCriterion Time -limit 14400 -output remote_results/AILS2_EoH_Ruin_continue.jar -resume /home/chenxin/CVRPLIB-2025/remote_results/test-5days/AILSII_origin_5d/XLTEST-n8389-k1106.sol
