@@ -175,6 +175,8 @@ public class AILSII
         }
         bestSolution.clone(referenceSolution);
         bestF = bestSolution.f;
+        // Always persist the initial solution so the DB is never empty
+        SQLiteHelper.saveBest(this.sharedDB, 0.0, bestF, bestSolution.toListString(), "ails2_init");
 		while(!stoppingCriterion())
 		{
 			iterator++;

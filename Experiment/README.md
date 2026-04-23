@@ -14,3 +14,5 @@ nohup python ./pipeline.py --time-limit 86400 --index-start 80 --index-end 100 -
 
 结果路径：Experiment/results
 运行时间：总共两天
+
+nohup python ./pipeline.py --time-limit 100 --index-start 20 --index-end 25 --eta-max 0.01 > output.log 2>&1 &

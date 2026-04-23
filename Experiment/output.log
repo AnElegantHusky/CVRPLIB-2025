@@ -1,0 +1,623 @@
+nohup: ignoring input
+Starting batch build tasks...
+==========================================
+[Building] Directory: AILS2
+Executing command: mvn clean package -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/usr/share/maven/lib/guava.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36morg.example:AILS-II[0;1m >-------------------------[m
+[[1;34mINFO[m] [1mBuilding AILS-II 1.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:2.5:clean[m [1m(default-clean)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Deleting /home/chenxin/CVRPLIB-2025/AILS2/target
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:compile[m [1m(default-compile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 37 source files to /home/chenxin/CVRPLIB-2025/AILS2/target/classes
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2/src/SearchMethod/AILSII.java: /home/chenxin/CVRPLIB-2025/AILS2/src/SearchMethod/AILSII.java uses unchecked or unsafe operations.
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2/src/SearchMethod/AILSII.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:testCompile[m [1m(default-testCompile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:2.12.4:test[m [1m(default-test)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No tests to run.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-jar-plugin:3.3.0:jar[m [1m(default-jar)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2/target/AILS-II-1.0-SNAPSHOT.jar
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-assembly-plugin:3.6.0:single[m [1m(make-assembly)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  2.765 s
+[[1;34mINFO[m] Finished at: 2026-04-22T20:22:44+08:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[32m[Success] AILS2 build completed[0m
+------------------------------------------
+[Building] Directory: AILS2_Eoh_Acc
+Executing command: mvn clean package -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/usr/share/maven/lib/guava.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36morg.example:AILS-II[0;1m >-------------------------[m
+[[1;34mINFO[m] [1mBuilding AILS-II 1.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:2.5:clean[m [1m(default-clean)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Deleting /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:compile[m [1m(default-compile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 37 source files to /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target/classes
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/src/SearchMethod/AILSII.java: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/src/SearchMethod/AILSII.java uses unchecked or unsafe operations.
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/src/SearchMethod/AILSII.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:testCompile[m [1m(default-testCompile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:2.12.4:test[m [1m(default-test)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No tests to run.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-jar-plugin:3.3.0:jar[m [1m(default-jar)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target/AILS-II-1.0-SNAPSHOT.jar
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-assembly-plugin:3.6.0:single[m [1m(make-assembly)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  2.680 s
+[[1;34mINFO[m] Finished at: 2026-04-22T20:22:47+08:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[32m[Success] AILS2_Eoh_Acc build completed[0m
+------------------------------------------
+[Building] Directory: AILS2_Eoh_Acc_large
+Executing command: mvn clean package -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/usr/share/maven/lib/guava.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36morg.example:AILS-II[0;1m >-------------------------[m
+[[1;34mINFO[m] [1mBuilding AILS-II 1.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:2.5:clean[m [1m(default-clean)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Deleting /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/target
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:compile[m [1m(default-compile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 37 source files to /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/target/classes
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/src/SearchMethod/AILSII.java: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/src/SearchMethod/AILSII.java uses unchecked or unsafe operations.
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/src/SearchMethod/AILSII.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:testCompile[m [1m(default-testCompile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:2.12.4:test[m [1m(default-test)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No tests to run.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-jar-plugin:3.3.0:jar[m [1m(default-jar)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/target/AILS-II-1.0-SNAPSHOT.jar
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-assembly-plugin:3.6.0:single[m [1m(make-assembly)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  2.673 s
+[[1;34mINFO[m] Finished at: 2026-04-22T20:22:50+08:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[32m[Success] AILS2_Eoh_Acc_large build completed[0m
+------------------------------------------
+[Building] Directory: AILS2_Eoh_Omega2
+Executing command: mvn clean package -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/usr/share/maven/lib/guava.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36morg.example:AILS-II[0;1m >-------------------------[m
+[[1;34mINFO[m] [1mBuilding AILS-II 1.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:2.5:clean[m [1m(default-clean)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Deleting /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/target
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:compile[m [1m(default-compile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 37 source files to /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/target/classes
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/src/SearchMethod/AILSII.java: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/src/SearchMethod/AILSII.java uses unchecked or unsafe operations.
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/src/SearchMethod/AILSII.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:testCompile[m [1m(default-testCompile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:2.12.4:test[m [1m(default-test)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No tests to run.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-jar-plugin:3.3.0:jar[m [1m(default-jar)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/target/AILS-II-1.0-SNAPSHOT.jar
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-assembly-plugin:3.6.0:single[m [1m(make-assembly)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  2.758 s
+[[1;34mINFO[m] Finished at: 2026-04-22T20:22:53+08:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[32m[Success] AILS2_Eoh_Omega2 build completed[0m
+------------------------------------------
+[Building] Directory: AILS2_Eoh_Ruin
+Executing command: mvn clean package -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper (file:/usr/share/maven/lib/guava.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.util.concurrent.AbstractFuture$UnsafeAtomicHelper
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[[1;34mINFO[m] Scanning for projects...
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m------------------------< [0;36morg.example:AILS-II[0;1m >-------------------------[m
+[[1;34mINFO[m] [1mBuilding AILS-II 1.0-SNAPSHOT[m
+[[1;34mINFO[m] [1m--------------------------------[ jar ]---------------------------------[m
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-clean-plugin:2.5:clean[m [1m(default-clean)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Deleting /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:resources[m [1m(default-resources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/src/main/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:compile[m [1m(default-compile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Changes detected - recompiling the module!
+[[1;34mINFO[m] Compiling 38 source files to /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/classes
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/src/SearchMethod/AILSII.java: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/src/SearchMethod/AILSII.java uses unchecked or unsafe operations.
+[[1;33mWARNING[m] /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/src/SearchMethod/AILSII.java: Recompile with -Xlint:unchecked for details.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-resources-plugin:2.6:testResources[m [1m(default-testResources)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Using 'UTF-8' encoding to copy filtered resources.
+[[1;34mINFO[m] skip non existing resourceDirectory /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/src/test/resources
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-compiler-plugin:3.1:testCompile[m [1m(default-testCompile)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No sources to compile
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-surefire-plugin:2.12.4:test[m [1m(default-test)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] No tests to run.
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-jar-plugin:3.3.0:jar[m [1m(default-jar)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/AILS-II-1.0-SNAPSHOT.jar
+[[1;34mINFO[m] 
+[[1;34mINFO[m] [1m--- [0;32mmaven-assembly-plugin:3.6.0:single[m [1m(make-assembly)[m @ [36mAILS-II[0;1m ---[m
+[[1;34mINFO[m] Building jar: /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] [1;32mBUILD SUCCESS[m
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[[1;34mINFO[m] Total time:  2.750 s
+[[1;34mINFO[m] Finished at: 2026-04-22T20:22:57+08:00
+[[1;34mINFO[m] [1m------------------------------------------------------------------------[m
+[32m[Success] AILS2_Eoh_Ruin build completed[0m
+------------------------------------------
+
+==========================================
+           Build Summary Report
+==========================================
+Total Tasks: 5
+Success Count: [32m5[0m
+Failure Count: [31m0[0m
+
+[32mCongratulations! All projects built successfully.[0m
+==========================================
+
+Pipeline config:
+  instances   : 20..25 (5 total)
+  time_limit  : 100s
+  step2 algo  : AILS2  eta_max=1.0
+  step3 algos : ['AILS2_Eoh_Acc', 'AILS2_Eoh_Acc_large', 'AILS2_Eoh_Omega2', 'AILS2_Eoh_Ruin', 'AILS2']  eta_max=0.01
+
+============================================================
+Step 1: Compiling algorithms
+============================================================
+[Step 1] Compilation done.
+
+============================================================
+Step 2: AILS2 — generating initial solutions
+============================================================
+  [Step2] Running AILS2 on XL-n1934-k46.vrp ...
+  [Sol] Written: XL-n1934-k46.sol  cost=53381.00  routes=46
+  [Step2] Running AILS2 on XL-n2028-k617.vrp ...
+  [Sol] Written: XL-n2028-k617.sol  cost=545419.00  routes=622
+  [Step2] Running AILS2 on XL-n1981-k13.vrp ...
+  [Sol] Written: XL-n1981-k13.sol  cost=32809.00  routes=13
+  [Step2] Running AILS2 on XL-n2121-k186.vrp ...
+  [Sol] Written: XL-n2121-k186.sol  cost=283622.00  routes=186
+  [Step2] Running AILS2 on XL-n2074-k264.vrp ...
+  [Sol] Written: XL-n2074-k264.sol  cost=423110.00  routes=265
+[Step 2] Done. 5/5 solutions written.
+
+============================================================
+Step 3: Running remaining algorithms
+============================================================
+  Launching 25 jobs (all in parallel) ...
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[stderr]
+[DB Error] [SQLITE_ERROR] SQL error or missing database (no such table: solution_history)
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such table: solution_history)
+	at org.sqlite.core.DB.newSQLException(DB.java:1179)
+	at org.sqlite.core.DB.newSQLException(DB.java:1190)
+	at org.sqlite.core.DB.throwex(DB.java:1150)
+	at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+	at org.sqlite.core.NativeDB.prepare(NativeDB.java:135)
+	at org.sqlite.core.DB.prepare(DB.java:264)
+	at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+	at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+	at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+	at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:225)
+	at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:205)
+	at SearchMethod.SQLiteHelper.saveBest(SQLiteHelper.java:59)
+	at SearchMethod.AILSII.evaluateSolution(AILSII.java:232)
+	at SearchMethod.AILSII.search(AILSII.java:194)
+	at SearchMethod.AILSII.main(AILSII.java:331)
+
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[DB read error] no such table: solution_history
+[Setup] instance=XL-n2074-k264.vrp  init_sol=XL-n2074-k264.sol  algo=AILS2_Eoh_Acc_large
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Setup] instance=XL-n2028-k617.vrp  init_sol=XL-n2028-k617.sol  algo=AILS2_Eoh_Acc_large
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2028-k617.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2028-k617.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.392946 -etaMax 0.01
+[Debug] Process started, pid=158307
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Acc_large
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  13 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Acc_large/XL-n2028-k617.csv
+[Setup] instance=XL-n1934-k46.vrp  init_sol=XL-n1934-k46.sol  algo=AILS2_Eoh_Acc_large
+[Debug] Cleaning up old DB files...
+[Setup] instance=XL-n1981-k13.vrp  init_sol=XL-n1981-k13.sol  algo=AILS2_Eoh_Omega2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1981-k13.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1981-k13.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.394353 -etaMax 0.01
+[Debug] Process started, pid=158311
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Omega2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Omega2/XL-n1981-k13.csv
+[Setup] instance=XL-n1981-k13.vrp  init_sol=XL-n1981-k13.sol  algo=AILS2_Eoh_Acc_large
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1981-k13.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1981-k13.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.3962526 -etaMax 0.01
+[Debug] Process started, pid=158316
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Acc_large
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  11 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Acc_large/XL-n1981-k13.csv
+[Setup] instance=XL-n1981-k13.vrp  init_sol=XL-n1981-k13.sol  algo=AILS2_Eoh_Acc
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1981-k13.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1981-k13.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.3957198 -etaMax 0.01
+[Debug] Process started, pid=158314
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Acc
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Acc/XL-n1981-k13.csv
+[Setup] instance=XL-n2121-k186.vrp  init_sol=XL-n2121-k186.sol  algo=AILS2_Eoh_Acc
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2121-k186.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2121-k186.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.432167 -etaMax 0.01
+[Debug] Process started, pid=158496
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Acc
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  27 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Acc/XL-n2121-k186.csv
+[Setup] instance=XL-n1934-k46.vrp  init_sol=XL-n1934-k46.sol  algo=AILS2_Eoh_Acc
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1934-k46.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1934-k46.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.3912966 -etaMax 0.01
+[Debug] Process started, pid=158303
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Acc
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  7 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Acc/XL-n1934-k46.csv
+[Setup] instance=XL-n2074-k264.vrp  init_sol=XL-n2074-k264.sol  algo=AILS2_Eoh_Omega2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2074-k264.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2074-k264.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.4783037 -etaMax 0.01
+[Debug] Process started, pid=158682
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Omega2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  4 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Omega2/XL-n2074-k264.csv
+[Setup] instance=XL-n2028-k617.vrp  init_sol=XL-n2028-k617.sol  algo=AILS2_Eoh_Acc
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2028-k617.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2028-k617.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.4348373 -etaMax 0.01
+[Debug] Process started, pid=158507
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Acc
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Acc/XL-n2028-k617.csv
+[Setup] instance=XL-n2121-k186.vrp  init_sol=XL-n2121-k186.sol  algo=AILS2_Eoh_Acc_large
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Acc_large/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2121-k186.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2121-k186.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.4334004 -etaMax 0.01
+[Debug] Process started, pid=158500
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Acc_large
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Acc_large/XL-n2121-k186.csv
+[Setup] instance=XL-n2121-k186.vrp  init_sol=XL-n2121-k186.sol  algo=AILS2_Eoh_Omega2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Omega2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2121-k186.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2121-k186.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.4693866 -etaMax 0.01
+[Debug] Process started, pid=158652
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2_Eoh_Omega2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Omega2/XL-n2121-k186.csv
+[Setup] instance=XL-n1934-k46.vrp  init_sol=XL-n1934-k46.sol  algo=AILS2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1934-k46.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1934-k46.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.438172 -etaMax 0.01
+[Debug] Process started, pid=158525
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2/XL-n1934-k46.csv
+[Setup] instance=XL-n2074-k264.vrp  init_sol=XL-n2074-k264.sol  algo=AILS2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2074-k264.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2074-k264.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.5012844 -etaMax 0.01
+[Debug] Process started, pid=158729
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2/XL-n2074-k264.csv
+[Setup] instance=XL-n1981-k13.vrp  init_sol=XL-n1981-k13.sol  algo=AILS2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1981-k13.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1981-k13.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.3983574 -etaMax 0.01
+[Debug] Process started, pid=158333
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2/XL-n1981-k13.csv
+[Setup] instance=XL-n2121-k186.vrp  init_sol=XL-n2121-k186.sol  algo=AILS2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2121-k186.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2121-k186.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.4767976 -etaMax 0.01
+[Debug] Process started, pid=158676
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2/XL-n2121-k186.csv
+[Setup] instance=XL-n2028-k617.vrp  init_sol=XL-n2028-k617.sol  algo=AILS2
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2028-k617.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2028-k617.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.397995 -etaMax 0.01
+[Debug] Process started, pid=158328
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Debug] stdout drain finished for AILS2
+[Debug] proc.wait() returned, returncode=0
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2/XL-n2028-k617.csv
+[Setup] instance=XL-n1934-k46.vrp  init_sol=XL-n1934-k46.sol  algo=AILS2_Eoh_Omega2
+[Debug] Cleaning up old DB files...
+[Setup] instance=XL-n1981-k13.vrp  init_sol=XL-n1981-k13.sol  algo=AILS2_Eoh_Ruin
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1981-k13.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1981-k13.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.3912992 -etaMax 0.01
+[Debug] Process started, pid=158304
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Timeout] killing AILS2_Eoh_Ruin
+[Debug] stdout drain finished for AILS2_Eoh_Ruin
+[Debug] process killed
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Ruin/XL-n1981-k13.csv
+[Setup] instance=XL-n2028-k617.vrp  init_sol=XL-n2028-k617.sol  algo=AILS2_Eoh_Omega2
+[Debug] Cleaning up old DB files...
+[Setup] instance=XL-n2074-k264.vrp  init_sol=XL-n2074-k264.sol  algo=AILS2_Eoh_Acc
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Setup] instance=XL-n2074-k264.vrp  init_sol=XL-n2074-k264.sol  algo=AILS2_Eoh_Ruin
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2074-k264.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2074-k264.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.4337223 -etaMax 0.01
+[Debug] Process started, pid=158501
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Timeout] killing AILS2_Eoh_Ruin
+[Debug] stdout drain finished for AILS2_Eoh_Ruin
+[Debug] process killed
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Ruin/XL-n2074-k264.csv
+[Setup] instance=XL-n1934-k46.vrp  init_sol=XL-n1934-k46.sol  algo=AILS2_Eoh_Ruin
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n1934-k46.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n1934-k46.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.448165 -etaMax 0.01
+[Debug] Process started, pid=158566
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Timeout] killing AILS2_Eoh_Ruin
+[Debug] stdout drain finished for AILS2_Eoh_Ruin
+[Debug] process killed
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Ruin/XL-n1934-k46.csv
+[Setup] instance=XL-n2028-k617.vrp  init_sol=XL-n2028-k617.sol  algo=AILS2_Eoh_Ruin
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2028-k617.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2028-k617.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.4518902 -etaMax 0.01
+[Debug] Process started, pid=158573
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Timeout] killing AILS2_Eoh_Ruin
+[Debug] stdout drain finished for AILS2_Eoh_Ruin
+[Debug] process killed
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Ruin/XL-n2028-k617.csv
+[Setup] instance=XL-n2121-k186.vrp  init_sol=XL-n2121-k186.sol  algo=AILS2_Eoh_Ruin
+[Debug] Cleaning up old DB files...
+[Debug] init_db done
+[Debug] preload_init_solution done
+[Run]   java --enable-native-access=ALL-UNNAMED -jar /home/chenxin/CVRPLIB-2025/AILS2_Eoh_Ruin/target/AILS-II-1.0-SNAPSHOT-jar-with-dependencies.jar -file /home/chenxin/CVRPLIB-2025/Experiment/Instances/XL-n2121-k186.vrp -sharedDB /home/chenxin/CVRPLIB-2025/Experiment/tmp/XL-n2121-k186.db -rounded true -best 0 -limit 100 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime 1776860679.5132115 -etaMax 0.01
+[Debug] Process started, pid=158757
+[Debug] stdout thread started, waiting for process (timeout=110s)...
+[Timeout] killing AILS2_Eoh_Ruin
+[Debug] stdout drain finished for AILS2_Eoh_Ruin
+[Debug] process killed
+[Debug] joining stdout thread...
+[Debug] stdout thread joined
+[Done]  0 improvement records found
+[Output] /home/chenxin/CVRPLIB-2025/Experiment/results/AILS2_Eoh_Ruin/XL-n2121-k186.csv
+  [Done] AILS2_Eoh_Acc × XL-n1934-k46: ok
+  [Done] AILS2_Eoh_Acc_large × XL-n1934-k46: error: database is locked
+  [Done] AILS2_Eoh_Omega2 × XL-n1934-k46: error: disk I/O error
+  [Done] AILS2_Eoh_Ruin × XL-n1934-k46: ok
+  [Done] AILS2 × XL-n1934-k46: ok
+  [Done] AILS2_Eoh_Acc × XL-n1981-k13: ok
+  [Done] AILS2_Eoh_Acc_large × XL-n1981-k13: ok
+  [Done] AILS2_Eoh_Omega2 × XL-n1981-k13: ok
+  [Done] AILS2_Eoh_Ruin × XL-n1981-k13: ok
+  [Done] AILS2 × XL-n1981-k13: ok
+  [Done] AILS2_Eoh_Acc × XL-n2028-k617: ok
+  [Done] AILS2_Eoh_Acc_large × XL-n2028-k617: ok
+  [Done] AILS2_Eoh_Omega2 × XL-n2028-k617: error: disk I/O error
+  [Done] AILS2_Eoh_Ruin × XL-n2028-k617: ok
+  [Done] AILS2 × XL-n2028-k617: ok
+  [Done] AILS2_Eoh_Acc × XL-n2074-k264: error: no such table: global_best
+  [Done] AILS2_Eoh_Acc_large × XL-n2074-k264: error: no such table: global_best
+  [Done] AILS2_Eoh_Omega2 × XL-n2074-k264: ok
+  [Done] AILS2_Eoh_Ruin × XL-n2074-k264: ok
+  [Done] AILS2 × XL-n2074-k264: ok
+  [Done] AILS2_Eoh_Acc × XL-n2121-k186: ok
+  [Done] AILS2_Eoh_Acc_large × XL-n2121-k186: ok
+  [Done] AILS2_Eoh_Omega2 × XL-n2121-k186: ok
+  [Done] AILS2_Eoh_Ruin × XL-n2121-k186: ok
+  [Done] AILS2 × XL-n2121-k186: ok
+
+Pipeline complete.
