@@ -1,0 +1,421 @@
+nohup: ignoring input
+Starting batch build tasks...
+==========================================
+[Building] AILS-II_continue
+added manifest
+adding: Auxiliary/(in = 0) (out= 0)(stored 0%)
+adding: Auxiliary/Distance.class(in = 1176) (out= 639)(deflated 45%)
+adding: Auxiliary/Mean.class(in = 1466) (out= 792)(deflated 45%)
+adding: Data/(in = 0) (out= 0)(stored 0%)
+adding: Data/Best.class(in = 362) (out= 254)(deflated 29%)
+adding: Data/EdgeType.class(in = 1049) (out= 608)(deflated 42%)
+adding: Data/File.class(in = 706) (out= 468)(deflated 33%)
+adding: Data/Instance.class(in = 7625) (out= 4053)(deflated 46%)
+adding: Data/InstanceData.class(in = 2043) (out= 909)(deflated 55%)
+adding: Data/Instances.class(in = 9151) (out= 4268)(deflated 53%)
+adding: Data/MaxNumRoutes.class(in = 223) (out= 181)(deflated 18%)
+adding: Data/NodeKnn.class(in = 1151) (out= 631)(deflated 45%)
+adding: Data/Point.class(in = 924) (out= 509)(deflated 44%)
+adding: DiversityControl/(in = 0) (out= 0)(stored 0%)
+adding: DiversityControl/AcceptanceCriterion$1.class(in = 736) (out= 455)(deflated 38%)
+adding: DiversityControl/AcceptanceCriterion.class(in = 2647) (out= 1500)(deflated 43%)
+adding: DiversityControl/DistAdjustment$1.class(in = 721) (out= 457)(deflated 36%)
+adding: DiversityControl/DistAdjustment.class(in = 1950) (out= 1056)(deflated 45%)
+adding: DiversityControl/IdealDist.class(in = 233) (out= 185)(deflated 20%)
+adding: DiversityControl/OmegaAdjustment.class(in = 3086) (out= 1506)(deflated 51%)
+adding: Evaluators/(in = 0) (out= 0)(stored 0%)
+adding: Evaluators/CostEvaluation.class(in = 2270) (out= 915)(deflated 59%)
+adding: Evaluators/ExecuteMovement$1.class(in = 861) (out= 533)(deflated 38%)
+adding: Evaluators/ExecuteMovement.class(in = 2746) (out= 1549)(deflated 43%)
+adding: Evaluators/FeasibilityEvaluation.class(in = 1711) (out= 752)(deflated 56%)
+adding: Evaluators/MovementType.class(in = 1280) (out= 709)(deflated 44%)
+adding: Improvement/(in = 0) (out= 0)(stored 0%)
+adding: Improvement/CandidateNode.class(in = 3668) (out= 1623)(deflated 55%)
+adding: Improvement/FeasibilityPhase.class(in = 7624) (out= 3548)(deflated 53%)
+adding: Improvement/IntraLocalSearch.class(in = 2730) (out= 1450)(deflated 46%)
+adding: Improvement/LocalSearch.class(in = 6920) (out= 3143)(deflated 54%)
+adding: Perturbation/(in = 0) (out= 0)(stored 0%)
+adding: Perturbation/Concentric.class(in = 1528) (out= 898)(deflated 41%)
+adding: Perturbation/InsertionHeuristic.class(in = 1117) (out= 584)(deflated 47%)
+adding: Perturbation/Perturbation$1.class(in = 694) (out= 431)(deflated 37%)
+adding: Perturbation/Perturbation.class(in = 5852) (out= 2819)(deflated 51%)
+adding: Perturbation/PerturbationType.class(in = 1106) (out= 581)(deflated 47%)
+adding: Perturbation/Sequential.class(in = 1758) (out= 1037)(deflated 41%)
+adding: SearchMethod/(in = 0) (out= 0)(stored 0%)
+adding: SearchMethod/AILSII$1.class(in = 803) (out= 514)(deflated 35%)
+adding: SearchMethod/AILSII$2.class(in = 689) (out= 440)(deflated 36%)
+adding: SearchMethod/AILSII.class(in = 13981) (out= 7146)(deflated 48%)
+adding: SearchMethod/Config.class(in = 4456) (out= 1822)(deflated 59%)
+adding: SearchMethod/ConstructSolution.class(in = 2888) (out= 1601)(deflated 44%)
+adding: SearchMethod/InputParameters.class(in = 5514) (out= 2630)(deflated 52%)
+adding: SearchMethod/StoppingCriterionType.class(in = 1134) (out= 585)(deflated 48%)
+adding: Solution/(in = 0) (out= 0)(stored 0%)
+adding: Solution/Node.class(in = 2472) (out= 1287)(deflated 47%)
+adding: Solution/Route.class(in = 6709) (out= 3291)(deflated 50%)
+adding: Solution/Solution.class(in = 10435) (out= 5436)(deflated 47%)
+[32m[Success] AILS-II_continue[0m
+------------------------------------------
+[Building] AILS-II_origin
+added manifest
+adding: Auxiliary/(in = 0) (out= 0)(stored 0%)
+adding: Auxiliary/Distance.class(in = 1176) (out= 639)(deflated 45%)
+adding: Auxiliary/Mean.class(in = 1466) (out= 792)(deflated 45%)
+adding: Data/(in = 0) (out= 0)(stored 0%)
+adding: Data/Best.class(in = 362) (out= 254)(deflated 29%)
+adding: Data/EdgeType.class(in = 1049) (out= 608)(deflated 42%)
+adding: Data/File.class(in = 706) (out= 468)(deflated 33%)
+adding: Data/Instance.class(in = 7625) (out= 4053)(deflated 46%)
+adding: Data/InstanceData.class(in = 2043) (out= 909)(deflated 55%)
+adding: Data/Instances.class(in = 9151) (out= 4268)(deflated 53%)
+adding: Data/MaxNumRoutes.class(in = 223) (out= 181)(deflated 18%)
+adding: Data/NodeKnn.class(in = 1151) (out= 631)(deflated 45%)
+adding: Data/Point.class(in = 924) (out= 509)(deflated 44%)
+adding: DiversityControl/(in = 0) (out= 0)(stored 0%)
+adding: DiversityControl/AcceptanceCriterion$1.class(in = 736) (out= 455)(deflated 38%)
+adding: DiversityControl/AcceptanceCriterion.class(in = 2639) (out= 1488)(deflated 43%)
+adding: DiversityControl/DistAdjustment$1.class(in = 721) (out= 457)(deflated 36%)
+adding: DiversityControl/DistAdjustment.class(in = 1950) (out= 1056)(deflated 45%)
+adding: DiversityControl/IdealDist.class(in = 233) (out= 185)(deflated 20%)
+adding: DiversityControl/OmegaAdjustment.class(in = 3086) (out= 1506)(deflated 51%)
+adding: Evaluators/(in = 0) (out= 0)(stored 0%)
+adding: Evaluators/CostEvaluation.class(in = 2270) (out= 915)(deflated 59%)
+adding: Evaluators/ExecuteMovement$1.class(in = 861) (out= 533)(deflated 38%)
+adding: Evaluators/ExecuteMovement.class(in = 2746) (out= 1549)(deflated 43%)
+adding: Evaluators/FeasibilityEvaluation.class(in = 1711) (out= 752)(deflated 56%)
+adding: Evaluators/MovementType.class(in = 1280) (out= 709)(deflated 44%)
+adding: Improvement/(in = 0) (out= 0)(stored 0%)
+adding: Improvement/CandidateNode.class(in = 3668) (out= 1623)(deflated 55%)
+adding: Improvement/FeasibilityPhase.class(in = 7624) (out= 3548)(deflated 53%)
+adding: Improvement/IntraLocalSearch.class(in = 2730) (out= 1450)(deflated 46%)
+adding: Improvement/LocalSearch.class(in = 6920) (out= 3143)(deflated 54%)
+adding: Perturbation/(in = 0) (out= 0)(stored 0%)
+adding: Perturbation/Concentric.class(in = 1528) (out= 898)(deflated 41%)
+adding: Perturbation/InsertionHeuristic.class(in = 1117) (out= 584)(deflated 47%)
+adding: Perturbation/Perturbation$1.class(in = 694) (out= 431)(deflated 37%)
+adding: Perturbation/Perturbation.class(in = 5852) (out= 2819)(deflated 51%)
+adding: Perturbation/PerturbationType.class(in = 1106) (out= 581)(deflated 47%)
+adding: Perturbation/Sequential.class(in = 1758) (out= 1037)(deflated 41%)
+adding: SearchMethod/(in = 0) (out= 0)(stored 0%)
+adding: SearchMethod/AILSII$1.class(in = 689) (out= 441)(deflated 35%)
+adding: SearchMethod/AILSII.class(in = 12792) (out= 6492)(deflated 49%)
+adding: SearchMethod/Config.class(in = 4456) (out= 1822)(deflated 59%)
+adding: SearchMethod/ConstructSolution.class(in = 2888) (out= 1601)(deflated 44%)
+adding: SearchMethod/InputParameters.class(in = 5514) (out= 2630)(deflated 52%)
+adding: SearchMethod/StoppingCriterionType.class(in = 1134) (out= 585)(deflated 48%)
+adding: Solution/(in = 0) (out= 0)(stored 0%)
+adding: Solution/Node.class(in = 2472) (out= 1287)(deflated 47%)
+adding: Solution/Route.class(in = 6709) (out= 3291)(deflated 50%)
+adding: Solution/Solution.class(in = 8266) (out= 4097)(deflated 50%)
+[32m[Success] AILS-II_origin[0m
+------------------------------------------
+[Building] AILS2_EoH_Acc
+added manifest
+adding: Auxiliary/(in = 0) (out= 0)(stored 0%)
+adding: Auxiliary/Distance.class(in = 1176) (out= 639)(deflated 45%)
+adding: Auxiliary/Mean.class(in = 1466) (out= 792)(deflated 45%)
+adding: Data/(in = 0) (out= 0)(stored 0%)
+adding: Data/Best.class(in = 362) (out= 254)(deflated 29%)
+adding: Data/EdgeType.class(in = 1049) (out= 608)(deflated 42%)
+adding: Data/File.class(in = 706) (out= 468)(deflated 33%)
+adding: Data/Instance.class(in = 7625) (out= 4053)(deflated 46%)
+adding: Data/InstanceData.class(in = 2043) (out= 909)(deflated 55%)
+adding: Data/Instances.class(in = 9151) (out= 4268)(deflated 53%)
+adding: Data/MaxNumRoutes.class(in = 223) (out= 181)(deflated 18%)
+adding: Data/NodeKnn.class(in = 1151) (out= 631)(deflated 45%)
+adding: Data/Point.class(in = 924) (out= 509)(deflated 44%)
+adding: DiversityControl/(in = 0) (out= 0)(stored 0%)
+adding: DiversityControl/AcceptanceCriterion.class(in = 1786) (out= 1097)(deflated 38%)
+adding: DiversityControl/DistAdjustment$1.class(in = 721) (out= 457)(deflated 36%)
+adding: DiversityControl/DistAdjustment.class(in = 1950) (out= 1056)(deflated 45%)
+adding: DiversityControl/IdealDist.class(in = 233) (out= 185)(deflated 20%)
+adding: DiversityControl/OmegaAdjustment.class(in = 3086) (out= 1506)(deflated 51%)
+adding: Evaluators/(in = 0) (out= 0)(stored 0%)
+adding: Evaluators/CostEvaluation.class(in = 2270) (out= 915)(deflated 59%)
+adding: Evaluators/ExecuteMovement$1.class(in = 861) (out= 533)(deflated 38%)
+adding: Evaluators/ExecuteMovement.class(in = 2746) (out= 1549)(deflated 43%)
+adding: Evaluators/FeasibilityEvaluation.class(in = 1711) (out= 752)(deflated 56%)
+adding: Evaluators/MovementType.class(in = 1280) (out= 709)(deflated 44%)
+adding: Improvement/(in = 0) (out= 0)(stored 0%)
+adding: Improvement/CandidateNode.class(in = 3668) (out= 1623)(deflated 55%)
+adding: Improvement/FeasibilityPhase.class(in = 7624) (out= 3548)(deflated 53%)
+adding: Improvement/IntraLocalSearch.class(in = 2730) (out= 1450)(deflated 46%)
+adding: Improvement/LocalSearch.class(in = 6920) (out= 3143)(deflated 54%)
+adding: Perturbation/(in = 0) (out= 0)(stored 0%)
+adding: Perturbation/Concentric.class(in = 1528) (out= 898)(deflated 41%)
+adding: Perturbation/InsertionHeuristic.class(in = 1117) (out= 584)(deflated 47%)
+adding: Perturbation/Perturbation$1.class(in = 694) (out= 431)(deflated 37%)
+adding: Perturbation/Perturbation.class(in = 5852) (out= 2819)(deflated 51%)
+adding: Perturbation/PerturbationType.class(in = 1106) (out= 581)(deflated 47%)
+adding: Perturbation/Sequential.class(in = 1758) (out= 1037)(deflated 41%)
+adding: SearchMethod/(in = 0) (out= 0)(stored 0%)
+adding: SearchMethod/AILSII$1.class(in = 803) (out= 514)(deflated 35%)
+adding: SearchMethod/AILSII$2.class(in = 689) (out= 440)(deflated 36%)
+adding: SearchMethod/AILSII.class(in = 13981) (out= 7146)(deflated 48%)
+adding: SearchMethod/Config.class(in = 4456) (out= 1822)(deflated 59%)
+adding: SearchMethod/ConstructSolution.class(in = 2888) (out= 1601)(deflated 44%)
+adding: SearchMethod/InputParameters.class(in = 5514) (out= 2630)(deflated 52%)
+adding: SearchMethod/StoppingCriterionType.class(in = 1134) (out= 585)(deflated 48%)
+adding: Solution/(in = 0) (out= 0)(stored 0%)
+adding: Solution/Node.class(in = 2472) (out= 1287)(deflated 47%)
+adding: Solution/Route.class(in = 6709) (out= 3291)(deflated 50%)
+adding: Solution/Solution.class(in = 10435) (out= 5436)(deflated 47%)
+[32m[Success] AILS2_EoH_Acc[0m
+------------------------------------------
+[Building] AILS2_EoH_Acc_large
+added manifest
+adding: Auxiliary/(in = 0) (out= 0)(stored 0%)
+adding: Auxiliary/Distance.class(in = 1176) (out= 639)(deflated 45%)
+adding: Auxiliary/Mean.class(in = 1466) (out= 792)(deflated 45%)
+adding: Data/(in = 0) (out= 0)(stored 0%)
+adding: Data/Best.class(in = 362) (out= 254)(deflated 29%)
+adding: Data/EdgeType.class(in = 1049) (out= 608)(deflated 42%)
+adding: Data/File.class(in = 706) (out= 468)(deflated 33%)
+adding: Data/Instance.class(in = 7625) (out= 4053)(deflated 46%)
+adding: Data/InstanceData.class(in = 2043) (out= 909)(deflated 55%)
+adding: Data/Instances.class(in = 9151) (out= 4268)(deflated 53%)
+adding: Data/MaxNumRoutes.class(in = 223) (out= 181)(deflated 18%)
+adding: Data/NodeKnn.class(in = 1151) (out= 631)(deflated 45%)
+adding: Data/Point.class(in = 924) (out= 509)(deflated 44%)
+adding: DiversityControl/(in = 0) (out= 0)(stored 0%)
+adding: DiversityControl/AcceptanceCriterion$1.class(in = 736) (out= 457)(deflated 37%)
+adding: DiversityControl/AcceptanceCriterion$SearchPhase.class(in = 1253) (out= 611)(deflated 51%)
+adding: DiversityControl/AcceptanceCriterion.class(in = 4291) (out= 2405)(deflated 43%)
+adding: DiversityControl/DistAdjustment$1.class(in = 721) (out= 457)(deflated 36%)
+adding: DiversityControl/DistAdjustment.class(in = 1950) (out= 1056)(deflated 45%)
+adding: DiversityControl/IdealDist.class(in = 233) (out= 185)(deflated 20%)
+adding: DiversityControl/OmegaAdjustment.class(in = 3086) (out= 1506)(deflated 51%)
+adding: Evaluators/(in = 0) (out= 0)(stored 0%)
+adding: Evaluators/CostEvaluation.class(in = 2270) (out= 915)(deflated 59%)
+adding: Evaluators/ExecuteMovement$1.class(in = 861) (out= 533)(deflated 38%)
+adding: Evaluators/ExecuteMovement.class(in = 2746) (out= 1549)(deflated 43%)
+adding: Evaluators/FeasibilityEvaluation.class(in = 1711) (out= 752)(deflated 56%)
+adding: Evaluators/MovementType.class(in = 1280) (out= 709)(deflated 44%)
+adding: Improvement/(in = 0) (out= 0)(stored 0%)
+adding: Improvement/CandidateNode.class(in = 3668) (out= 1623)(deflated 55%)
+adding: Improvement/FeasibilityPhase.class(in = 7624) (out= 3548)(deflated 53%)
+adding: Improvement/IntraLocalSearch.class(in = 2730) (out= 1450)(deflated 46%)
+adding: Improvement/LocalSearch.class(in = 6920) (out= 3143)(deflated 54%)
+adding: Perturbation/(in = 0) (out= 0)(stored 0%)
+adding: Perturbation/Concentric.class(in = 1528) (out= 898)(deflated 41%)
+adding: Perturbation/InsertionHeuristic.class(in = 1117) (out= 584)(deflated 47%)
+adding: Perturbation/Perturbation$1.class(in = 694) (out= 431)(deflated 37%)
+adding: Perturbation/Perturbation.class(in = 5852) (out= 2819)(deflated 51%)
+adding: Perturbation/PerturbationType.class(in = 1106) (out= 581)(deflated 47%)
+adding: Perturbation/Sequential.class(in = 1758) (out= 1037)(deflated 41%)
+adding: SearchMethod/(in = 0) (out= 0)(stored 0%)
+adding: SearchMethod/AILSII$1.class(in = 803) (out= 514)(deflated 35%)
+adding: SearchMethod/AILSII$2.class(in = 689) (out= 440)(deflated 36%)
+adding: SearchMethod/AILSII.class(in = 13981) (out= 7146)(deflated 48%)
+adding: SearchMethod/Config.class(in = 4456) (out= 1822)(deflated 59%)
+adding: SearchMethod/ConstructSolution.class(in = 2888) (out= 1601)(deflated 44%)
+adding: SearchMethod/InputParameters.class(in = 5514) (out= 2630)(deflated 52%)
+adding: SearchMethod/StoppingCriterionType.class(in = 1134) (out= 585)(deflated 48%)
+adding: Solution/(in = 0) (out= 0)(stored 0%)
+adding: Solution/Node.class(in = 2472) (out= 1287)(deflated 47%)
+adding: Solution/Route.class(in = 6709) (out= 3291)(deflated 50%)
+adding: Solution/Solution.class(in = 10435) (out= 5436)(deflated 47%)
+[32m[Success] AILS2_EoH_Acc_large[0m
+------------------------------------------
+[Building] AILS2_EoH_Omega2
+added manifest
+adding: Auxiliary/(in = 0) (out= 0)(stored 0%)
+adding: Auxiliary/Distance.class(in = 1176) (out= 639)(deflated 45%)
+adding: Auxiliary/Mean.class(in = 1466) (out= 792)(deflated 45%)
+adding: Data/(in = 0) (out= 0)(stored 0%)
+adding: Data/Best.class(in = 362) (out= 254)(deflated 29%)
+adding: Data/EdgeType.class(in = 1049) (out= 608)(deflated 42%)
+adding: Data/File.class(in = 706) (out= 468)(deflated 33%)
+adding: Data/Instance.class(in = 7625) (out= 4053)(deflated 46%)
+adding: Data/InstanceData.class(in = 2043) (out= 909)(deflated 55%)
+adding: Data/Instances.class(in = 9151) (out= 4268)(deflated 53%)
+adding: Data/MaxNumRoutes.class(in = 223) (out= 181)(deflated 18%)
+adding: Data/NodeKnn.class(in = 1151) (out= 631)(deflated 45%)
+adding: Data/Point.class(in = 924) (out= 509)(deflated 44%)
+adding: DiversityControl/(in = 0) (out= 0)(stored 0%)
+adding: DiversityControl/AcceptanceCriterion$1.class(in = 736) (out= 455)(deflated 38%)
+adding: DiversityControl/AcceptanceCriterion.class(in = 2647) (out= 1500)(deflated 43%)
+adding: DiversityControl/DistAdjustment$1.class(in = 721) (out= 457)(deflated 36%)
+adding: DiversityControl/DistAdjustment.class(in = 1950) (out= 1056)(deflated 45%)
+adding: DiversityControl/IdealDist.class(in = 233) (out= 185)(deflated 20%)
+adding: DiversityControl/OmegaAdjustment$ControlState.class(in = 1259) (out= 619)(deflated 50%)
+adding: DiversityControl/OmegaAdjustment.class(in = 4394) (out= 2421)(deflated 44%)
+adding: Evaluators/(in = 0) (out= 0)(stored 0%)
+adding: Evaluators/CostEvaluation.class(in = 2270) (out= 915)(deflated 59%)
+adding: Evaluators/ExecuteMovement$1.class(in = 861) (out= 533)(deflated 38%)
+adding: Evaluators/ExecuteMovement.class(in = 2746) (out= 1549)(deflated 43%)
+adding: Evaluators/FeasibilityEvaluation.class(in = 1711) (out= 752)(deflated 56%)
+adding: Evaluators/MovementType.class(in = 1280) (out= 709)(deflated 44%)
+adding: Improvement/(in = 0) (out= 0)(stored 0%)
+adding: Improvement/CandidateNode.class(in = 3668) (out= 1623)(deflated 55%)
+adding: Improvement/FeasibilityPhase.class(in = 7624) (out= 3548)(deflated 53%)
+adding: Improvement/IntraLocalSearch.class(in = 2730) (out= 1450)(deflated 46%)
+adding: Improvement/LocalSearch.class(in = 6920) (out= 3143)(deflated 54%)
+adding: Perturbation/(in = 0) (out= 0)(stored 0%)
+adding: Perturbation/Concentric.class(in = 1528) (out= 898)(deflated 41%)
+adding: Perturbation/InsertionHeuristic.class(in = 1117) (out= 584)(deflated 47%)
+adding: Perturbation/Perturbation$1.class(in = 694) (out= 431)(deflated 37%)
+adding: Perturbation/Perturbation.class(in = 5852) (out= 2819)(deflated 51%)
+adding: Perturbation/PerturbationType.class(in = 1106) (out= 581)(deflated 47%)
+adding: Perturbation/Sequential.class(in = 1758) (out= 1037)(deflated 41%)
+adding: SearchMethod/(in = 0) (out= 0)(stored 0%)
+adding: SearchMethod/AILSII$1.class(in = 803) (out= 514)(deflated 35%)
+adding: SearchMethod/AILSII$2.class(in = 689) (out= 440)(deflated 36%)
+adding: SearchMethod/AILSII.class(in = 13981) (out= 7146)(deflated 48%)
+adding: SearchMethod/Config.class(in = 4456) (out= 1822)(deflated 59%)
+adding: SearchMethod/ConstructSolution.class(in = 2888) (out= 1601)(deflated 44%)
+adding: SearchMethod/InputParameters.class(in = 5514) (out= 2630)(deflated 52%)
+adding: SearchMethod/StoppingCriterionType.class(in = 1134) (out= 585)(deflated 48%)
+adding: Solution/(in = 0) (out= 0)(stored 0%)
+adding: Solution/Node.class(in = 2472) (out= 1287)(deflated 47%)
+adding: Solution/Route.class(in = 6709) (out= 3291)(deflated 50%)
+adding: Solution/Solution.class(in = 10435) (out= 5436)(deflated 47%)
+[32m[Success] AILS2_EoH_Omega2[0m
+------------------------------------------
+[Building] AILS2_EoH_Ruin
+added manifest
+adding: Auxiliary/(in = 0) (out= 0)(stored 0%)
+adding: Auxiliary/Distance.class(in = 1176) (out= 639)(deflated 45%)
+adding: Auxiliary/Mean.class(in = 1466) (out= 792)(deflated 45%)
+adding: Data/(in = 0) (out= 0)(stored 0%)
+adding: Data/Best.class(in = 362) (out= 254)(deflated 29%)
+adding: Data/EdgeType.class(in = 1049) (out= 608)(deflated 42%)
+adding: Data/File.class(in = 706) (out= 468)(deflated 33%)
+adding: Data/Instance.class(in = 7625) (out= 4053)(deflated 46%)
+adding: Data/InstanceData.class(in = 2043) (out= 909)(deflated 55%)
+adding: Data/Instances.class(in = 9151) (out= 4268)(deflated 53%)
+adding: Data/MaxNumRoutes.class(in = 223) (out= 181)(deflated 18%)
+adding: Data/NodeKnn.class(in = 1151) (out= 631)(deflated 45%)
+adding: Data/Point.class(in = 924) (out= 509)(deflated 44%)
+adding: DiversityControl/(in = 0) (out= 0)(stored 0%)
+adding: DiversityControl/AcceptanceCriterion$1.class(in = 736) (out= 455)(deflated 38%)
+adding: DiversityControl/AcceptanceCriterion.class(in = 2639) (out= 1488)(deflated 43%)
+adding: DiversityControl/DistAdjustment$1.class(in = 721) (out= 457)(deflated 36%)
+adding: DiversityControl/DistAdjustment.class(in = 1950) (out= 1056)(deflated 45%)
+adding: DiversityControl/IdealDist.class(in = 233) (out= 185)(deflated 20%)
+adding: DiversityControl/OmegaAdjustment.class(in = 3086) (out= 1506)(deflated 51%)
+adding: Evaluators/(in = 0) (out= 0)(stored 0%)
+adding: Evaluators/CostEvaluation.class(in = 2270) (out= 915)(deflated 59%)
+adding: Evaluators/ExecuteMovement$1.class(in = 861) (out= 533)(deflated 38%)
+adding: Evaluators/ExecuteMovement.class(in = 2746) (out= 1549)(deflated 43%)
+adding: Evaluators/FeasibilityEvaluation.class(in = 1711) (out= 752)(deflated 56%)
+adding: Evaluators/MovementType.class(in = 1280) (out= 709)(deflated 44%)
+adding: Improvement/(in = 0) (out= 0)(stored 0%)
+adding: Improvement/CandidateNode.class(in = 3668) (out= 1623)(deflated 55%)
+adding: Improvement/FeasibilityPhase.class(in = 7624) (out= 3548)(deflated 53%)
+adding: Improvement/IntraLocalSearch.class(in = 2730) (out= 1450)(deflated 46%)
+adding: Improvement/LocalSearch.class(in = 6920) (out= 3143)(deflated 54%)
+adding: Perturbation/(in = 0) (out= 0)(stored 0%)
+adding: Perturbation/Concentric.class(in = 1528) (out= 898)(deflated 41%)
+adding: Perturbation/InsertionHeuristic.class(in = 1117) (out= 584)(deflated 47%)
+adding: Perturbation/Perturbation$1.class(in = 694) (out= 431)(deflated 37%)
+adding: Perturbation/Perturbation.class(in = 5852) (out= 2819)(deflated 51%)
+adding: Perturbation/PerturbationType.class(in = 1161) (out= 616)(deflated 46%)
+adding: Perturbation/Ruinnew.class(in = 2241) (out= 1362)(deflated 39%)
+adding: Perturbation/Sequential.class(in = 1758) (out= 1037)(deflated 41%)
+adding: SearchMethod/(in = 0) (out= 0)(stored 0%)
+adding: SearchMethod/AILSII$1.class(in = 803) (out= 514)(deflated 35%)
+adding: SearchMethod/AILSII$2.class(in = 689) (out= 440)(deflated 36%)
+adding: SearchMethod/AILSII.class(in = 13981) (out= 7146)(deflated 48%)
+adding: SearchMethod/Config.class(in = 4489) (out= 1849)(deflated 58%)
+adding: SearchMethod/ConstructSolution.class(in = 2888) (out= 1601)(deflated 44%)
+adding: SearchMethod/InputParameters.class(in = 5514) (out= 2630)(deflated 52%)
+adding: SearchMethod/StoppingCriterionType.class(in = 1134) (out= 585)(deflated 48%)
+adding: Solution/(in = 0) (out= 0)(stored 0%)
+adding: Solution/Node.class(in = 2472) (out= 1287)(deflated 47%)
+adding: Solution/Route.class(in = 6709) (out= 3291)(deflated 50%)
+adding: Solution/Solution.class(in = 10435) (out= 5436)(deflated 47%)
+[32m[Success] AILS2_EoH_Ruin[0m
+------------------------------------------
+
+==========================================
+           Build Summary Report
+==========================================
+Total Tasks: 6
+Success Count: [32m6[0m
+Failure Count: [31m0[0m
+
+[32mAll projects built successfully.[0m
+==========================================
+
+Pipeline config:
+  instances   : [20:40] (20 total)
+  time_limit  : 10s
+  step2 algo  : AILS2  eta_max=1.0
+  step3 algos : ['AILS2_Eoh_Acc', 'AILS2_Eoh_Acc_large', 'AILS2_Eoh_Omega2', 'AILS2_Eoh_Ruin', 'AILS2_ws']  eta_max=0.01
+
+============================================================
+Step 1: Compiling file-version algorithms
+============================================================
+[Step 1] Compilation done.
+
+============================================================
+Step 2: AILS2 — generating initial solutions
+============================================================
+[Setup] instance=XL-n2307-k34.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2307-k34.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  205 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2307-k34.csv
+[Setup] instance=XL-n2261-k54.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2261-k54.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  257 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2261-k54.csv
+[Setup] instance=XL-n2214-k131.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2214-k131.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  318 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2214-k131.csv
+[Setup] instance=XL-n2681-k540.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2681-k540.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  9 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2681-k540.csv
+[Setup] instance=XL-n2401-k408.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2401-k408.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  308 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2401-k408.csv
+[Setup] instance=XL-n1934-k46.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n1934-k46.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  247 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n1934-k46.csv
+[Setup] instance=XL-n2354-k631.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2354-k631.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  202 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2354-k631.csv
+[Setup] instance=XL-n2541-k121.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2541-k121.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  339 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2541-k121.csv
+[Setup] instance=XL-n2774-k286.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2774-k286.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  384 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2774-k286.csv
+[Setup] instance=XL-n2121-k186.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2121-k186.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  508 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2121-k186.csv
+[Setup] instance=XL-n1981-k13.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n1981-k13.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  169 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n1981-k13.csv
+[Setup] instance=XL-n2494-k194.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2494-k194.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  510 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2494-k194.csv
+[Setup] instance=XL-n2727-k546.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2727-k546.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  266 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2727-k546.csv
+[Setup] instance=XL-n2447-k290.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2447-k290.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  466 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2447-k290.csv
+[Setup] instance=XL-n2821-k208.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2821-k208.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  470 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2821-k208.csv
+[Setup] instance=XL-n2028-k617.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2028-k617.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  11 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2028-k617.csv
+[Setup] instance=XL-n2587-k66.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2587-k66.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  268 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2587-k66.csv
+[Setup] instance=XL-n2168-k138.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2168-k138.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  312 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2168-k138.csv
+[Setup] instance=XL-n2634-k17.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2634-k17.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  194 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2634-k17.csv
+[Setup] instance=XL-n2074-k264.vrp  algo=AILS2  init_sol=None
+[Run]   java -jar /home/chenxin/CVRPLIB-2025/src/AILS-II_origin/AILSII.jar -file /home/chenxin/CVRPLIB-2025/Experiment_sol/Instances/XL-n2074-k264.vrp -rounded true -best 0 -limit 10 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -etaMax 1.0 -output /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+[Done]  517 improvement records in /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols/XL-n2074-k264.csv
+[Step 2] Done. 20/20 solutions written to /home/chenxin/CVRPLIB-2025/Experiment_sol/Initial_sols
+
+============================================================
+Step 3: Running all variants with initial solutions
+============================================================
+  Launching 100 jobs in parallel ...
+/home/chenxin/miniconda3/envs/wsl-cpu/lib/python3.10/multiprocessing/resource_tracker.py:224: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
