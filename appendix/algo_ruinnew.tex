@@ -1,0 +1,62 @@
+The standard ruin operator in AILS-II selects $\omega$ customers uniformly at random, which tends to scatter removals across unrelated routes and produces large, incoherent holes that are expensive to repair.
+We introduce a \emph{route-based split ruin} that instead collects a contiguous segment of customers from a single route.
+Starting from a randomly chosen seed node, the operator alternates between forward and backward traversal along the route, adding one customer per step until $\omega$ nodes have been collected.
+This produces a spatially coherent removal that preserves the structure of unaffected routes and gives the repair operator a well-defined gap to fill.
+If the host route is shorter than $\omega$, the remainder is filled with uniformly random customers from the rest of the solution, ensuring the ruin size is always exactly $\omega$.
+The removed nodes are then reinserted by the standard greedy or regret repair operator.
+
+\begin{algorithm}[t]
+\caption{Route-Based Split Ruin Perturbation}
+\label{alg:ruinnew}
+\KwIn{Solution $s$; ruin size $\omega$}
+\KwOut{Perturbed solution $s$}
+
+\BlankLine
+\tcp{Step 1 — select seed node}
+\Repeat{$v_{\textit{seed}}$ is assigned to a route}{
+    $v_{\textit{seed}} \leftarrow$ uniformly random customer in $s$\;
+}
+
+\BlankLine
+\tcp{Step 2 — collect $\omega$ nodes by alternating forward/backward traversal along the route}
+$R \leftarrow \{v_{\textit{seed}}\}$\;
+$\textit{fwd} \leftarrow v_{\textit{seed}}.\textit{next}$;\quad
+$\textit{bwd} \leftarrow v_{\textit{seed}}.\textit{prev}$;\quad
+$\textit{expandForward} \leftarrow \texttt{true}$\;
+
+\While{$|R| < \omega$}{
+    \eIf{$\textit{expandForward}$}{
+        \If{$\textit{fwd}$ is a customer $\wedge$ $\textit{fwd} \notin R$}{
+            $R \leftarrow R \cup \{\textit{fwd}\}$;\quad
+            $\textit{fwd} \leftarrow \textit{fwd}.\textit{next}$\;
+        }
+    }{
+        \If{$\textit{bwd}$ is a customer $\wedge$ $\textit{bwd} \notin R$}{
+            $R \leftarrow R \cup \{\textit{bwd}\}$;\quad
+            $\textit{bwd} \leftarrow \textit{bwd}.\textit{prev}$\;
+        }
+    }
+    \If{both $\textit{fwd}$ and $\textit{bwd}$ are exhausted}{\textbf{break}}
+    $\textit{expandForward} \leftarrow \neg\,\textit{expandForward}$\;
+}
+
+\BlankLine
+\tcp{Step 3 — fallback: fill remainder with random customers if route was shorter than $\omega$}
+\While{$|R| < \omega$}{
+    $v \leftarrow$ uniformly random customer in $s$\;
+    \If{$v \notin R$}{$R \leftarrow R \cup \{v\}$}
+}
+
+\BlankLine
+\tcp{Step 4 — remove selected nodes from their routes}
+\ForEach{$v \in R$}{
+    Remove $v$ from its route in $s$\;
+}
+
+\BlankLine
+\tcp{Step 5 — reinsert using greedy/regret repair}
+Reinsert all nodes in $R$ into $s$ via repair operator\;
+
+\BlankLine
+\Return $s$\;
+\end{algorithm}

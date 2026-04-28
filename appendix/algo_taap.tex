@@ -1,0 +1,64 @@
+The baseline AILS-II uses a simulated-annealing acceptance criterion whose temperature decays on a fixed geometric schedule, making the exploration--exploitation trade-off insensitive to the actual search trajectory.
+We replace this with \emph{Threshold Accepting with Adaptive Patience} (TAAP), a deterministic acceptance rule that adjusts its tolerance $\theta$ in response to observed progress.
+When a new global best is found, $\theta$ is halved to intensify search around the promising region.
+When no improvement is accepted for $\Gamma$ consecutive iterations (stagnation), $\theta$ is widened by a factor of $1.25$ to escape the local optimum.
+Between these events, $\theta$ decays by a factor of $0.98$ per iteration, providing gradual cooling toward intensification.
+This patience-driven mechanism avoids premature convergence without relying on a hand-tuned cooling schedule.
+
+\begin{algorithm}[t]
+\caption{Threshold Accepting with Adaptive Patience (TAAP)}
+\label{alg:taap}
+\KwIn{Candidate solution $s$; parameters $\eta_{\min}$, $\eta_{\max}$, patience limit $\Gamma$}
+\KwOut{\texttt{true} if $s$ is accepted, \texttt{false} otherwise}
+
+\BlankLine
+\tcp{Initialise on first call}
+\If{$\textit{iter} = 0$}{
+    $f^* \leftarrow s.f$\;
+    $f_{\textit{prev}} \leftarrow s.f$\;
+    $\theta \leftarrow \eta_{\min}$\;
+    $p \leftarrow 0$\;
+}
+
+\BlankLine
+$\textit{accepted} \leftarrow \texttt{false}$\;
+
+\BlankLine
+\tcp{Aspiration: always accept a new global best}
+\eIf{$s.f < f^*$}{
+    $f^* \leftarrow s.f$\;
+    $\theta \leftarrow \max\!\left(\eta_{\min},\; \theta \times 0.5\right)$\;
+    $p \leftarrow 0$\;
+    $\textit{accepted} \leftarrow \texttt{true}$\;
+}{
+    \tcp{Threshold Accepting: accept if within dynamic threshold of last accepted cost}
+    \If{$s.f \leq f_{\textit{prev}} + \theta$}{
+        $\textit{accepted} \leftarrow \texttt{true}$\;
+    }
+}
+
+\BlankLine
+\eIf{$\textit{accepted}$}{
+    $f_{\textit{prev}} \leftarrow s.f$\;
+}{
+    $p \leftarrow p + 1$\;
+}
+
+\BlankLine
+$\textit{iter} \leftarrow \textit{iter} + 1$\;
+
+\BlankLine
+\tcp{Adapt threshold}
+\eIf{$p \geq \Gamma$}{
+    \tcp{Stagnation detected: widen threshold to escape local optimum}
+    $\theta \leftarrow \min\!\left(\eta_{\max},\; \theta \times 1.25\right)$\;
+    $p \leftarrow 0$\;
+}{
+    \tcp{Gradual cooling toward intensification}
+    $\theta \leftarrow \theta \times 0.98$\;
+}
+$\theta \leftarrow \max(\eta_{\min}, \theta)$\;
+
+\BlankLine
+\Return $\textit{accepted}$\;
+\end{algorithm}

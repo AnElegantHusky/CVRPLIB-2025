@@ -6,12 +6,13 @@ Steps:
   2. Run AILS2 on assigned instances in parallel.
      - results/AILS2/{instance}.csv + results/AILS2/{instance}.sol
      - .sol is also copied to Initial_sols/{instance}.sol for step 3
+     - Skipped with --load-initial if Initial_sols/{instance}.sol already exists.
   3. Run all variants on the same instances using the step-2 .sol as warm start.
      - results/{algo}/{instance}.csv + results/{algo}/{instance}.sol
 
 Usage:
     python pipeline.py [--time-limit SEC] [--index-start N] [--index-end M] [--eta-max F]
-                       [--no-compile]
+                       [--no-compile] [--load-initial]
 """
 
 import argparse
@@ -37,6 +38,10 @@ RESULTS_DIR   = EXPERIMENT_DIR / "results"
 
 STEP2_ALGO  = "AILS2"
 STEP3_ALGOS = ["AILS2_Eoh_Acc", "AILS2_Eoh_Acc_large", "AILS2_Eoh_Omega2", "AILS2_Eoh_Ruin", "AILS2_ws"]
+# STEP3_ALGOS = ["AILS2_ws"]
+
+# STEP3_ALGOS = ["AILS2_Eoh_Ruin2"]
+
 
 # ─── Step 1: Compile ──────────────────────────────────────────────────────────
 
@@ -102,7 +107,8 @@ def _step3_worker(args):
 # ─── Main pipeline ────────────────────────────────────────────────────────────
 
 def run_pipeline(time_limit: int, index_start: int, index_end: int | None,
-                 eta_max: float = 1.0, no_compile: bool = False):
+                 eta_max: float = 1.0, no_compile: bool = False,
+                 load_initial: bool = False):
     all_instances = sorted(INSTANCES_DIR.glob("*.vrp"))
     if not all_instances:
         print(f"[Error] No .vrp files in {INSTANCES_DIR}", file=sys.stderr)
@@ -121,6 +127,7 @@ def run_pipeline(time_limit: int, index_start: int, index_end: int | None,
     print(f"  time_limit  : {time_limit}s")
     print(f"  step2 algo  : {STEP2_ALGO}  eta_max=1.0")
     print(f"  step3 algos : {STEP3_ALGOS}  eta_max={eta_max}")
+    print(f"  load_initial: {load_initial}")
 
     # ── Step 1 ──
     if not no_compile:
@@ -134,18 +141,29 @@ def run_pipeline(time_limit: int, index_start: int, index_end: int | None,
     print("Step 2: AILS2 — generating initial solutions")
     print("="*60)
 
-    step2_args = [(inst, cfg_step2) for inst in instances]
-    with multiprocessing.Pool(processes=len(instances)) as pool:
-        step2_results = pool.map(_step2_worker, step2_args)
-
     sol_map = {}
-    for stem, sol_path in step2_results:
-        if sol_path:
-            sol_map[stem] = sol_path
-        else:
-            print(f"  [Warning] No solution for {stem}", file=sys.stderr)
 
-    print(f"[Step 2] Done. {len(sol_map)}/{len(instances)} solutions in {INIT_SOLS_DIR}")
+    if load_initial:
+        # Try to load existing solutions from Initial_sols/
+        for inst in instances:
+            sol = INIT_SOLS_DIR / f"{inst.stem}.sol"
+            if sol.exists():
+                sol_map[inst.stem] = sol
+            else:
+                print(f"  [Warning] --load-initial set but no .sol found for {inst.stem}", file=sys.stderr)
+        print(f"[Step 2] Skipped (--load-initial). Loaded {len(sol_map)}/{len(instances)} existing solutions.")
+    else:
+        step2_args = [(inst, cfg_step2) for inst in instances]
+        with multiprocessing.Pool(processes=len(instances)) as pool:
+            step2_results = pool.map(_step2_worker, step2_args)
+
+        for stem, sol_path in step2_results:
+            if sol_path:
+                sol_map[stem] = sol_path
+            else:
+                print(f"  [Warning] No solution for {stem}", file=sys.stderr)
+
+        print(f"[Step 2] Done. {len(sol_map)}/{len(instances)} solutions in {INIT_SOLS_DIR}")
 
     # ── Step 3: All variants with warm start ──
     print("\n" + "="*60)
@@ -188,6 +206,8 @@ def parse_args():
                    help=f"etaMax for step 3 (default: {DEFAULT_CONFIG['eta_max']})")
     p.add_argument("--no-compile",  action="store_true", default=False, dest="no_compile",
                    help="skip step 1 compilation")
+    p.add_argument("--load-initial", action="store_true", default=False, dest="load_initial",
+                   help="skip step 2 and load existing .sol files from Initial_sols/")
     return p.parse_args()
 
 
@@ -200,4 +220,5 @@ if __name__ == "__main__":
         index_end=args.index_end,
         eta_max=args.eta_max,
         no_compile=args.no_compile,
+        load_initial=args.load_initial,
     )

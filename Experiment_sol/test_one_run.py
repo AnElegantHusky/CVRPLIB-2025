@@ -36,6 +36,7 @@ ALGO_JARS = {
     "AILS2_Eoh_Acc_large": SRC_DIR / "AILS2_EoH_Acc_large" / "AILSII.jar",
     "AILS2_Eoh_Omega2":    SRC_DIR / "AILS2_EoH_Omega2"   / "AILSII.jar",
     "AILS2_Eoh_Ruin":      SRC_DIR / "AILS2_EoH_Ruin"     / "AILSII.jar",
+    "AILS2_Eoh_Ruin2":     SRC_DIR / "AILS2_EoH_Ruin2"    / "AILSII.jar",
 }
 
 DEFAULT_CONFIG = {

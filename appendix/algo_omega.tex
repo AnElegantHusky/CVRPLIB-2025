@@ -1,0 +1,60 @@
+The ruin size $\omega$ controls the balance between diversification and intensification: a large $\omega$ destroys more of the current solution and encourages exploration, while a small $\omega$ makes targeted repairs and intensifies locally.
+The baseline AILS-II keeps $\omega$ fixed throughout the run.
+We replace this with a \emph{state-based adaptive} scheme that tracks the mean perturbation distance $\bar{d}$ over a sliding window and compares it to a target $d^*$.
+Three states govern the update rule.
+In the \textsc{Corrective} state ($\bar{d} \approx 0$, indicating the search has stalled), $\omega$ is scaled up multiplicatively to force diversification.
+In the \textsc{Aggressive} state (relative error $|e|/d^* > \delta_{\textit{agg}}$), a large proportional correction is applied and the integral term is reset to avoid wind-up.
+In the \textsc{Stable} state, a PI controller provides fine-grained tracking of $d^*$.
+The update fires every $\Gamma$ iterations, and $\omega$ is always clamped to $[\omega_{\min}, \omega_{\max}]$.
+
+\begin{algorithm}[t]
+\caption{State-Based Adaptive $\omega$ Adjustment}
+\label{alg:omega}
+\KwIn{Observed perturbation distance $d_{\textit{obs}}$; target distance $d^*$;
+      parameters $\omega_{\min}$, $\omega_{\max}$, update interval $\Gamma$,
+      $K_p^{\textit{agg}}=0.5$, $K_p^{\textit{stb}}=0.08$, $K_i^{\textit{stb}}=0.01$,
+      $\delta_{\textit{agg}}=0.25$, $\delta_{\textit{cor}}=1.10$}
+\KwOut{Updated $\omega$}
+
+\BlankLine
+\tcp{Called once per iteration; update only every $\Gamma$ iterations}
+Append $d_{\textit{obs}}$ to sliding window; $t \leftarrow t + 1$\;
+\If{$t \bmod \Gamma \neq 0$}{\Return $\omega$}
+
+\BlankLine
+$\bar{d} \leftarrow$ mean of sliding window\;
+$e \leftarrow d^* - \bar{d}$\;
+
+\BlankLine
+\tcp{State transition}
+\uIf{$\bar{d} < \varepsilon$}{
+    $\textit{state} \leftarrow \textsc{Corrective}$\;
+}
+\uElseIf{$|e| / d^* > \delta_{\textit{agg}}$}{
+    $\textit{state} \leftarrow \textsc{Aggressive}$\;
+    $I \leftarrow 0$\tcp*{reset integral on large jump}
+}
+\Else{
+    $\textit{state} \leftarrow \textsc{Stable}$\;
+}
+
+\BlankLine
+\tcp{State-specific adjustment}
+\Switch{$\textit{state}$}{
+    \Case{\textsc{Aggressive}}{
+        $\omega \leftarrow \omega + K_p^{\textit{agg}} \cdot e$\;
+    }
+    \Case{\textsc{Stable}}{
+        $I \leftarrow \operatorname{clamp}\!\left(I + e,\; -\tfrac{\omega_{\max}}{2},\; \tfrac{\omega_{\max}}{2}\right)$\;
+        $\omega \leftarrow \omega + K_p^{\textit{stb}} \cdot e + K_i^{\textit{stb}} \cdot I$\;
+    }
+    \Case{\textsc{Corrective}}{
+        $\omega \leftarrow \omega \times \delta_{\textit{cor}}$\;
+        $I \leftarrow 0$\;
+    }
+}
+
+\BlankLine
+$\omega \leftarrow \operatorname{clamp}(\omega,\; \omega_{\min},\; \omega_{\max})$\;
+\Return $\omega$\;
+\end{algorithm}
