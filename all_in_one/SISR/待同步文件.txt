@@ -1,4 +1,0 @@
-sqlite2csv.py
-db2sol.py
-main_for_all_final.py
-main.sh
