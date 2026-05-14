@@ -54,7 +54,7 @@ target_include_directories(hgs PRIVATE src/include)
 target_compile_features(hgs PRIVATE cxx_std_17)
 target_link_libraries(hgs PRIVATE pthread)
 target_link_libraries(hgs PRIVATE dl)
-target_compile_options(hgs PRIVATE -Wno-sign-compare)
+target_compile_options(hgs PRIVATE -Wno-sign-compare -Wno-deprecated-declarations)
 
 option(BATCH_MODE "Suppress printing to stdout, for running experiments on clusters." OFF)
 if(BATCH_MODE)

@@ -1,0 +1,5 @@
+experiment,id,algo_name,score,runningtime
+ablation_origin,1,HGS-TV,106580.0,60.008400678634644
+ablation_origin,2,ails2_etaMax1.000_stoppingTime60.00,104997.0,53.912
+ablation_origin,3,HGS-TV,104996.0,89.65664458274841
+ablation_origin,4,HGS-TV,104995.0,117.98777103424072

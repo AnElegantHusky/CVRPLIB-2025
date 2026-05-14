@@ -1,22 +1,50 @@
 # CVRPLIB-2025
 
-## 1. 开始计算
+## Server 1 — XL-n1188-k96, XL-n1654-k11
 
-1.1 打包数据
-
-```
-instances.zip: 内容为 instances/*.vrp
-```
-
-1.2 进入启动路径，并上传instances.zip到该路径下
-```
-cd /home/cvrp/cvrp_com_hyb_Competition_Deploy_Hybird/all_in_one/SISR/
-cd /home/ei/workspace/cvrp_com_hyb_Competition_Deploy_Hybird/all_in_one/SISR/
+```bash
+cd CVRPLIB-2025
+bash compile.sh
+bash run_ablation.sh XL-n1188-k96 60
+bash run_ablation.sh XL-n1654-k11 60
 ```
 
-1.3 运行启动脚本
-```
-bash main.sh start_idx end_idx
+## Server 2 — XL-n2214-k131, XL-n2447-k290
+
+```bash
+cd CVRPLIB-2025
+bash compile.sh
+bash run_ablation.sh XL-n2214-k131 60
+bash run_ablation.sh XL-n2447-k290 60
 ```
 
-## 2. 获取结果
+## Server 3 — XL-n3101-k311, XL-n3241-k115
+
+```bash
+cd CVRPLIB-2025
+bash compile.sh
+bash run_ablation.sh XL-n3101-k311 60
+bash run_ablation.sh XL-n3241-k115 60
+```
+
+## Server 4 — XL-n3408-k524, XL-n3975-k687
+
+```bash
+cd CVRPLIB-2025
+bash compile.sh
+bash run_ablation.sh XL-n3408-k524 60
+bash run_ablation.sh XL-n3975-k687 60
+```
+
+## Server 5 — XL-n4340-k148, XL-n8960-k634
+
+```bash
+cd CVRPLIB-2025
+bash compile.sh
+bash run_ablation.sh XL-n4340-k148 60
+bash run_ablation.sh XL-n8960-k634 60
+```
+
+## Results
+
+CSV exports: `Experiment/results_ablation_csv`

@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "AILSII",
+            "request": "launch",
+            "mainClass": "SearchMethod.AILSII",
+            "projectName": "AILS-II",
+            // "args": "-file /home/chenxin/cvrplib_experiment/Experiment/Instances/XL-n1048-k237.vrp -sharedDB /home/chenxin/cvrplib_experiment/Experiment/tmp/XL-n1048-k237__none__AILS2.db -rounded true -best 0 -limit 60  -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime ${input:highResTimestamp} -etaMax 0.01",  // target
+            // "args": "-file /home/chenxin/cvrplib_experiment/Experiment/Instances/XL-n1048-k237.vrp -sharedDB /home/chenxin/cvrplib_experiment/Experiment/tmp/test.db -rounded true -best 0 -limit 60  -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime ${input:highResTimestamp} -etaMax 0.01",   // test with empty sharedDB
+            "args": "-file /home/chenxin/cvrplib_experiment/Experiment/Instances/XL-n1048-k237.vrp -sharedDB /home/chenxin/cvrplib_experiment/Experiment/tmp/XL-n1048-k237__none__AILS2.db -rounded true -best 0 -limit 60 -crtRunningTime 0 -stoppingCriterion Time -dMax 30 -dMin 15 -gamma 30 -varphi 40 -startTime ${input:highResTimestamp} -etaMax 1.0", // test with feasible empty sharedDB
+        }
+    ],
+    "inputs": [
+        {
+            "id": "highResTimestamp",
+            "type": "command",
+            // 使用 command-variable 插件执行 shell 命令
+            "command": "extension.commandvariable.shell.execute",
+            "args": {
+                // %s 是秒，%N 是纳秒（9位），这里我们通过 cut 截取前 7 位小数
+                "command": "echo $(date +%s).$(date +%N | cut -c 1-7)"
+            }
+        }
+    ]
+}

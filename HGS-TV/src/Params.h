@@ -8,6 +8,7 @@
 #include <string>
 #include <optional>
 #include <cstddef>      // For std::size_t
+#include <cstdint>      // For std::uint32_t
 #include <iostream>     // For std::cerr
 #include <fstream>      // For std::ifstream
 #include <sstream>

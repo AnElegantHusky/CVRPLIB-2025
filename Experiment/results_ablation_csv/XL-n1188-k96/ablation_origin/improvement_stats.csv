@@ -1,0 +1,5 @@
+experiment,id,seed_algo,seed_score,winner_algo,winner_score,improvement,recording_time
+ablation_origin,1,,1e+20,HGS-TV,106580.0,0.0,60.10958170890808
+ablation_origin,2,HGS-TV,106580.0,ails2_etaMax1.000_stoppingTime60.00,104997.0,1583.0,62.141911029815674
+ablation_origin,3,ails2_etaMax1.000_stoppingTime60.00,104997.0,HGS-TV,104996.0,1.0,90.28233170509338
+ablation_origin,4,HGS-TV,104996.0,HGS-TV,104995.0,1.0,118.36439371109009
