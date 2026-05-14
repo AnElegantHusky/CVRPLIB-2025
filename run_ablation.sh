@@ -45,11 +45,11 @@ run_ablation() {
     NAMES+=("$name")
 }
 
-# run_ablation "$EXPERIMENT_DIR/ablation_all_e.py"
-# run_ablation "$EXPERIMENT_DIR/ablation_all_g.py"
+run_ablation "$EXPERIMENT_DIR/ablation_all_e.py"
+run_ablation "$EXPERIMENT_DIR/ablation_all_g.py"
 run_ablation "$EXPERIMENT_DIR/ablation_origin.py"
-# run_ablation "$EXPERIMENT_DIR/ablation_wo_e.py"
-# run_ablation "$EXPERIMENT_DIR/ablation_wo_ws.py"
+run_ablation "$EXPERIMENT_DIR/ablation_wo_e.py"
+run_ablation "$EXPERIMENT_DIR/ablation_wo_ws.py"
 
 # Wait for all and check exit codes
 FAILED=()
